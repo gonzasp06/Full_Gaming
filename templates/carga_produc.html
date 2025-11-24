@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHouse</title>
+    <!--Estilo CSS-->
+    <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}">
+    <!-- Vinculacion con Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Scripts de Bootstrap y jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/"><img src="/static/images/Logo.png" alt="Smarthouse Logo" class="mr-2"></a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/formulario">Publicar producto</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <div c
+                            lass="dropdown">
+                              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                Categorías
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="/TV_Video">TV & Video</a></li>
+                                <li><a class="dropdown-item" href="/Climatizacion">Climatización</a></li>
+                                <li><a class="dropdown-item" href="/Electrodomesticos">Electrodomésticos</a></li>
+                                <li><a class="dropdown-item" href="/Tecnologia">Tecnología</a></li>
+                              </ul>
+                            </div>
+                        </li>                                             
+                    </ul>
+                    <span class="navbar-text">
+                        <a class="nav-link" href="/acceso">Acceder</a>
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container py-6">
+            <h1 class="text-center">Cargar Producto</h1>
+            <form id="formularioProducto" action="/cargar_producto" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="nombre" class="form-label">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="descripcion" class="form-label">Descripción:</label>
+                    <input type="text" id="descripcion" name="descripcion" class="form-control"> 
+                </div>
+                <div class="form-group">
+                    <label for="descripcion" class="form-label">Categoria:</label>
+                    <input type="text" id="categoria" name="categoria" class="form-control"> 
+                </div>
+                <div class="form-group">
+                    <label for="precio" class="form-label">Precio:</label>
+                    <input type="text"te id="precio" name="precio" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="cantidad" class="form-label">Cantidad:</label>
+                    <input type="number" id="cantidad" name="cantidad" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="foto" class="form-label">Foto:</label>
+                    <input type="file" id="foto formFile" name="foto" class="form-control">
+                </div>    
+            
+                <button type="submit" class="btn btn-primary" value="Cargar Producto" >Cargar Producto</button>
+               
+                
+            </form>
+        
+    </div>
+    
+    <div id="resultado"></div>       
+    
+    <footer class="text-body-secondary py-5">
+        <div class="container">
+          <p class="float-end mb-1">
+            <a href="#">Volver al inicio</a>
+          </p>
+          <p class="mb-1">Creado por &copy; Electrodomesticy</p>
+          <p class="mb-0">New to Bootstrap? <a href="/">Visit the homepage</a> or read our <a href="../getting-started/introduction/">getting started guide</a>.</p>
+        </div>
+    </footer>
+    <script>
+        document.getElementById("formularioProducto").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Obtener datos del formulario
+            var nombre = document.getElementById("nombre").value;
+            var descripcion = document.getElementById("descripcion").value;
+            var categoria = document.getElementById("categoria").value;
+            var precio = document.getElementById("precio").value;
+            var cantidad = document.getElementById("cantidad").value;
+            var foto = document.getElementById("foto").files[0];
+
+            // Construir objeto con los datos de arriba
+            //FormData 
+            var formData = new FormData();
+            formData.append("nombre", nombre);
+            formData.append("descripcion", descripcion);
+            formData.append("categoria", categoria);
+            formData.append("precio", precio);
+            formData.append("cantidad", cantidad);
+            formData.append("foto", foto);
+
+            // Envia solicitud POST para carga del producto
+            fetch("/cargar_producto", {
+                method: "POST",
+                body: formData 
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("resultado").innerText = data.mensaje;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("resultado").innerText = "Error al cargar el producto";
+            });
+        });
+    </script>
+    
+
+<script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+ <!-- Vinculacion de JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+</body>
+</html>
+
