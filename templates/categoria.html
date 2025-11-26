@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartHouse</title>
+    <title>FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
     <!--Estilo CSS-->
     <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}">
     <!-- Vinculacion con Bootstrap -->
@@ -15,7 +16,8 @@
 
 <body>
     {% include 'navbar.html' %} <!--incluye el navabar.html-->
-        
+    {% include 'productos_destacados.html' %} <!--incluye el productos_destacados.html-->    
+
     <h1>{{ categoria }}</h1>
     <div class="container">
         <div class="row row-cols-3">
@@ -27,9 +29,9 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">{{ producto[1] }}</h5>
-                        <p class="card-text">{{ producto[2] }}</p>
-                        <p class="card-text">Precio: {{ producto[4] }}</p>
-                        <p class="card-text">Cantidad disponible: {{ producto[5] }}</p>
+                    <!-- <p class="card-text">{{ producto[2] }}</p>--> 
+                        <h4 class="card-text">${{ producto[4] }}</h4>  <!-- PRECIO --> 
+                    <!-- <p class="card-text">Cantidad disponible: {{ producto[5] }}</p> --> 
                     </div>
                 </div>
             </div>

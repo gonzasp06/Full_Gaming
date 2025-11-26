@@ -37,7 +37,7 @@
     justify-content: center;
 }
 
-/*Botones del nav derecho */
+/*Botones navbar acceder y carrito */
 .nav-right {
     display: flex;
     align-items: center;
@@ -45,17 +45,24 @@
 }
 
 .nav-btn {
-    padding: 8px 14px;
     background: #3C308C;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
     border: none;
-    display: inline-block;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* espacio entre imagen y texto */
     cursor: pointer;
+    text-decoration: none;
+    color: white;
+    font-weight: 520; /*negrita*/
+    font-family: 'Horizon', sans-serif;
 }
 
+.nav-btn img.nav-btn-img {
+    width: 20px; /* tamaño de la imagen */
+    height: auto;
+}
 .nav-btn:hover {
     background: #6A44F2;
 }
@@ -262,4 +269,34 @@ h1 {
     color: #B5B3F2;
     font-size: 2rem;        /* tamaño*/
     font-weight: 700;       /* negrita */
+}
+
+
+/* Paginación estilo navbar */
+.pagination .page-link {
+    background-color: #3C308C; /* Igual que los botones del navbar */
+    color: #fff !important;    /* Texto blanco */
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    padding: 8px 14px;
+    margin: 0 3px;
+    transition: background 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #6A44F2; /* Hover igual que navbar */
+    color: #fff !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #6A44F2; /* Activa igual que hover */
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #272D40; /* Fondo navbar */
+    color: #aaa !important;
+    cursor: not-allowed;
 }

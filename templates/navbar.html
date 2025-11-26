@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
     <link rel="stylesheet" href="style.css">
 </head>
     <body>
@@ -25,8 +26,16 @@
                 </div>
 
                     <div class="nav-right">
-                        <a href="/acceso" class="nav-btn">Acceder</a>
-                        <a href="/carrito" class="nav-btn">Carrito</a>
+                        <!-- Botón Acceder con imagen -->
+                        <a href="/acceso" class="nav-btn">
+                            <img src="{{ url_for('static', filename='images/persona.png') }}" alt="Acceder" class="nav-btn-img">
+                            <span>Acceder</span>
+                        </a>
+                        <!-- Botón Carrito con imagen -->
+                        <a href="/carrito" class="nav-btn">
+                            <img src="{{ url_for('static', filename='images/carrito.png') }}" alt="Carrito" class="nav-btn-img">
+                            <span>Carrito</span>
+                        </a>
                     </div>
 
                 </div>
