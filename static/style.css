@@ -7,30 +7,137 @@
   justify-content: center;
   min-height: 100vh;
 }
-header img{
-  width: 15%;
-  margin-left: 10px; /* Ajusta el valor según sea necesario */
+
+
+/* PRIMER NAVAR (LOGO, EXPLORADOR, ACCEDER Y CARRITO */
+.primer_nav {
+    width: 100%;
+    background-color: #272D40;
+    padding: 12px 20px;
 }
-header {
-  background-color: #000000;
+
+.nav-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
 }
-.navbar-nav .nav-link {
-  color: #fff !important; /* Letras blancas */
+
+/* Logo */
+.logo img {
+    height: 45px;
+    width: auto;
 }
-.navbar-text .nav-link {
-  color: #fff !important; /* Letras blancas para el enlace Acceder */
+
+/*Centro (barra de búsqueda) */
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
-/* Estilo para el usuario en la barra de navegación */
-.navbar-text {
-  color: #fff; /* Color del texto */
-  font-weight: bold; /* Peso de la fuente */
-  margin-right: 20px; /* Espacio a la derecha */
+
+/*Botones del nav derecho */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
-/* Estilo para el enlace de acceso */
-.navbar-text a {
-  color: #fff; /* Color del enlace */
-  text-decoration: none; /* Sin subrayado */
+
+.nav-btn {
+    padding: 8px 14px;
+    background: #3C308C;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    display: inline-block;
+    cursor: pointer;
 }
+
+.nav-btn:hover {
+    background: #6A44F2;
+}
+
+
+/* BARRA EXPLORADORA */
+
+/* Contenedor del buscador con imagen encima */
+.barra_exploradora {
+  position: relative;
+  width: 100%;
+  max-width: 500px; 
+  display: flex;
+  justify-content: center;
+}
+
+.barra_exploradora .nav-search {
+  width: 100%;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  padding-right: 45px;  /* Espacio para la lupa */
+}
+
+/* Botón con la imagen encima del input */
+.search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.search-btn img {
+  width: 22px; 
+  height: auto;
+  opacity: 0.8;
+}
+
+.search-btn img:hover {
+  opacity: 1;
+}
+
+
+/* SEGUNDO NAVAR (CATEGORIAS Y GESTION DE PRODUCTOS) */
+
+.segundo_nav {
+  width: 100%;
+  background: transparent; /* Sin fondo */
+  padding: 10px 0;
+
+  display: flex;
+  justify-content: center; /* Centrar completamente */
+}
+
+.segundo_nav ul {
+  list-style: none;
+  display: flex;
+  gap: 40px; /* Separación entre opciones */
+  margin: 0;
+  padding: 0;
+}
+
+.segundo_nav li a {
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 600;
+
+  color: #272D40; /* Color del texto */
+  transition: 0.2s ease;
+}
+
+.segundo_nav li a:hover {
+  color: #6A44F2; 
+}
+
+/* TABLA DE PRODUCTOS */
+
 body{
   color: #000;
 }
@@ -40,9 +147,11 @@ body{
 a{
   color: #000;
 }
+
+/* Tabla de productos */
 .image-container {
   width: 100%;
-  height: 260px; /* Altura deseada de la imagen */
+  height: 260px; 
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -56,3 +165,4 @@ a{
   object-fit: contain;
   border: 10px solid #ffffff;
 }
+
