@@ -15,61 +15,8 @@
 
 <body>
     {% include 'navbar.html' %} <!--incluye el navabar.html-->
-
-<!--CARRUSEL DE BANNERS-->
-    <div id="carouselExampleFade" class="carousel slide carousel-fade">  
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <a href="/Tecnologia">
-                <img src="/static/images/1.png" class="d-block w-100" alt="Tecnologia">
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="/TV_Video">
-                <img src="/static/images/2.png" class="d-block w-100" alt="...">
-            </a>  
-        </div>
-        <div class="carousel-item">
-            <a href="/Climatizacion">
-             <img src="/static/images/3.png" class="d-block w-100" alt="...">
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="/Electrodomesticos">
-                <img src="/static/images/4.png" class="d-block w-100" alt="...">
-            </a>
-        </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-
-    <h1>Nuestro productos</h1>
-    <div class="container">
-        <div class="row row-cols-3"> <!--crea filas tipo rejillas-->
-            {% for producto in productos %}   <!--for en jinja2-->  
-            <div class="col"> <!--columna individual para cada producto-->  
-                <div class="card"> <!--diseño de tarjeta boostrap-->
-                    <div class="image-container">
-                        <img src="{{ producto[6] }}" class="card-img-top" alt="Imagen del producto">
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ producto[1] }}</h5>
-                        <p class="card-text">{{ producto[2] }}</p>
-                        <p class="card-text">Precio: {{ producto[4] }}</p>
-                        <p class="card-text">Cantidad disponible: {{ producto[5] }}</p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    {% include 'carrusel.html' %} <!--incluye el carrusel.html-->
+    {% include 'productos_destacados.html' %} <!--incluye el productos_destacados.html-->
 
     <nav aria-label="Page navigation example" class="d-flex justify-content-center">
         <ul class="pagination">

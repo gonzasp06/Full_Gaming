@@ -136,33 +136,130 @@
   color: #6A44F2; 
 }
 
+
+/* CARRUSEL*/
+.carrusel {
+    width: 100%;
+    max-width: 700vw;
+    margin: 10px auto;
+    overflow: hidden;
+    position: relative;
+    border-radius: 25px;
+}
+
+.carrusel-inner {
+    position: relative;
+    width: 100%;
+    height: 400px; 
+}
+
+.carrusel-inner a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.carrusel-inner a:first-child {
+    opacity: 1;
+}
+
+.carrusel-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; 
+    display: block;
+}
+
+/* Animación */
+@keyframes cyberSlide {
+  0% { opacity: 0; transform: translateX(40px); }
+  40% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.carrusel-inner a.active {
+    animation: cyberSlide 0.6s ease-in-out;
+}
+
+
+
 /* TABLA DE PRODUCTOS */
 
-body{
-  color: #000;
-}
-.form {
-  width: 450px;
-}
-a{
-  color: #000;
+/* Tarjeta del producto */
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: #1c1c28; /* Fondo */
+    color: #fff;
+    border: 2px solid #3C308C; /* Borde*/
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Tabla de productos */
+/* Hover de la tarjeta */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(60, 48, 140, 0.4);
+}
+
+/* Contenedor de la imagen */
 .image-container {
-  width: 100%;
-  height: 260px; 
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.image-container img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border: 10px solid #ffffff;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+/* Imagen del producto */
+.image-container img {
+    width: auto;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* animacion zoom */
+.card:hover .image-container img {
+    transform: scale(1.05);
+}
+
+/* Cuerpo de la tarjeta */
+.card-body {
+    text-align: center;
+    padding: 15px;
+}
+
+/* Titulo del producto */
+.card-title {
+    font-family: 'Horizon', sans-serif; 
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #B5B3F2;
+}
+
+/* Precio destacado */
+.card-text {
+    font-family: 'Horizon', sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #6A44F2;
+    margin-top: 5px;
+}
+
+/* Encabezado de productos destacados */
+h1 {
+    font-family: 'Horizon', sans-serif;
+    text-align: center;
+    margin: 40px 0 25px 0; /* margen arriba y abajo*/
+    color: #B5B3F2;
+    font-size: 2rem;        /* tamaño*/
+    font-weight: 700;       /* negrita */
+}
