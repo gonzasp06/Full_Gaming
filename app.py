@@ -8,6 +8,9 @@ import os
 from werkzeug.utils import secure_filename #wsi
 from math import ceil
 import bcrypt #incripta contraseña 
+from services.producto_service import ProductoService
+print("ProductoService:", ProductoService)
+
 
 app = Flask(__name__)
 
@@ -54,11 +57,11 @@ def obtener_productos_paginados(pagina): #paremetro de la "pagina" obtine subcon
 @app.route('/') #define ruta principal 
 @app.route('/<int:pagina>')
 def mostrar_catalogo(pagina=1): 
-    productos = obtener_productos_paginados(pagina) 
-    total_productos = len(obtener_productos())  
-    total_paginas = ceil(total_productos / productos_por_pagina)  # Calcular el total de páginas necesarias
-    return render_template('index.html', productos=productos, pagina_actual=pagina, total_paginas=total_paginas)
-
+    service = ProductoService()
+    productos = service.obtener_paginados(pagina, 9)
+    total_productos = len(obtener_productos())
+    total_paginas = ceil(total_productos / 9)
+    return render_template('index.html', productos=productos, pagina=pagina, total_paginas=total_paginas)
 
 def filtrar_categoria(categoria_seleccionada):
     cursor = conexion.cursor()
