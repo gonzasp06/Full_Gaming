@@ -128,6 +128,39 @@ def buscar_usuario(email):
     else:
         return None
 
+@app.route('/usuarios')
+def usuarios():
+    usuarios = obtener_usuarios()
+    return render_template('gestion_usuarios.html', usuarios=usuarios)
+
+def obtener_usuarios():
+    cursor = conexion.cursor()
+    consulta = 'SELECT idusuario, nombre, apellido, email, is_admin FROM catalogo.usuario;'
+    cursor.execute(consulta )
+    usuarios = cursor.fetchall()
+    cursor.close()
+    return usuarios
+
+@app.route('/actualizar_rol/<int:usuario_id>', methods=['POST'])
+def actualizar_rol(usuario_id):
+    nuevo_estado = request.json['isAdmin']
+    cursor = conexion.cursor()
+    accion = 'UPDATE catalogo.usuario SET is_admin = %s WHERE idusuario = %s;'
+    cursor.execute(accion, (nuevo_estado, usuario_id))
+    conexion.commit()
+    cursor.close()
+    return "Rol de usuario actualizado", 200
+
+@app.route('/eliminar/<int:usuario_id>', methods=['POST'])
+def eliminar_usuario(usuario_id):
+    cursor = conexion.cursor()
+    accion = 'DELETE FROM catalogo.usuario WHERE idusuario = %s;'
+    cursor.execute(accion, (usuario_id,))
+    conexion.commit()
+    cursor.close()
+    return jsonify({"mensaje": "Usuario eliminado correctamente", "usuario_id": usuario_id})
+
+
 @app.route('/cuenta', methods=['GET', 'POST'])
 def acceso_cuentas():
     if request.method == 'POST':
@@ -140,12 +173,19 @@ def acceso_cuentas():
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
     else:
-        return render_template('f_acceso.html')
+        return render_template('acceso.html')
     
 @app.route('/acceso')
 def render_acceso():
     return render_template('acceso.html') 
 #######################################################
+
+
+@app.route('/gestion')
+def gestion_productos():
+    return render_template('gestion_productos.html')
+@app.route('/gestion_productos', methods=['POST'])
+
 
 # Ruta para cargar un nuevo producto
 @app.route('/formulario')
