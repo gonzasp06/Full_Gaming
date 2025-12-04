@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+</head>
+<body>
+    
+        <h1>Conocé nuestros productos destacados</h1>
+    <div class="container">
+        <div class="row row-cols-3"> <!--crea filas tipo rejillas-->
+            {% for producto in productos %}   <!--for en jinja2-->  
+            <div class="col"> <!--columna individual para cada producto-->  
+                <div class="card"> <!--diseño de tarjeta boostrap-->
+                    <div class="image-container">
+                        <img src="{{ producto[6] }}" class="card-img-top" alt="Imagen del producto">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ producto[1] }}</h5>
+                    <!-- <p class="card-text">{{ producto[2] }}</p>--> 
+                        <h4 class="card-text">${{ producto[4] }}</h4>  <!-- PRECIO --> 
+                    <!-- <p class="card-text">Cantidad disponible: {{ producto[5] }}</p> --> 
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+</body>
+</html>

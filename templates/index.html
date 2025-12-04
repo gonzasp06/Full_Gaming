@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
     <!--Estilo CSS-->
     <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}">
     <!-- Vinculacion con Bootstrap -->
@@ -14,97 +16,9 @@
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-              <a class="navbar-brand" href="/"><img src="/static/images/Logo.png" alt="Smarthouse Logo" class="mr-2"></a>
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/formulario">Publicar producto</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <div c
-                            lass="dropdown">
-                              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                Categorías
-                              </button>
-                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item" href="/Teclados">Teclados</a></li>
-                                <li><a class="dropdown-item" href="/Mouse">Mouse</a></li>
-                                <li><a class="dropdown-item" href="/Audio">Audio</a></li>
-                                <li><a class="dropdown-item" href="/Otros">Otros</a></li>
-                              </ul>
-                            </div>
-                        </li>                                             
-                    </ul>
-                    <span class="navbar-text">
-                        <a class="nav-link" href="/acceso">Acceder</a>
-                    </span>
-                </div>
-            </div>
-        </nav>
-    </header>
-      
-    <div id="carouselExampleFade" class="carousel slide carousel-fade">  
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <a href="/Tecnologia">
-                <img src="/static/images/1.png" class="d-block w-100" alt="Tecnologia">
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="/TV_Video">
-                <img src="/static/images/2.png" class="d-block w-100" alt="...">
-            </a>  
-        </div>
-        <div class="carousel-item">
-            <a href="/Climatizacion">
-             <img src="/static/images/3.png" class="d-block w-100" alt="...">
-            </a>
-        </div>
-        <div class="carousel-item">
-            <a href="/Electrodomesticos">
-                <img src="/static/images/4.png" class="d-block w-100" alt="...">
-            </a>
-        </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-
-    <h1>Nuestros Productos</h1>
-    <div class="container">
-        <div class="row row-cols-3"> <!--crea filas tipo rejillas-->
-            {% for producto in productos %}   <!--for en jinja2-->  
-            <div class="col"> <!--columna individual para cada producto-->  
-                <div class="card"> <!--diseño de tarjeta boostrap-->
-                    <div class="image-container">
-                        <img src="{{ producto[6] }}" class="card-img-top" alt="Imagen del producto">
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ producto[1] }}</h5>
-                        <p class="card-text">{{ producto[2] }}</p>
-                        <p class="card-text">Precio: {{ producto[4] }}</p>
-                        <p class="card-text">Cantidad disponible: {{ producto[5] }}</p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    {% include 'carrusel.html' %} <!--incluye el carrusel.html-->
+    {% include 'productos_destacados.html' %} <!--incluye el productos_destacados.html-->
 
     <nav aria-label="Page navigation example" class="d-flex justify-content-center">
     <ul class="pagination">
@@ -133,13 +47,13 @@
 </nav>
 
 
-    <footer class="text-body-secondary py-5">
+   <!--<footer class="text-body-secondary py-5">
         <div class="container">
             <p class="float-end mb-1">
                 <a href="#" class="btn btn-primary btn-sm">Volver al inicio</a>
             </p>
         </div>
-    </footer>
+    </footer>-->
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

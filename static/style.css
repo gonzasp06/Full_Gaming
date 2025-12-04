@@ -7,52 +7,296 @@
   justify-content: center;
   min-height: 100vh;
 }
-header img{
-  width: 15%;
-  margin-left: 10px; /* Ajusta el valor según sea necesario */
+
+
+/* PRIMER NAVAR (LOGO, EXPLORADOR, ACCEDER Y CARRITO */
+.primer_nav {
+    width: 100%;
+    background-color: #272D40;
+    padding: 12px 20px;
 }
-header {
-  background-color: #000000;
+
+.nav-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
 }
-.navbar-nav .nav-link {
-  color: #fff !important; /* Letras blancas */
+
+/* Logo */
+.logo img {
+    height: 45px;
+    width: auto;
 }
-.navbar-text .nav-link {
-  color: #fff !important; /* Letras blancas para el enlace Acceder */
+
+/*Centro (barra de búsqueda) */
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
-/* Estilo para el usuario en la barra de navegación */
-.navbar-text {
-  color: #fff; /* Color del texto */
-  font-weight: bold; /* Peso de la fuente */
-  margin-right: 20px; /* Espacio a la derecha */
+
+/*Botones navbar acceder y carrito */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
-/* Estilo para el enlace de acceso */
-.navbar-text a {
-  color: #fff; /* Color del enlace */
-  text-decoration: none; /* Sin subrayado */
+
+.nav-btn {
+    background: #3C308C;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* espacio entre imagen y texto */
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    font-weight: 520; /*negrita*/
+    font-family: 'Horizon', sans-serif;
 }
-body{
-  color: #000;
+
+.nav-btn img.nav-btn-img {
+    width: 20px; /* tamaño de la imagen */
+    height: auto;
 }
-.form {
-  width: 450px;
+.nav-btn:hover {
+    background: #6A44F2;
 }
-a{
-  color: #000;
-}
-.image-container {
+
+
+/* BARRA EXPLORADORA */
+
+/* Contenedor del buscador con imagen encima */
+.barra_exploradora {
+  position: relative;
   width: 100%;
-  height: 260px; /* Altura deseada de la imagen */
-  overflow: hidden;
+  max-width: 500px; 
   display: flex;
   justify-content: center;
-  align-items: center;
 }
-.image-container img {
-  width: auto;
+
+.barra_exploradora .nav-search {
+  width: 100%;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  padding-right: 45px;  /* Espacio para la lupa */
+}
+
+/* Botón con la imagen encima del input */
+.search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.search-btn img {
+  width: 22px; 
   height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border: 10px solid #ffffff;
+  opacity: 0.8;
+}
+
+.search-btn img:hover {
+  opacity: 1;
+}
+
+
+/* SEGUNDO NAVAR (CATEGORIAS Y GESTION DE PRODUCTOS) */
+
+.segundo_nav {
+  width: 100%;
+  background: transparent; /* Sin fondo */
+  padding: 10px 0;
+
+  display: flex;
+  justify-content: center; /* Centrar completamente */
+}
+
+.segundo_nav ul {
+  list-style: none;
+  display: flex;
+  gap: 40px; /* Separación entre opciones */
+  margin: 0;
+  padding: 0;
+}
+
+.segundo_nav li a {
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 600;
+
+  color: #272D40; /* Color del texto */
+  transition: 0.2s ease;
+}
+
+.segundo_nav li a:hover {
+  color: #6A44F2; 
+}
+
+
+/* CARRUSEL*/
+.carrusel {
+    width: 100%;
+    max-width: 700vw;
+    margin: 10px auto;
+    overflow: hidden;
+    position: relative;
+    border-radius: 25px;
+}
+
+.carrusel-inner {
+    position: relative;
+    width: 100%;
+    height: 400px; 
+}
+
+.carrusel-inner a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.carrusel-inner a:first-child {
+    opacity: 1;
+}
+
+.carrusel-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; 
+    display: block;
+}
+
+/* Animación */
+@keyframes cyberSlide {
+  0% { opacity: 0; transform: translateX(40px); }
+  40% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.carrusel-inner a.active {
+    animation: cyberSlide 0.6s ease-in-out;
+}
+
+
+
+/* TABLA DE PRODUCTOS */
+
+/* Tarjeta del producto */
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: #1c1c28; /* Fondo */
+    color: #fff;
+    border: 2px solid #3C308C; /* Borde*/
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover de la tarjeta */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(60, 48, 140, 0.4);
+}
+
+/* Contenedor de la imagen */
+.image-container {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Imagen del producto */
+.image-container img {
+    width: auto;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* animacion zoom */
+.card:hover .image-container img {
+    transform: scale(1.05);
+}
+
+/* Cuerpo de la tarjeta */
+.card-body {
+    text-align: center;
+    padding: 15px;
+}
+
+/* Titulo del producto */
+.card-title {
+    font-family: 'Horizon', sans-serif; 
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #B5B3F2;
+}
+
+/* Precio destacado */
+.card-text {
+    font-family: 'Horizon', sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #6A44F2;
+    margin-top: 5px;
+}
+
+/* Encabezado de productos destacados */
+h1 {
+    font-family: 'Horizon', sans-serif;
+    text-align: center;
+    margin: 40px 0 25px 0; /* margen arriba y abajo*/
+    color: #B5B3F2;
+    font-size: 2rem;        /* tamaño*/
+    font-weight: 700;       /* negrita */
+}
+
+
+/* Paginación estilo navbar */
+.pagination .page-link {
+    background-color: #3C308C; /* Igual que los botones del navbar */
+    color: #fff !important;    /* Texto blanco */
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    padding: 8px 14px;
+    margin: 0 3px;
+    transition: background 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #6A44F2; /* Hover igual que navbar */
+    color: #fff !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #6A44F2; /* Activa igual que hover */
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #272D40; /* Fondo navbar */
+    color: #aaa !important;
+    cursor: not-allowed;
 }
