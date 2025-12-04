@@ -21,24 +21,31 @@
     {% include 'productos_destacados.html' %} <!--incluye el productos_destacados.html-->
 
     <nav aria-label="Page navigation example" class="d-flex justify-content-center">
-        <ul class="pagination">
-            <li class="page-item {% if pagina_actual == 1 %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('mostrar_catalogo', pagina=pagina_actual-1) }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
+    <ul class="pagination">
+
+        <li class="page-item {% if pagina == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('mostrar_catalogo', pagina=pagina-1) }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        {% for num_pagina in range(1, total_paginas + 1) %}
+            <li class="page-item {% if num_pagina == pagina %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('mostrar_catalogo', pagina=num_pagina) }}">
+                    {{ num_pagina }}
                 </a>
             </li>
-            {% for num_pagina in range(1, total_paginas + 1) %}
-                <li class="page-item {% if num_pagina == pagina_actual %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('mostrar_catalogo', pagina=num_pagina) }}">{{ num_pagina }}</a>
-                </li>
-            {% endfor %}
-            <li class="page-item {% if pagina_actual == total_paginas %}disabled{% endif %}">
-                <a class="page-link" href="{{ url_for('mostrar_catalogo', pagina=pagina_actual+1) }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+        {% endfor %}
+
+        <li class="page-item {% if pagina == total_paginas %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('mostrar_catalogo', pagina=pagina+1) }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
 
    <!--<footer class="text-body-secondary py-5">
         <div class="container">
