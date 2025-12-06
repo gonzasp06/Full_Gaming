@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename #wsi
 from math import ceil
 import bcrypt #incripta contraseña 
 from services.producto_service import ProductoService
+from services.usuario_service import UsuarioService 
 print("ProductoService:", ProductoService)
 
 
@@ -76,80 +77,73 @@ def mostrar_catalogo_categoria(categoria):
     productos = filtrar_categoria(categoria)
     return render_template('categoria.html', productos=productos, categoria=categoria)
 
+# -----------------------------------------
+# FORMULARIO DE REGISTRO
+# -----------------------------------------
 @app.route('/nuevo_usuario')
 def crear_usuario():
     return render_template('f_nuevo_usuario.html')
 
-#cifrado de contraseñas
-def cifrar_contraseñas(contraseña):
-    hashed_password = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
-    return hashed_password
 
-#verificar contraseña cifrada
-def verificar_contraseña(contraseña, hashed_password):
-    return bcrypt.checkpw(contraseña.encode('utf-8'), hashed_password)
-
+# -----------------------------------------
+# CREAR USUARIO (POST)
+# -----------------------------------------
 @app.route('/cargar_usuario', methods=['POST'])
 def cargar_usuario():
-    if request.method == 'POST':
-        datos_usuario = request.form
-        # Cifrar la contraseña
-        hashed_password = cifrar_contraseñas(datos_usuario['contraseña'])
-        cursor = conexion.cursor()
-        cursor.execute("INSERT INTO usuario (nombre, apellido, email, contraseña) VALUES (%s, %s, %s, %s)",(datos_usuario['nombre'], datos_usuario['apellido'], datos_usuario['email'], hashed_password))
-        conexion.commit()
-        cursor.close()
+    service = UsuarioService()
+    datos = request.form
+    resultado = service.crear_usuario(
+        nombre=datos['nombre'],
+        apellido=datos['apellido'],
+        email=datos['email'],
+        contraseña=datos['contraseña']
+    )
+
+    if resultado["ok"]:
         return jsonify({"mensaje": "Cuenta creada"}), 200
     else:
-        return jsonify({"error": "Método no permitido"}), 405
+        return jsonify({"error": resultado["error"]}), 400
 
-@app.route('/verificar', methods=['GET', 'POST'])
+
+# -----------------------------------------
+# BUSCAR USUARIO POR EMAIL (USADO PARA TEST)
+# -----------------------------------------
+@app.route('/verificar', methods=['POST'])
 def verificar_usuario():
-    if request.method == 'POST':
-        email = request.form['email']
-        usuario = buscar_usuario(email)
-        if usuario:
-            return jsonify({"mensaje": "Usuario encontrado", "usuario": usuario}), 200
-        else:
-            return jsonify({"error": "Usuario no encontrado"}), 404
-    else:
-        return jsonify({"error": "Método no permitido"}), 405
-
-def buscar_usuario(email):
-    cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM catalogo.usuario WHERE email = %s", (email,))
-    usuario = cursor.fetchone()
-    cursor.close() 
+    service = UsuarioService()
+    email = request.form['email']
+    usuario = service.buscar_usuario(email)
     if usuario:
-        return {
-            'id': usuario[0], 
-            'nombre': usuario[1],  
-            'apellido': usuario[2], 
-            'email': usuario[3],       
-            'contraseña': usuario[4]   
-        }
+        return jsonify({"mensaje": "Usuario encontrado", "usuario": usuario}), 200
     else:
-        return None
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
+
+# -----------------------------------------
+# LOGIN DE USUARIO
+# -----------------------------------------
 @app.route('/cuenta', methods=['GET', 'POST'])
 def acceso_cuentas():
     if request.method == 'POST':
+        service = UsuarioService()
         email = request.form['email']
         contraseña = request.form['contraseña']
-        usuario = buscar_usuario(email)
-        if usuario and verificar_contraseña(contraseña, usuario['contraseña']):
+        usuario = service.login(email, contraseña)
+        if usuario:
             session['usuario'] = usuario
             return redirect(url_for('index'))
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
-    else:
-        return render_template('f_acceso.html')
-    
+
+    return render_template('f_acceso.html')
+
+
+# -----------------------------------------
+# FORM LOGIN (VISTA SIMPLE)
+# -----------------------------------------
 @app.route('/acceso')
 def render_acceso():
-    return render_template('acceso.html') 
-#######################################################
-
+    return render_template('acceso.html')
 # Ruta para cargar un nuevo producto
 @app.route('/formulario')
 def carga_producto():
