@@ -69,3 +69,5 @@ class UsuarioService:
             return usuario
         else:
             return None
+    
+    

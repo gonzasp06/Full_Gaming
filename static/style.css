@@ -300,3 +300,64 @@ h1 {
     color: #aaa !important;
     cursor: not-allowed;
 }
+
+/* FORMULARIO NUEVO PRODUCTO / ACCESO / USUARIO */
+.form-container {
+  max-width: 600px;              
+  margin: 40px auto;             
+  background-color: #1c1c28;     
+  border-radius: 15px;
+  padding: 25px 30px;
+  border: 2px solid #3C308C;     
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Título del formulario */
+.form-container h1 {
+  font-family: 'Horizon', sans-serif;
+  color: #B5B3F2;
+  margin-bottom: 25px;
+}
+
+/* Labels */
+.form-container .form-label {
+  color: #B5B3F2;
+  font-family: 'Horizon', sans-serif;
+  font-size: 0.95rem;
+}
+
+/* Inputs */
+.form-container .form-control {
+  background-color: #272D40;
+  border: 1px solid #3C308C;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.form-container .form-control::placeholder {
+  color: #aaa;
+}
+
+/* Focus */
+.form-container .form-control:focus {
+  border-color: #6A44F2;
+  box-shadow: 0 0 0 0.15rem rgba(106, 68, 242, 0.4);
+  background-color: #272D40;
+  color: #fff;
+}
+
+/* Botón */
+.form-container .btn-primary {
+  background-color: #3C308C;
+  border-color: #3C308C;
+  font-family: 'Horizon', sans-serif;
+  font-weight: 520;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.form-container .btn-primary:hover {
+  background-color: #6A44F2;
+  border-color: #6A44F2;
+}

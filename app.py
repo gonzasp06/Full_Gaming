@@ -10,6 +10,7 @@ from math import ceil
 import bcrypt #incripta contraseña 
 from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService 
+
 print("ProductoService:", ProductoService)
 
 
@@ -72,6 +73,18 @@ def filtrar_categoria(categoria_seleccionada):
     productos = cursor.fetchall()
     cursor.close()
     return productos
+
+@app.route('/buscar')
+def buscar_productos():
+    termino = request.args.get('q', '').strip()
+
+    if not termino:
+        return redirect(url_for('mostrar_catalogo'))
+
+    service = ProductoService()
+    productos = service.buscar_productos(termino)
+
+    return render_template('resultado_busqueda.html', productos=productos, termino=termino)
 
 @app.route('/<categoria>')
 def mostrar_catalogo_categoria(categoria):
@@ -214,7 +227,7 @@ def cargar_producto():
     else:
         ruta_imagen = None
 
-    # Insertar usando el servicio (POO)
+   
     service = ProductoService()
     resultado = service.agregar_producto(
         nombre=nombre,
