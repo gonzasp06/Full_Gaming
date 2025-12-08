@@ -18,14 +18,21 @@
                         <img src="/static/images/Logo.png" alt="Logo Full Gaming">
                     </a>
             <!--barra exploradora-->
-                <div class="barra_exploradora">
-                    <input type="text" class="nav-search" placeholder="Buscar productos...">
-                    <button class="search-btn">
-                        <img src="/static/images/lupa.png" alt="Buscar">
-                    </button>
-                </div>
+            <div class="barra_exploradora">
+            <form class="barra_exploradora" action="{{ url_for('buscar_productos') }}" method="get">
+                <input 
+                    type="text" 
+                    name="q"                   
+                    class="nav-search" 
+                    placeholder="Buscar productos..."
+                >
+                <button class="search-btn" type="submit">
+                    <img src="/static/images/lupa.png" alt="Buscar">
+                </button>
+            </form>
+            </div>
 
-                    <div class="nav-right">
+            <div class="nav-right">
                         <!-- Botón Acceder con imagen -->
                         <a href="/acceso" class="nav-btn">
                             <img src="{{ url_for('static', filename='images/persona.png') }}" alt="Acceder" class="nav-btn-img">

@@ -31,3 +31,18 @@ class ProductoService:
         productos = cursor.fetchall()
         cursor.close()
         return productos
+    
+    def buscar_productos(self, termino):
+        cursor = self.conexion.cursor()
+        like = f"%{termino}%"
+        consulta = """
+            SELECT * 
+            FROM catalogo.producto
+            WHERE nombre LIKE %s
+                OR descripcion LIKE %s
+                OR categoria LIKE %s
+        """
+        cursor.execute(consulta, (like, like, like))
+        productos = cursor.fetchall()
+        cursor.close()
+        return productos

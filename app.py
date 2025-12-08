@@ -10,6 +10,7 @@ from math import ceil
 import bcrypt #incripta contraseña 
 from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService 
+
 print("ProductoService:", ProductoService)
 
 
@@ -72,6 +73,18 @@ def filtrar_categoria(categoria_seleccionada):
     cursor.close()
     return productos
 
+@app.route('/buscar')
+def buscar_productos():
+    termino = request.args.get('q', '').strip()
+
+    if not termino:
+        return redirect(url_for('mostrar_catalogo'))
+
+    service = ProductoService()
+    productos = service.buscar_productos(termino)
+
+    return render_template('resultado_busqueda.html', productos=productos, termino=termino)
+
 @app.route('/<categoria>')
 def mostrar_catalogo_categoria(categoria):
     productos = filtrar_categoria(categoria)
@@ -83,7 +96,6 @@ def mostrar_catalogo_categoria(categoria):
 @app.route('/nuevo_usuario')
 def crear_usuario():
     return render_template('f_nuevo_usuario.html')
-
 
 # -----------------------------------------
 # CREAR USUARIO (POST)
@@ -179,6 +191,21 @@ def cargar_producto():
         return jsonify({"mensaje": "Producto cargado correctamente"}), 200
     else:
         return jsonify({"error": "Método no permitido"}), 405
+    
+@app.route('/buscar', methods=['GET'])
+def buscar():
+    texto = request.args.get('q', '').strip()
+    
+    if texto == "":
+        resultados = []
+    else:
+        resultados = buscar_productos(texto)
+
+    return render_template(
+        'resultados_busqueda.html',
+        productos=resultados,
+        texto_busqueda=texto
+    )
 
 
 if __name__ == '__main__':
