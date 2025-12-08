@@ -9,12 +9,12 @@ class UsuarioService:
         # Cada vez que se crea el servicio, se crea la conexión a la BD
         self.conexion = conectar_base_datos()
 
-    # ---------------------------------------------------------
+    
     # CREAR USUARIO
-    # ---------------------------------------------------------
+    
     def crear_usuario(self, nombre, apellido, email, contraseña):
 
-        # 1) Cifrar contraseña
+        # Cifrar contraseña
         hashed = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
 
         try:
@@ -32,9 +32,9 @@ class UsuarioService:
         except mysql.connector.Error as error:
             return {"ok": False, "error": str(error)}
 
-    # ---------------------------------------------------------
+    
     # BUSCAR USUARIO POR EMAIL
-    # ---------------------------------------------------------
+   
     def buscar_usuario(self, email):
 
         cursor = self.conexion.cursor()
@@ -54,9 +54,9 @@ class UsuarioService:
         else:
             return None
 
-    # ---------------------------------------------------------
+    
     # LOGIN
-    # ---------------------------------------------------------
+    
     def login(self, email, contraseña):
 
         usuario = self.buscar_usuario(email)

@@ -19,6 +19,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+app.secret_key = '5x7#YI6+W<i{n^$V5y4ZHf7' #clave secreta para sesiones
 
 # conexión a base de datos
 conexion = conectar_base_datos()
@@ -77,21 +78,22 @@ def mostrar_catalogo_categoria(categoria):
     productos = filtrar_categoria(categoria)
     return render_template('categoria.html', productos=productos, categoria=categoria)
 
-# -----------------------------------------
+
 # FORMULARIO DE REGISTRO
-# -----------------------------------------
+
 @app.route('/nuevo_usuario')
 def crear_usuario():
     return render_template('f_nuevo_usuario.html')
 
 
-# -----------------------------------------
+
 # CREAR USUARIO (POST)
-# -----------------------------------------
+
 @app.route('/cargar_usuario', methods=['POST'])
 def cargar_usuario():
     service = UsuarioService()
     datos = request.form
+    
     resultado = service.crear_usuario(
         nombre=datos['nombre'],
         apellido=datos['apellido'],
@@ -105,9 +107,9 @@ def cargar_usuario():
         return jsonify({"error": resultado["error"]}), 400
 
 
-# -----------------------------------------
+
 # BUSCAR USUARIO POR EMAIL (USADO PARA TEST)
-# -----------------------------------------
+
 @app.route('/verificar', methods=['POST'])
 def verificar_usuario():
     service = UsuarioService()
@@ -119,9 +121,9 @@ def verificar_usuario():
         return jsonify({"error": "Usuario no encontrado"}), 404
 
 
-# -----------------------------------------
+
 # LOGIN DE USUARIO
-# -----------------------------------------
+
 @app.route('/cuenta', methods=['GET', 'POST'])
 def acceso_cuentas():
     if request.method == 'POST':
@@ -130,14 +132,17 @@ def acceso_cuentas():
         contraseña = request.form['contraseña']
         usuario = service.login(email, contraseña)
         if usuario:
-            session['usuario'] = usuario
+            session['usuario'] = usuario ['email']  # Guardar email en sesión 
+            session['nombre'] = usuario ['nombre']  # Guardar nombre en sesión
+            session['es_admin'] = usuario.get('es_admin', 0)  # Guardar si es admin en sesión
             return redirect(url_for('index'))
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
 
     return render_template('f_acceso.html')
 
-
+def es_admin_logueado():
+    return session.get('es_admin') == 0
 # -----------------------------------------
 # FORM LOGIN (VISTA SIMPLE)
 # -----------------------------------------
@@ -148,37 +153,88 @@ def render_acceso():
 @app.route('/formulario')
 def carga_producto():
     return render_template('formulario_carga_producto.html')
+
+@app.route('/gestion_productos')
+def gestion_productos():
+    service = ProductoService()
+    productos = service.obtener_todos()
+    return render_template('gestion_productos.html', productos=productos)
+
+@app.route('/eliminar_producto/<int:id_producto>')
+def eliminar_producto(id_producto):
+    service = ProductoService()
+    service.eliminar_producto(id_producto)
+    return redirect('/gestion_productos')
+
+@app.route('/editar_producto/<int:id_producto>')
+def editar_producto(id_producto):
+    service = ProductoService()
+    producto = service.obtener_por_id(id_producto)
+    return render_template('editar_producto.html', producto=producto)
+
+@app.route('/actualizar_producto/<int:id_producto>', methods=['POST'])
+def actualizar_producto(id_producto):
+    service = ProductoService()
+
+    nombre = request.form['nombre']
+    descripcion = request.form['descripcion']
+    categoria = request.form['categoria']
+    precio = request.form['precio']
+    cantidad = request.form['cantidad']
+
+    foto = request.files.get('foto')
+    ruta = None
+
+    if foto and foto.filename:
+        filename = secure_filename(foto.filename)
+        ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        foto.save(ruta)
+
+    service.editar_producto(id_producto, nombre, descripcion, categoria, precio, cantidad, ruta)
+
+    return redirect('/gestion_productos')
+
+
 @app.route('/cargar_producto', methods=['POST'])
-
 def cargar_producto():
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        descripcion = request.form['descripcion']
-        categoria = request.form['categoria']
-        precio = request.form['precio']
-        cantidad = request.form['cantidad']
+    # Esta ruta procesa el formulario de carga de producto (POST)
+    nombre = request.form.get('nombre')
+    descripcion = request.form.get('descripcion')
+    categoria = request.form.get('categoria')
+    precio = request.form.get('precio')
+    cantidad = request.form.get('cantidad')
 
-        foto = request.files['foto']
-        
-        # Guardar la imagen en el sistema de archivos
-        if foto:
-            filename = secure_filename(foto.filename)
-            ruta_imagen = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            foto.save(ruta_imagen)
-        else:
-            ruta_imagen = None
+    foto = request.files.get('foto')
 
-        # Ingresar info a la BD
-        cursor = conexion.cursor()
-        consulta = "INSERT INTO producto (nombre, descripcion, categoria, precio, cantidad, foto) VALUES (%s, %s, %s, %s, %s, %s)"
-        valores = (nombre, descripcion, categoria, precio, cantidad, ruta_imagen)
-        cursor.execute(consulta, valores)
-        conexion.commit()
-        cursor.close()
-        
+    # Guardar la imagen en el sistema de archivos
+    if foto and foto.filename:
+        filename = secure_filename(foto.filename)
+        ruta_imagen = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        foto.save(ruta_imagen)
+    else:
+        ruta_imagen = None
+
+    # Insertar usando el servicio (POO)
+    service = ProductoService()
+    resultado = service.agregar_producto(
+        nombre=nombre,
+        descripcion=descripcion,
+        categoria=categoria,
+        precio=precio,
+        cantidad=cantidad,
+        ruta_imagen=ruta_imagen
+    )
+
+    if resultado.get("ok"):
         return jsonify({"mensaje": "Producto cargado correctamente"}), 200
     else:
-        return jsonify({"error": "Método no permitido"}), 405
+        # Si hubo un archivo guardado y la inserción falló, eliminar el archivo para no dejar basura
+        try:
+            if ruta_imagen and os.path.exists(ruta_imagen):
+                os.remove(ruta_imagen)
+        except Exception:
+            pass
+        return jsonify({"error": resultado.get("error", "Error al insertar producto")}), 500
 
 
 if __name__ == '__main__':
