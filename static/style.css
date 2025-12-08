@@ -305,30 +305,30 @@ h1 {
 .form-container {
   max-width: 600px;              
   margin: 40px auto;             
-  background-color: #1c1c28;     
+  background-color: #6565b885;     
   border-radius: 15px;
   padding: 25px 30px;
-  border: 2px solid #3C308C;     
+  border: 2px solid #3c308c5d;     
   box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
 /* Título del formulario */
 .form-container h1 {
   font-family: 'Horizon', sans-serif;
-  color: #B5B3F2;
+  color: #39377e;
   margin-bottom: 25px;
 }
 
 /* Labels */
 .form-container .form-label {
-  color: #B5B3F2;
+  color: #39377e;
   font-family: 'Horizon', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
 }
 
 /* Inputs */
 .form-container .form-control {
-  background-color: #272D40;
+  background-color: #28304892;
   border: 1px solid #3C308C;
   color: #fff;
   border-radius: 8px;
@@ -360,4 +360,154 @@ h1 {
 .form-container .btn-primary:hover {
   background-color: #6A44F2;
   border-color: #6A44F2;
+}
+
+
+/* ============================= */
+/* TABLA GESTIÓN DE PRODUCTOS   */
+/* ============================= */
+
+/* Cuando form-container tenga una tabla se haga mas anchoo */
+.form-container.table-container {
+  max-width: 1200px; 
+  width: 95%;
+}
+
+/* Estilo general de la tabla */
+.form-container table {
+  background-color: #1c1c28;
+  border-radius: 12px;
+  overflow: hidden;
+  color: #fff;
+}
+
+/* Encabezado */
+.form-container thead {
+  background-color: #272D40;
+  color: #B5B3F2;
+  font-family: 'Horizon', sans-serif;
+}
+
+/* Filas */
+.form-container tbody tr {
+  transition: background 0.2s ease;
+}
+
+.form-container tbody tr:hover {
+  background-color: rgba(106, 68, 242, 0.15);
+}
+
+/* Celdas */
+.form-container th,
+.form-container td {
+  vertical-align: middle;
+  border-color: #3C308C;
+}
+
+/* Botones dentro de la tabla */
+.form-container .btn-warning {
+  background-color: #6A44F2;
+  border-color: #6A44F2;
+  color: #fff;
+}
+
+/* ============================= */
+/* DESCRIPCIÓN EN TABLA         */
+/* ============================= */
+
+.form-container td.descripcion {
+  max-width: 420px;   /* ancho máx de la columna */
+}
+
+/* Recorte del texto dentro de la descripción */
+.form-container td.descripcion .descripcion-texto {
+  line-height: 1.4em;
+  max-height: 4.2em;        /* aprox 3 líneas */
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+
+}
+
+/* BOTONES DE ACCIÓN CON ICONOS */
+.acciones-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-editar,
+.btn-eliminar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 520;
+  text-decoration: none;
+  color: white;
+  transition: 0.2s ease;
+  justify-content: center;
+}
+
+/* EDITAR */
+.btn-editar {
+  background-color: #6A44F2;
+}
+
+.btn-editar:hover {
+  background-color: #3C308C;
+}
+
+/* ELIMINAR */
+.btn-eliminar {
+  background-color: #a83232;
+}
+
+.btn-eliminar:hover {
+  background-color: #c23b3b;
+}
+
+/* ICONOS */
+.btn-editar img,
+.btn-eliminar img {
+  width: 16px;
+  height: auto;
+}
+
+/* BOTÓN AGREGAR PRODUCTO (MISMO ESTILO QUE EDITAR) */
+.btn-agregar-producto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 520;
+  text-decoration: none;
+  color: white;
+  background-color: #6A44F2;
+  transition: 0.2s ease;
+  margin-bottom: 20px; /* separación de la tabla */
+}
+
+.btn-agregar-producto:hover {
+  background-color: #3C308C;
+}
+
+/* Icono del botón agregar */
+.btn-agregar-producto img {
+  width: 20px;
+  height: auto;
+}
+
+.btn-agregar-producto {
+  margin-left: auto;
+  display: flex;
+  width: fit-content;
 }
