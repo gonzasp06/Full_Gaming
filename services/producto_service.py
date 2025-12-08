@@ -6,7 +6,7 @@ class ProductoService:
     
     def obtener_todos(self):
         cursor = self.conexion.cursor()
-        cursor.execute("SELECT * FROM catalogo.productos")
+        cursor.execute("SELECT * FROM catalogo.producto")
         productos = cursor.fetchall()
         cursor.close()
         return productos
@@ -32,17 +32,71 @@ class ProductoService:
         cursor.close()
         return productos
     
-    def buscar_productos(self, termino):
+    def obtener_por_id(self, id_producto):
         cursor = self.conexion.cursor()
-        like = f"%{termino}%"
-        consulta = """
-            SELECT * 
-            FROM catalogo.producto
-            WHERE nombre LIKE %s
-                OR descripcion LIKE %s
-                OR categoria LIKE %s
-        """
-        cursor.execute(consulta, (like, like, like))
-        productos = cursor.fetchall()
+        cursor.execute(
+            'SELECT * FROM catalogo.producto WHERE id = %s',
+            (id_producto,)
+        )
+        producto = cursor.fetchone()
         cursor.close()
-        return productos
+        return producto
+    
+    def agregar_producto(self, nombre, descripcion, categoria, precio, cantidad, ruta_imagen):
+        """Inserta un producto en la base de datos y devuelve un dict con el resultado.
+
+        Retorna: {'ok': True} o {'ok': False, 'error': 'mensaje'}
+        """
+        cursor = None
+        try:
+            cursor = self.conexion.cursor()
+            query = """
+                INSERT INTO catalogo.producto (nombre, descripcion, categoria, precio, cantidad, foto)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (nombre, descripcion, categoria, precio, cantidad, ruta_imagen))
+            self.conexion.commit()
+            return {"ok": True}
+        except Exception as e:
+            # Intentar cerrar el cursor si existe
+            try:
+                if cursor:
+                    cursor.close()
+            except:
+                pass
+            return {"ok": False, "error": str(e)}
+        finally:
+            try:
+                if cursor:
+                    cursor.close()
+            except:
+                pass
+    
+    def editar_producto(self, id_producto, nombre, descripcion, categoria, precio, cantidad, ruta_imagen):
+        cursor = self.conexion.cursor()
+        if ruta_imagen is not None:
+            consulta = """
+                UPDATE catalogo.producto
+                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, foto=%s
+                WHERE id=%s
+            """
+            valores = (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, id_producto)
+        else:
+            consulta = """
+                UPDATE catalogo.producto
+                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s
+                WHERE id=%s
+            """
+            valores = (nombre, descripcion, categoria, precio, cantidad, id_producto)
+
+        cursor.execute(consulta, valores)
+        self.conexion.commit()
+        cursor.close()
+        return True
+    
+    def eliminar_producto(self, id_producto):
+        cursor = self.conexion.cursor()
+        cursor.execute('DELETE FROM catalogo.producto WHERE id= %s', (id_producto,))
+        self.conexion.commit()
+        cursor.close()
+        return True
