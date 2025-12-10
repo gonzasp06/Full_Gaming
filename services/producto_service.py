@@ -114,3 +114,20 @@ class ProductoService:
         productos = cursor.fetchall()
         cursor.close()
         return productos
+    
+    def restar_stock(self, id_producto, cantidad):
+        """Resta stock de un producto"""
+        cursor = self.conexion.cursor()
+        try:
+            consulta = """
+                UPDATE catalogo.producto
+                SET cantidad = cantidad - %s
+                WHERE id = %s AND cantidad >= %s
+            """
+            cursor.execute(consulta, (cantidad, id_producto, cantidad))
+            self.conexion.commit()
+            cursor.close()
+            return True
+        except Exception as e:
+            cursor.close()
+            return False

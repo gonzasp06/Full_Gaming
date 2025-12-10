@@ -49,7 +49,8 @@ class UsuarioService:
                 "nombre": usuario[1],
                 "apellido": usuario[2],
                 "email": usuario[3],
-                "contraseña": usuario[4]  # cifrada
+                "contraseña": usuario[4],  # cifrada
+                "is_admin": usuario[5]  # agregar is_admin
             }
         else:
             return None

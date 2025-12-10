@@ -9,9 +9,10 @@ from werkzeug.utils import secure_filename #wsi
 from math import ceil
 import bcrypt #incripta contraseña 
 from services.producto_service import ProductoService
-from services.usuario_service import UsuarioService 
+from services.usuario_service import UsuarioService
+from services.pedido_service import PedidoService 
 
-print("ProductoService:", ProductoService)
+# print("ProductoService:", ProductoService)
 
 
 app = Flask(__name__)
@@ -121,7 +122,7 @@ def cargar_usuario():
 
 
 
-# BUSCAR USUARIO POR EMAIL (USADO PARA TEST)
+# BUSCAR USUARIO POR EMAIL 
 
 @app.route('/verificar', methods=['POST'])
 def verificar_usuario():
@@ -145,17 +146,22 @@ def acceso_cuentas():
         contraseña = request.form['contraseña']
         usuario = service.login(email, contraseña)
         if usuario:
-            session['usuario'] = usuario ['email']  # Guardar email en sesión 
-            session['nombre'] = usuario ['nombre']  # Guardar nombre en sesión
-            session['es_admin'] = usuario.get('es_admin', 0)  # Guardar si es admin en sesión
-            return redirect(url_for('index'))
+            session['usuario_id'] = usuario['id']  # ID del usuario
+            session['usuario_email'] = usuario['email']  # Email en sesión 
+            session['usuario_nombre'] = usuario['nombre']  # Nombre en sesión
+            session['es_admin'] = usuario['is_admin']  # Si es admin
+            session.permanent = True  # Mantener sesión
+            return redirect(url_for('mostrar_catalogo'))
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
 
-    return render_template('f_acceso.html')
+    return render_template('acceso.html')
 
 def es_admin_logueado():
-    return session.get('es_admin') == 0
+    return session.get('es_admin') == 1
+
+def usuario_logueado():
+    return 'usuario_id' in session
 # -----------------------------------------
 # FORM LOGIN (VISTA SIMPLE)
 # -----------------------------------------
@@ -227,7 +233,7 @@ def cargar_producto():
     else:
         ruta_imagen = None
 
-   
+
     service = ProductoService()
     resultado = service.agregar_producto(
         nombre=nombre,
@@ -250,5 +256,193 @@ def cargar_producto():
         return jsonify({"error": resultado.get("error", "Error al insertar producto")}), 500
 
 
+# ==================== CARRITO ====================
+
+@app.route('/carrito')
+def ver_carrito():
+    """Mostrar carrito"""
+    carrito = session.get('carrito', {})
+    
+    # Si carrito está vacío
+    if not carrito:
+        return render_template('carrito.html', items=[], total=0, usuario_logueado=usuario_logueado())
+    
+    # Calcular totales
+    service = ProductoService()
+    items = []
+    total = 0
+    
+    for producto_id, cantidad in carrito.items():
+        producto = service.obtener_por_id(int(producto_id))
+        if producto:
+            precio = float(producto[4])
+            subtotal = precio * cantidad
+            items.append({
+                'id': producto[0],
+                'nombre': producto[1],
+                'precio': precio,
+                'cantidad': cantidad,
+                'subtotal': subtotal,
+                'foto': producto[6]
+            })
+            total += subtotal
+    
+    return render_template('carrito.html', items=items, total=total, usuario_logueado=usuario_logueado())
+
+
+@app.route('/agregar_carrito/<int:id_producto>', methods=['POST'])
+def agregar_carrito(id_producto):
+    """Agregar producto al carrito"""
+    
+    # Inicializar carrito en sesión si no existe
+    if 'carrito' not in session:
+        session['carrito'] = {}
+    
+    # Obtener cantidad del request (default 1)
+    datos = request.get_json() or request.form
+    cantidad = int(datos.get('cantidad', 1))
+    
+    # Validar que exista el producto
+    service = ProductoService()
+    producto = service.obtener_por_id(id_producto)
+    
+    if not producto:
+        return jsonify({"ok": False, "error": "Producto no existe"}), 404
+    
+    # Validar que hay stock
+    stock = producto[5]
+    if stock <= 0:
+        return jsonify({"ok": False, "error": "Producto agotado"}), 400
+    
+    # Agregar o actualizar cantidad
+    carrito = session['carrito']
+    if str(id_producto) in carrito:
+        carrito[str(id_producto)] += cantidad
+    else:
+        carrito[str(id_producto)] = cantidad
+    
+    session.modified = True  # Marcar sesión como modificada
+    
+    return jsonify({"ok": True, "mensaje": "Producto agregado"}), 200
+
+
+@app.route('/eliminar_carrito/<int:id_producto>', methods=['POST'])
+def eliminar_carrito(id_producto):
+    """Eliminar producto del carrito"""
+    if 'carrito' in session:
+        carrito = session['carrito']
+        if str(id_producto) in carrito:
+            del carrito[str(id_producto)]
+            session.modified = True
+    
+    return jsonify({"ok": True}), 200
+
+
+@app.route('/actualizar_carrito/<int:id_producto>', methods=['POST'])
+def actualizar_carrito(id_producto):
+    """Actualizar cantidad de producto"""
+    if 'carrito' not in session:
+        return jsonify({"ok": False}), 400
+    
+    datos = request.get_json() or request.form
+    cantidad = int(datos.get('cantidad', 1))
+    
+    # Validar cantidad
+    if cantidad <= 0:
+        return jsonify({"ok": False, "error": "Cantidad inválida"}), 400
+    
+    # Validar stock
+    service = ProductoService()
+    producto = service.obtener_por_id(id_producto)
+    if not producto or cantidad > producto[5]:
+        return jsonify({"ok": False, "error": "Stock insuficiente"}), 400
+    
+    carrito = session['carrito']
+    if str(id_producto) in carrito:
+        carrito[str(id_producto)] = cantidad
+        session.modified = True
+    
+    return jsonify({"ok": True}), 200
+
+
+@app.route('/vaciar_carrito', methods=['POST'])
+def vaciar_carrito():
+    """Vaciar todo el carrito"""
+    if 'carrito' in session:
+        session['carrito'] = {}
+        session.modified = True
+    
+    return jsonify({"ok": True}), 200
+
+
+@app.route('/logout')
+def logout():
+    """Cerrar sesión"""
+    session.clear()
+    return redirect(url_for('mostrar_catalogo'))
+
+
+@app.route('/procesar_compra', methods=['POST'])
+def procesar_compra():
+    """Procesar compra y guardar en BD"""
+    
+    # Obtener carrito de sesión
+    carrito = session.get('carrito', {})
+    
+    if not carrito:
+        return jsonify({"ok": False, "error": "Carrito vacío"}), 400
+    
+    try:
+        service_producto = ProductoService()
+        service_pedido = PedidoService()
+        
+        # Calcular total
+        total = 0
+        items_compra = []
+        
+        for producto_id, cantidad in carrito.items():
+            producto = service_producto.obtener_por_id(int(producto_id))
+            if producto:
+                precio = float(producto[4])
+                subtotal = precio * cantidad
+                total += subtotal
+                items_compra.append({
+                    'producto_id': int(producto_id),
+                    'cantidad': cantidad,
+                    'precio': precio,
+                    'subtotal': subtotal
+                })
+        
+        # Obtener datos del usuario
+        usuario_id = session.get('usuario_id')
+        email = session.get('usuario_email', 'anonimo@email.com')
+        
+        # Crear pedido en BD
+        resultado = service_pedido.crear_pedido(usuario_id, email, total, items_compra)
+        
+        if not resultado['ok']:
+            return jsonify({"ok": False, "error": resultado['error']}), 500
+        
+        pedido_id = resultado['pedido_id']
+        
+        # Restar stock de cada producto
+        for item in items_compra:
+            service_producto.restar_stock(item['producto_id'], item['cantidad'])
+        
+        # Vaciar carrito
+        session['carrito'] = {}
+        session.modified = True
+        
+        return jsonify({
+            "ok": True,
+            "pedido_id": pedido_id,
+            "total": total,
+            "mensaje": "Compra realizada exitosamente"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

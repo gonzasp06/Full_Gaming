@@ -55,16 +55,20 @@
 
     <script>
         function agregarAlCarrito(idProducto, nombreProducto) {
-            // Por ahora solo muestra alerta
-            // Después lo conectaremos con el backend
-            alert('✓ ' + nombreProducto + ' agregado al carrito');
-            
-            // Esto lo haremos funcionalmente después:
-            // fetch('/agregar_carrito/' + idProducto, {
-            //   method: 'POST',
-            //   headers: {'Content-Type': 'application/json'},
-            //   body: JSON.stringify({cantidad: 1})
-            // })
+            fetch('/agregar_carrito/' + idProducto, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({cantidad: 1})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert('✓ ' + nombreProducto + ' agregado al carrito');
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
 

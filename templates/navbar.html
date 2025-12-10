@@ -35,11 +35,20 @@
             </div>
 
             <div class="nav-right">
-                        <!-- Botón Acceder con imagen -->
-                        <a href="/acceso" class="nav-btn">
-                            <img src="{{ url_for('static', filename='images/persona.png') }}" alt="Acceder" class="nav-btn-img">
-                            <span>Acceder</span>
-                        </a>
+                        <!-- Si usuario está logueado -->
+                        {% if session.get('usuario_nombre') %}
+                            <div class="nav-user-logueado">
+                                <span class="nav-user-name">👤 {{ session.get('usuario_nombre') }}</span>
+                                <a href="/logout" class="nav-btn-logout">Logout</a>
+                            </div>
+                        {% else %}
+                            <!-- Botón Acceder con imagen -->
+                            <a href="/acceso" class="nav-btn">
+                                <img src="{{ url_for('static', filename='images/persona.png') }}" alt="Acceder" class="nav-btn-img">
+                                <span>Acceder</span>
+                            </a>
+                        {% endif %}
+                        
                         <!-- Botón Carrito con imagen -->
                         <a href="/carrito" class="nav-btn">
                             <img src="{{ url_for('static', filename='images/carrito.png') }}" alt="Carrito" class="nav-btn-img">
