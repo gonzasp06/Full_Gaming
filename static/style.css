@@ -67,6 +67,42 @@
     background: #6A44F2;
 }
 
+/* USUARIO LOGUEADO EN NAVBAR */
+.nav-user-logueado {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: rgba(106, 68, 242, 0.1);
+    border-radius: 8px;
+    border: 1px solid #6A44F2;
+}
+
+.nav-user-name {
+    color: #6A44F2;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.nav-btn-logout {
+    background: #dc3545;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.nav-btn-logout:hover {
+    background: #c82333;
+    text-decoration: none;
+    color: white;
+}
+
 
 /* BARRA EXPLORADORA */
 

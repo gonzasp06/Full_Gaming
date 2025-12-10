@@ -16,23 +16,47 @@
 
 <body>
     {% include 'navbar.html' %} <!--incluye el navabar.html-->
-    {% include 'productos_destacados.html' %} <!--incluye el productos_destacados.html-->    
+    
 
     <h1>{{ categoria }}</h1>
     <div class="container">
-        <div class="row row-cols-3">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
           {% for producto in productos %}
             <div class="col">
-                <div class="card">
-                    <div class="image-container">
-                        <img src="{{ producto[6] }}" class="card-img-top" alt="Imagen del producto">
+                <div class="product-card">
+                    
+                    <!-- IMAGEN CON BADGES -->
+                    <div class="product-image-wrapper">
+                        <img src="{{ producto[6] }}" alt="{{ producto[1] }}" class="product-image">
+                        
+                        <!-- BADGE STOCK (arriba izquierda) -->
+                        <span class="badge-stock {% if producto[5] > 0 %}stock-disponible{% else %}agotado{% endif %}">
+                            <span class="stock-dot"></span>
+                            {% if producto[5] > 0 %}Disponible{% else %}Agotado{% endif %}
+                        </span>
                     </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ producto[1] }}</h5>
-                    <!-- <p class="card-text">{{ producto[2] }}</p>--> 
-                        <h4 class="card-text">${{ producto[4] }}</h4>  <!-- PRECIO --> 
-                    <!-- <p class="card-text">Cantidad disponible: {{ producto[5] }}</p> --> 
+
+                    <!-- INFO DEL PRODUCTO -->
+                    <div class="product-info">
+                        <h5 class="product-name">{{ producto[1] }}</h5>
+                        
+                        <!-- PRECIO -->
+                        <div class="product-price">
+                            <span class="price">${{ "%.2f"|format(producto[4]|float) }}</span>
+                        </div>
+                        
+                        <!-- CANTIDAD DISPONIBLE (pequeño, abajo) -->
+                        <p class="product-stock-text">
+                            Stock: <strong>{{ producto[5] }}</strong> unidades
+                        </p>
                     </div>
+
+                    <!-- BOTÓN COMPRAR -->
+                    <button class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
+                    onclick="agregarAlCarrito({{ producto[0] }}, '{{ producto[1] }}')"
+                    {% if producto[5] == 0 %}disabled{% endif %}>
+                    {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
+                    </button>
                 </div>
             </div>
           {% endfor %}
@@ -46,6 +70,25 @@
           </p>
         </div>
     </footer>
+
+    <script>
+        function agregarAlCarrito(idProducto, nombreProducto) {
+            fetch('/agregar_carrito/' + idProducto, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({cantidad: 1})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert('✓ ' + nombreProducto + ' agregado al carrito');
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
    
 </body>
 </html>
