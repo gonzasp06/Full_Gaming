@@ -12,9 +12,10 @@
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4"> <!--crea filas tipo rejillas-->
             {% for producto in productos %}   <!--for en jinja2-->  
-            <div class="col"> <!--columna individual para cada producto-->  
-                <div class="product-card"> <!--diseño de tarjeta personalizado-->
-                    
+            <div class="col"> <!--columna individual para cada producto--> 
+                    <div class="product-card"> <!--diseño de tarjeta personalizado-->
+
+                    <a class="product-link" href="{{ url_for('ver_producto', producto_id=producto[0]) }}"> 
                     <!-- IMAGEN CON BADGES -->
                     <div class="product-image-wrapper">
                         <img src="{{ producto[6] }}" alt="{{ producto[1] }}" class="product-image">
@@ -40,14 +41,15 @@
                             Stock: <strong>{{ producto[5] }}</strong> unidades
                         </p>
                     </div>
+                    </a>
 
-                    <!-- BOTÓN COMPRAR -->
-                    <button class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
-                    onclick="agregarAlCarrito({{ producto[0] }}, '{{ producto[1] }}')"
-                    {% if producto[5] == 0 %}disabled{% endif %}>
-                    {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
-                    </button>
-                </div>
+                <!-- BOTÓN COMPRAR -->
+                <button class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
+                onclick="agregarAlCarrito({{ producto[0] }}, '{{ producto[1] }}')"
+                {% if producto[5] == 0 %}disabled{% endif %}>
+                {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
+                </button>
+            </div>
             </div>
             {% endfor %}
         </div>

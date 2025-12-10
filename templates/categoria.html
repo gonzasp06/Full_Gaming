@@ -16,13 +16,17 @@
 
 <body>
     {% include 'navbar.html' %} <!--incluye el navabar.html-->
+<<<<<<< Updated upstream
     
+=======
+>>>>>>> Stashed changes
 
     <h1>{{ categoria }}</h1>
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
           {% for producto in productos %}
             <div class="col">
+<<<<<<< Updated upstream
                 <div class="product-card">
                     
                     <!-- IMAGEN CON BADGES -->
@@ -34,6 +38,12 @@
                             <span class="stock-dot"></span>
                             {% if producto[5] > 0 %}Disponible{% else %}Agotado{% endif %}
                         </span>
+=======
+                <a class="product-link" href="{{ url_for('ver_producto', producto_id=producto[0]) }}">
+                <div class="card">
+                    <div class="image-container">
+                        <img src="{{ producto[6] }}" class="card-img-top" alt="Imagen del producto">
+>>>>>>> Stashed changes
                     </div>
 
                     <!-- INFO DEL PRODUCTO -->
@@ -58,6 +68,7 @@
                     {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
                     </button>
                 </div>
+                </a>
             </div>
           {% endfor %}
         </div>

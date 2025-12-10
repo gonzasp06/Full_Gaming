@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, abort
 import mysql.connector
 
 from database import conectar_base_datos
@@ -92,13 +92,22 @@ def mostrar_catalogo_categoria(categoria):
     productos = filtrar_categoria(categoria)
     return render_template('categoria.html', productos=productos, categoria=categoria)
 
+# Producto en detalle 
+@app.route('/producto/<int:producto_id>')
+def ver_producto(producto_id):
+    service = ProductoService()
+    producto = service.obtener_por_id(producto_id)
+
+    if not producto:
+        return abort(404)
+
+    return render_template('producto_detalle.html', producto=producto)
 
 # FORMULARIO DE REGISTRO
 
 @app.route('/nuevo_usuario')
 def crear_usuario():
     return render_template('f_nuevo_usuario.html')
-
 
 
 # CREAR USUARIO (POST)
@@ -121,8 +130,12 @@ def cargar_usuario():
         return jsonify({"error": resultado["error"]}), 400
 
 
+<<<<<<< Updated upstream
 
 # BUSCAR USUARIO POR EMAIL 
+=======
+# BUSCAR USUARIO POR EMAIL (USADO PARA TEST)
+>>>>>>> Stashed changes
 
 @app.route('/verificar', methods=['POST'])
 def verificar_usuario():
@@ -133,7 +146,6 @@ def verificar_usuario():
         return jsonify({"mensaje": "Usuario encontrado", "usuario": usuario}), 200
     else:
         return jsonify({"error": "Usuario no encontrado"}), 404
-
 
 
 # LOGIN DE USUARIO
@@ -255,6 +267,7 @@ def cargar_producto():
             pass
         return jsonify({"error": resultado.get("error", "Error al insertar producto")}), 500
 
+<<<<<<< Updated upstream
 
 # ==================== CARRITO ====================
 
@@ -444,5 +457,7 @@ def procesar_compra():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+=======
+>>>>>>> Stashed changes
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

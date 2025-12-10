@@ -752,3 +752,130 @@ h1 {
     font-size: 13px;
   }
 }
+
+/* ============================= */
+/* VISTA DETALLE DE PRODUCTO    */
+/* ============================= */
+
+.producto-detalle-container {
+  max-width: 1100px;        /* ancho cómodo en el centro */
+  margin: 40px auto 60px;   /* separación arriba y abajo */
+  padding: 10px 20px;
+}
+
+/* Columna de la imagen */
+.producto-detalle-imagen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.producto-detalle-imagen img {
+  max-width: 200%;
+  max-height: 600px;        /* un poco más grande */
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+}
+
+/* Columna de info (titulo, precio, stock, botón) */
+.producto-detalle-titulo {
+  text-align: center;
+  font-size: 2.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Centramos todo el bloque de info debajo del título */
+.producto-detalle-categoria,
+.producto-detalle-precio,
+.producto-detalle-stock {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.producto-detalle-categoria {
+  color: #555;
+}
+
+.producto-detalle-categoria span {
+  font-weight: 600;
+  color: #3C308C;
+}
+
+.producto-detalle-precio {
+  font-family: 'Horizon', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #6A44F2;
+  margin: 12px 0;
+}
+
+.producto-detalle-stock {
+  color: #333;
+}
+
+.producto-detalle-stock span {
+  font-weight: 600;
+}
+
+/* Botón agregar al carrito (centrado) */
+.btn-agregar-carrito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;                 /* separa icono del texto */
+  padding: 10px 22px;
+  border-radius: 8px;
+  background-color: #3C308C;
+  color: #fff;
+  font-family: 'Horizon', sans-serif;
+  font-weight: 520;
+  text-decoration: none;
+  border: none;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-agregar-carrito:hover {
+  background-color: #6A44F2;
+  transform: translateY(-1px);
+}
+
+.btn-agregar-carrito img {
+  width: 20px;
+  height: auto;
+}
+
+/* Bloque de descripción abajo */
+.producto-detalle-descripcion {
+  margin-top: 50px;
+}
+
+/* Título "Descripción" centrado y más grande */
+.producto-detalle-descripcion h2 {
+  font-family: 'Horizon', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #6A44F2;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+/* Texto de la descripción igual que antes */
+.producto-detalle-descripcion p {
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Fuerza que toda la columna de info quede centrada */
+.col-md-7 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Ajuste fino del botón debajo del stock */
+.btn-agregar-carrito {
+  margin-top: 16px;   /* separación del stock */
+}

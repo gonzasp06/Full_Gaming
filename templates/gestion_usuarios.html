@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <!--Estilo CSS-->
+    <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}">
+    <!-- Vinculacion con Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Scripts de Bootstrap y jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    {% include 'navbar.html' %} <!--incluye el navabar.html-->
+
+    <div class="form-container table-container">
+    <h1 class="">Listado de Usuarios</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Administrador</th>
+                <th>Modificar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario[1] }}</td>
+                <td>{{ usuario[2] }}</td>
+                <td>{{ usuario[3] }}</td>
+                <td>{{ "Si" if usuario[4] else "No" }}</td>
+                <td class="text-end">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="toggle{{ usuario[0] }}" {% if usuario[4] %}checked{% endif %} onchange="toggleAdmin('{{ usuario[0] }}')">
+                        <label class="form-check-label" for="toggle{{ usuario[0] }}">Admin</label>
+                    </div>
+                </td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarEliminacionModal{{ usuario[0] }}">
+                        Eliminar
+                    </button>
+                    <!-- ventanita emergente para confirmar-->
+                    <div class="modal fade" id="confirmarEliminacionModal{{ usuario[0] }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5">Advertencia...</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body"> 
+                                    <p>¿Estás seguro que deseas eliminar a {{ usuario[1] }}? </p>
+                                    <p>Esta acción no puede deshacerse.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                    <button type="button" class="btn btn-danger" onclick="eliminarUsuario('{{ usuario[0] }}')">Confirmar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    <script>
+        // CAMBIAR ROLES
+        function toggleAdmin(userId) {
+            var isChecked = document.getElementById("toggle" + userId).checked;
+            fetch("/actualizar_rol/" + userId, {
+                method: "POST",
+                body: JSON.stringify({ isAdmin: isChecked }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Rol del usuario actualizado exitosamente");
+                    location.reload();// actualiza pag
+                } 
+                else {
+                    console.error("Error al actualizar el rol del usuario");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+        // ELIMINAR USUARIOS
+        function eliminarUsuario(userId) {
+            console.log("Eliminar usuario con ID:", userId);
+            fetch("/eliminar/" + userId, {
+                method: "POST"
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Usuario eliminado correctamente");
+                    var modal = new bootstrap.Modal(document.getElementById('confirmarEliminacionModal' + userId));
+                    modal.show();
+                    location.reload();
+                } else {
+                    console.error("Error al eliminar el usuario");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+    </script>
+
+</body>
+</html>

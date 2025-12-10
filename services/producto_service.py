@@ -100,6 +100,7 @@ class ProductoService:
         self.conexion.commit()
         cursor.close()
         return True
+    
     def buscar_productos(self, termino):
         cursor = self.conexion.cursor()
         like = f"%{termino}%"
