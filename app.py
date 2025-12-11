@@ -36,26 +36,7 @@ def verificar_conexion():
         return 'Error de conexión'
 
 
-def obtener_productos(): #obtiene los datos de la base de datos
-    cursor= conexion.cursor()
-    consulta= 'SELECT * FROM catalogo.producto;'
-    cursor.execute(consulta) 
-    productos=cursor.fetchall() #obtine el resultado de la consulta
-    cursor.close()
-    return productos
-
 productos_por_pagina = 9
-
-#paginado 
-def obtener_productos_paginados(pagina): #paremetro de la "pagina" obtine subconjunto paginado
-    inicio = (pagina - 1) * productos_por_pagina
-    fin = inicio + productos_por_pagina
-    cursor = conexion.cursor() 
-    consulta = 'SELECT * FROM catalogo.producto LIMIT %s, %s;' 
-    cursor.execute(consulta, (inicio, productos_por_pagina))
-    productos = cursor.fetchall() 
-    cursor.close()
-    return productos
 
 # Ruta raíz
 @app.route('/') #define ruta principal 
@@ -63,17 +44,9 @@ def obtener_productos_paginados(pagina): #paremetro de la "pagina" obtine subcon
 def mostrar_catalogo(pagina=1): 
     service = ProductoService()
     productos = service.obtener_paginados(pagina, 9)
-    total_productos = len(obtener_productos())
+    total_productos = len(service.obtener_todos())
     total_paginas = ceil(total_productos / 9)
     return render_template('index.html', productos=productos, pagina=pagina, total_paginas=total_paginas)
-
-def filtrar_categoria(categoria_seleccionada):
-    cursor = conexion.cursor()
-    consulta = 'SELECT * FROM catalogo.producto WHERE categoria = %s;'
-    cursor.execute(consulta, (categoria_seleccionada, ))
-    productos = cursor.fetchall()
-    cursor.close()
-    return productos
 
 @app.route('/buscar')
 def buscar_productos():
@@ -89,7 +62,8 @@ def buscar_productos():
 
 @app.route('/<categoria>')
 def mostrar_catalogo_categoria(categoria):
-    productos = filtrar_categoria(categoria)
+    service = ProductoService()
+    productos = service.filtrar_categoria(categoria)
     return render_template('categoria.html', productos=productos, categoria=categoria)
 
 # Producto en detalle 
