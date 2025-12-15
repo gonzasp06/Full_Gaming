@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, abort
 import mysql.connector
+from datetime import timedelta
 
 from database import conectar_base_datos
 
@@ -22,6 +23,18 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = '5x7#YI6+W<i{n^$V5y4ZHf7' #clave secreta para sesiones
+
+# Configuración de sesiones para que persistan
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Sesión dura 7 días
+app.config['SESSION_COOKIE_SECURE'] = False  # False en desarrollo, True en producción
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Evita acceso desde JS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Importante para cookies cross-site
+
+# Hacer que TODAS las sesiones sean permanentes por defecto
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=7)
 
 # conexión a base de datos
 conexion = conectar_base_datos()
@@ -133,7 +146,7 @@ def acceso_cuentas():
             session['usuario_nombre'] = usuario['nombre']  # Nombre en sesión
             session['es_admin'] = usuario['is_admin']  # Si es admin
             session.permanent = True  # Mantener sesión
-            return redirect(url_for('mostrar_catalogo'))
+            return jsonify({"mensaje": "Login exitoso"}), 200
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
 

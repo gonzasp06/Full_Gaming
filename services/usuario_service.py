@@ -65,10 +65,32 @@ class UsuarioService:
         if not usuario:
             return None
 
-        # Verificar contraseña cifrada
-        if bcrypt.checkpw(contraseña.encode('utf-8'), usuario["contraseña"]):
-            return usuario
+        # Obtener el hash de la contraseña guardada
+        hash_guardado = usuario["contraseña"]
+        
+        print(f"DEBUG - Tipo de hash_guardado: {type(hash_guardado)}")
+        print(f"DEBUG - Valor: {hash_guardado}")
+        
+        # Asegurar que hash_guardado es bytes
+        if isinstance(hash_guardado, bytes):
+            pass  # Ya es bytes
+        elif isinstance(hash_guardado, str):
+            hash_guardado = hash_guardado.encode('utf-8')
         else:
+            print(f"Tipo desconocido: {type(hash_guardado)}")
+            return None
+        
+        try:
+            # Verificar contraseña
+            resultado = bcrypt.checkpw(contraseña.encode('utf-8'), hash_guardado)
+            if resultado:
+                return usuario
+            else:
+                return None
+        except Exception as e:
+            # Si falla bcrypt, es que el hash es inválido
+            print(f"Error en bcrypt.checkpw: {e}")
+            print(f"Hash type: {type(hash_guardado)}, Hash value: {hash_guardado}")
             return None
     
     
