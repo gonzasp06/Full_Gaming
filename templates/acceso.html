@@ -46,18 +46,24 @@
             var formData = new FormData();
             formData.append("email", email);
             formData.append("contraseña", contraseña);
-            // Envia solicitud POST para carga del producto
-            fetch("/verificar", {
+            // Envía solicitud POST al login
+            fetch("/cuenta", {
                 method: "POST",
                 body: formData 
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("resultado").innerText = data.mensaje;
+            .then(response => {
+                if(response.ok) {
+                    // Si login exitoso, redirige a página principal
+                    window.location.href = "/";
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.error || "Error al acceder");
+                    });
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
-                document.getElementById("resultado").innerText = "Error al acceder";
+                document.getElementById("resultado").innerText = error.message || "Error al acceder";
             });
         });
     </script>
