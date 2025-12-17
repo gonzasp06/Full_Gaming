@@ -3,6 +3,8 @@ import mysql.connector
 from datetime import timedelta
 
 from database import conectar_base_datos
+from services.admin_manager import AdminManager
+from services.carrito_service import CarritoService
 
 #Subir foto tipo archivo al servidor
 import os
@@ -17,6 +19,12 @@ from services.pedido_service import PedidoService
 
 
 app = Flask(__name__)
+
+# ============================================
+# INSTANCIAR SERVICIOS
+# ============================================
+admin_manager = AdminManager()
+carrito_service = CarritoService()
 
 # Carpeta para imágenes
 UPLOAD_FOLDER = 'static/uploads'
@@ -163,30 +171,36 @@ def usuario_logueado():
 @app.route('/acceso')
 def render_acceso():
     return render_template('acceso.html')
+
 # Ruta para cargar un nuevo producto
 @app.route('/formulario')
+@admin_manager.requerir_admin
 def carga_producto():
     return render_template('formulario_carga_producto.html')
 
 @app.route('/gestion_productos')
+@admin_manager.requerir_admin
 def gestion_productos():
     service = ProductoService()
     productos = service.obtener_todos()
     return render_template('gestion_productos.html', productos=productos)
 
 @app.route('/eliminar_producto/<int:id_producto>')
+@admin_manager.requerir_admin
 def eliminar_producto(id_producto):
     service = ProductoService()
     service.eliminar_producto(id_producto)
     return redirect('/gestion_productos')
 
 @app.route('/editar_producto/<int:id_producto>')
+@admin_manager.requerir_admin
 def editar_producto(id_producto):
     service = ProductoService()
     producto = service.obtener_por_id(id_producto)
     return render_template('editar_producto.html', producto=producto)
 
 @app.route('/actualizar_producto/<int:id_producto>', methods=['POST'])
+@admin_manager.requerir_admin
 def actualizar_producto(id_producto):
     service = ProductoService()
 
@@ -210,6 +224,7 @@ def actualizar_producto(id_producto):
 
 
 @app.route('/cargar_producto', methods=['POST'])
+@admin_manager.requerir_admin
 def cargar_producto():
     # Esta ruta procesa el formulario de carga de producto (POST)
     nombre = request.form.get('nombre')
@@ -255,32 +270,10 @@ def cargar_producto():
 
 @app.route('/carrito')
 def ver_carrito():
-    """Mostrar carrito"""
-    carrito = session.get('carrito', {})
-    
-    # Si carrito está vacío
-    if not carrito:
-        return render_template('carrito.html', items=[], total=0, usuario_logueado=usuario_logueado())
-    
-    # Calcular totales
-    service = ProductoService()
-    items = []
-    total = 0
-    
-    for producto_id, cantidad in carrito.items():
-        producto = service.obtener_por_id(int(producto_id))
-        if producto:
-            precio = float(producto[4])
-            subtotal = precio * cantidad
-            items.append({
-                'id': producto[0],
-                'nombre': producto[1],
-                'precio': precio,
-                'cantidad': cantidad,
-                'subtotal': subtotal,
-                'foto': producto[6]
-            })
-            total += subtotal
+    """Mostrar carrito con detalles de productos"""
+    producto_service = ProductoService()
+    items = carrito_service.obtener_items_detalle(producto_service)
+    total = carrito_service.calcular_total(producto_service)
     
     return render_template('carrito.html', items=items, total=total, usuario_logueado=usuario_logueado())
 
@@ -289,11 +282,6 @@ def ver_carrito():
 def agregar_carrito(id_producto):
     """Agregar producto al carrito"""
     
-    # Inicializar carrito en sesión si no existe
-    if 'carrito' not in session:
-        session['carrito'] = {}
-    
-    # Obtener cantidad del request (default 1)
     datos = request.get_json() or request.form
     cantidad = int(datos.get('cantidad', 1))
     
@@ -309,14 +297,8 @@ def agregar_carrito(id_producto):
     if stock <= 0:
         return jsonify({"ok": False, "error": "Producto agotado"}), 400
     
-    # Agregar o actualizar cantidad
-    carrito = session['carrito']
-    if str(id_producto) in carrito:
-        carrito[str(id_producto)] += cantidad
-    else:
-        carrito[str(id_producto)] = cantidad
-    
-    session.modified = True  # Marcar sesión como modificada
+    # Agregar al carrito usando CarritoService
+    carrito_service.agregar_item(id_producto, cantidad)
     
     return jsonify({"ok": True, "mensaje": "Producto agregado"}), 200
 
@@ -324,20 +306,13 @@ def agregar_carrito(id_producto):
 @app.route('/eliminar_carrito/<int:id_producto>', methods=['POST'])
 def eliminar_carrito(id_producto):
     """Eliminar producto del carrito"""
-    if 'carrito' in session:
-        carrito = session['carrito']
-        if str(id_producto) in carrito:
-            del carrito[str(id_producto)]
-            session.modified = True
-    
+    carrito_service.eliminar_item(id_producto)
     return jsonify({"ok": True}), 200
 
 
 @app.route('/actualizar_carrito/<int:id_producto>', methods=['POST'])
 def actualizar_carrito(id_producto):
-    """Actualizar cantidad de producto"""
-    if 'carrito' not in session:
-        return jsonify({"ok": False}), 400
+    """Actualizar cantidad de producto en carrito"""
     
     datos = request.get_json() or request.form
     cantidad = int(datos.get('cantidad', 1))
@@ -352,21 +327,17 @@ def actualizar_carrito(id_producto):
     if not producto or cantidad > producto[5]:
         return jsonify({"ok": False, "error": "Stock insuficiente"}), 400
     
-    carrito = session['carrito']
-    if str(id_producto) in carrito:
-        carrito[str(id_producto)] = cantidad
-        session.modified = True
-    
-    return jsonify({"ok": True}), 200
+    # Actualizar usando CarritoService
+    if carrito_service.actualizar_cantidad(id_producto, cantidad):
+        return jsonify({"ok": True}), 200
+    else:
+        return jsonify({"ok": False, "error": "Error al actualizar"}), 400
 
 
 @app.route('/vaciar_carrito', methods=['POST'])
 def vaciar_carrito():
     """Vaciar todo el carrito"""
-    if 'carrito' in session:
-        session['carrito'] = {}
-        session.modified = True
-    
+    carrito_service.vaciar_carrito()
     return jsonify({"ok": True}), 200
 
 
@@ -381,8 +352,8 @@ def logout():
 def procesar_compra():
     """Procesar compra y guardar en BD"""
     
-    # Obtener carrito de sesión
-    carrito = session.get('carrito', {})
+    # Obtener carrito
+    carrito = carrito_service.obtener_carrito()
     
     if not carrito:
         return jsonify({"ok": False, "error": "Carrito vacío"}), 400
@@ -391,22 +362,9 @@ def procesar_compra():
         service_producto = ProductoService()
         service_pedido = PedidoService()
         
-        # Calcular total
-        total = 0
-        items_compra = []
-        
-        for producto_id, cantidad in carrito.items():
-            producto = service_producto.obtener_por_id(int(producto_id))
-            if producto:
-                precio = float(producto[4])
-                subtotal = precio * cantidad
-                total += subtotal
-                items_compra.append({
-                    'producto_id': int(producto_id),
-                    'cantidad': cantidad,
-                    'precio': precio,
-                    'subtotal': subtotal
-                })
+        # Obtener items de compra usando CarritoService
+        items_compra = carrito_service.obtener_items_para_compra(service_producto)
+        total = carrito_service.calcular_total(service_producto)
         
         # Obtener datos del usuario
         usuario_id = session.get('usuario_id')
@@ -424,9 +382,8 @@ def procesar_compra():
         for item in items_compra:
             service_producto.restar_stock(item['producto_id'], item['cantidad'])
         
-        # Vaciar carrito
-        session['carrito'] = {}
-        session.modified = True
+        # Vaciar carrito usando CarritoService
+        carrito_service.vaciar_carrito()
         
         return jsonify({
             "ok": True,
