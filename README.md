@@ -53,7 +53,14 @@ Se ha creado documentación completa del sistema para facilitar su comprensión 
 
 ### Documentos Disponibles
 
-1. **[DOCUMENTACION_SISTEMA.md](DOCUMENTACION_SISTEMA.md)** - Documentación completa y detallada
+1. **[RESUMEN_PARA_EXAMEN.md](RESUMEN_PARA_EXAMEN.md)** - ⭐ **EMPIEZA AQUÍ**
+   - Resumen ejecutivo en 5 minutos
+   - Los conceptos más importantes
+   - Preguntas típicas de examen con respuestas
+   - Checklist de preparación
+   - Puntos para destacar al profesor
+
+2. **[DOCUMENTACION_SISTEMA.md](DOCUMENTACION_SISTEMA.md)** - Documentación completa y detallada
    - Arquitectura general del proyecto
    - Estructura de base de datos
    - Explicación de todos los servicios y clases
@@ -62,19 +69,26 @@ Se ha creado documentación completa del sistema para facilitar su comprensión 
    - Sistema de carrito de compras
    - Conceptos clave y preguntas frecuentes
 
-2. **[GUIA_RAPIDA_EXAMEN.md](GUIA_RAPIDA_EXAMEN.md)** - Guía rápida de referencia
+3. **[GUIA_RAPIDA_EXAMEN.md](GUIA_RAPIDA_EXAMEN.md)** - Guía rápida de referencia
    - Respuestas a preguntas comunes
    - Explicaciones concisas de cada funcionalidad
    - Diagramas de flujo simplificados
    - Comandos útiles
    - Solución de errores comunes
 
-3. **[EJEMPLOS_PRACTICOS.md](EJEMPLOS_PRACTICOS.md)** - Ejemplos prácticos con código
+4. **[EJEMPLOS_PRACTICOS.md](EJEMPLOS_PRACTICOS.md)** - Ejemplos prácticos con código
    - Código comentado línea por línea
    - Casos de uso reales completos
    - Debugging y troubleshooting
    - Consultas SQL generadas por el sistema
    - Interacción frontend-backend
+
+5. **[DIAGRAMAS_VISUALES.md](DIAGRAMAS_VISUALES.md)** - Diagramas y visualizaciones
+   - Arquitectura del sistema en diagramas ASCII
+   - Flujo de datos completo
+   - Estructura de base de datos visual
+   - Flujos de autenticación y compra
+   - Organización de archivos
 
 ### ¿Para qué sirve esta documentación?
 
