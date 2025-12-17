@@ -47,6 +47,42 @@ cd Full_Gaming
 
 Luego deben crear su entorno virtual, instalar dependencias y configurar `database.py` como se indica arriba.
 
+## 📚 Documentación del Sistema
+
+Se ha creado documentación completa del sistema para facilitar su comprensión y estudio:
+
+### Documentos Disponibles
+
+1. **[DOCUMENTACION_SISTEMA.md](DOCUMENTACION_SISTEMA.md)** - Documentación completa y detallada
+   - Arquitectura general del proyecto
+   - Estructura de base de datos
+   - Explicación de todos los servicios y clases
+   - Flujos de usuario y administrador
+   - Sistema de autenticación y seguridad
+   - Sistema de carrito de compras
+   - Conceptos clave y preguntas frecuentes
+
+2. **[GUIA_RAPIDA_EXAMEN.md](GUIA_RAPIDA_EXAMEN.md)** - Guía rápida de referencia
+   - Respuestas a preguntas comunes
+   - Explicaciones concisas de cada funcionalidad
+   - Diagramas de flujo simplificados
+   - Comandos útiles
+   - Solución de errores comunes
+
+3. **[EJEMPLOS_PRACTICOS.md](EJEMPLOS_PRACTICOS.md)** - Ejemplos prácticos con código
+   - Código comentado línea por línea
+   - Casos de uso reales completos
+   - Debugging y troubleshooting
+   - Consultas SQL generadas por el sistema
+   - Interacción frontend-backend
+
+### ¿Para qué sirve esta documentación?
+
+- **Estudiar para exámenes**: Explicaciones detalladas de cómo funciona cada componente
+- **Incorporar nuevos desarrolladores**: Entender rápidamente la arquitectura
+- **Resolver problemas**: Ejemplos de debugging y soluciones
+- **Referencia técnica**: Consultar cómo se implementan funcionalidades específicas
+
 ## Colaboración
 
 - Hacer commits claros al trabajar en nuevas funciones o arreglos.
