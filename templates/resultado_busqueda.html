@@ -22,7 +22,7 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
             {% for producto in productos %}
             <div class="col">
-                <div class="product-card">
+                <div class="product-card" ondblclick="window.location.href='{{ url_for('ver_producto', producto_id=producto[0]) }}'">
                     
                     <!-- IMAGEN CON BADGES -->
                     <div class="product-image-wrapper">
@@ -54,10 +54,11 @@
 
                     <!-- BOTÓN COMPRAR -->
                     <button class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
-                    onclick="agregarAlCarrito({{ producto[0] }}, '{{ producto[1] }}')"
+                    onclick="event.stopPropagation(); agregarAlCarrito({{ producto[0] }}, {{ producto[1] | tojson }})"
+                    ondblclick="event.stopPropagation();"
                     {% if producto[5] == 0 %}disabled{% endif %}>
                     {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
-                    </button>
+                    </button> 
                 </div>
             </div>
             {% else %}
@@ -84,7 +85,6 @@
             .catch(error => console.error('Error:', error));
         }
     </script>
-
 </body>
     {% include 'footer.html' %} 
 </body>

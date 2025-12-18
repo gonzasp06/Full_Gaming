@@ -598,6 +598,7 @@ h1 {
   display: flex;
   flex-direction: column;
   border: 1px solid #f0f0f0;
+  cursor: pointer;
 }
 
 .product-card:hover {
@@ -805,8 +806,10 @@ h1 {
 }
 
 .producto-detalle-imagen img {
-  max-width: 200%;
-  max-height: 600px;        /* un poco más grande */
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 600px;
   object-fit: contain;
   border-radius: 18px;
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
@@ -821,11 +824,12 @@ h1 {
 }
 
 /* Centramos todo el bloque de info debajo del título */
+.producto-detalle-titulo,
 .producto-detalle-categoria,
 .producto-detalle-precio,
 .producto-detalle-stock {
+  align-self: center;
   text-align: center;
-  margin-bottom: 8px;
 }
 
 .producto-detalle-categoria {
@@ -895,6 +899,22 @@ h1 {
   margin-bottom: 18px;
 }
 
+.producto-detalle-descripcion p{
+  max-width: 900px;
+  margin: 0 auto;
+  color: #444;
+  line-height: 1.75;
+}
+
+.producto-info-wrapper{
+  width: 100%;
+  max-width: 420px;   /* 🔥 clave: todos comparten el mismo ancho */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Texto de la descripción igual que antes */
 .producto-detalle-descripcion p {
   line-height: 1.6;
@@ -912,6 +932,162 @@ h1 {
 /* Ajuste fino del botón debajo del stock */
 .btn-agregar-carrito {
   margin-top: 16px;   /* separación del stock */
+}
+
+/* ====== META (ID/SKU) ====== */
+.producto-meta{
+  margin-bottom: 10px;
+}
+.badge-meta{
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #666;
+  background: #f3f3f6;
+  border: 1px solid #e6e6ee;
+}
+
+/* ====== STOCK PRO ====== */
+.stock-wrap{
+  margin: 10px 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #f7f7fa;
+  border: 1px solid #ececf2;
+}
+
+.stock-ok{ color: #1a7f37; font-weight: 700; }
+.stock-low{ color: #b25b00; font-weight: 700; }
+.stock-out{ color: #b42318; font-weight: 700; }
+
+.stock-num{
+  font-weight: 800;
+  color: #333;
+  padding-left: 10px;
+  border-left: 1px solid #e3e3ea;
+}
+
+/* ====== BENEFICIOS más compactos ====== */
+.beneficios-lista{
+  margin-top: 14px;
+  gap: 8px;
+}
+.beneficio-icono{
+  width: 20px;
+  height: 20px;
+}
+.beneficio-texto{
+  font-size: 0.94rem;
+}
+
+/* ====== COMPRA (cantidad + botón) ====== */
+.compra-wrap{
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.qty-control{
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2e2ea;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.qty-btn{
+  width: 44px;
+  height: 40px;
+  border: 0;
+  background: #f3f3f6;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.qty-input{
+  width: 60px;
+  height: 40px;
+  border: 0;
+  text-align: center;
+  outline: none;
+  font-weight: 700;
+  color: #333;
+}
+
+/* botón más pro */
+.btn-agregar-carrito{
+  min-width: 260px;
+  height: 44px;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+}
+
+/* ====== Separador antes de descripción ====== */
+.producto-detalle-descripcion{
+  margin-top: 55px;
+  padding-top: 35px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+
+
+/* ============================= */
+/* BENEFICIOS - ESTILO LISTA     */
+/* ============================= */
+
+.beneficios-lista{
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ✅ centra cada item */
+  gap: 10px;
+}
+
+/* Cada línea: ícono + texto centrados como bloque */
+.beneficio-linea{
+  display: inline-flex;      /* ✅ ancho = contenido */
+  align-items: center;
+  justify-content: center;   /* ✅ centra icono+texto */
+  gap: 10px;
+  padding: 0;
+}
+
+/* Icono */
+.beneficio-icono{
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Texto gris */
+.beneficio-texto{
+  color: #5f5f66;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;        /* ✅ por si hay salto de línea */
+}
+
+/* Link centrado también */
+.beneficio-link{
+  margin-left: 8px;
+  font-size: 0.92rem;
+  color: #3C308C;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.beneficio-link:hover{
+  text-decoration: underline;
 }
 
 
@@ -969,3 +1145,4 @@ h1 {
   font-size: 0.8rem;
   color: #999;
 }
+
