@@ -51,11 +51,13 @@
                     Stock disponible: <span>{{ producto[5] }}</span>
                 </p>
 
-                <!-- Botón agregar al carrito (enlazá a tu ruta real de carrito cuando la tengas) -->
-                <a href="/carrito?producto_id={{ producto[0] }}" class="btn-agregar-carrito">
-                    <img src="{{ url_for('static', filename='images/carrito.png') }}" alt="Carrito">
-                    Agregar al carrito
-                </a>
+                <!-- Botón agregar al carrito -->
+                <button id="btn-agregar-{{ producto[0] }}" class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
+                data-nombre="{{ producto[1] }}"
+                onclick="agregarAlCarrito({{ producto[0] }}, 'btn-agregar-{{ producto[0] }}')"
+                {% if producto[5] == 0 %}disabled{% endif %}>
+                {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
+                </button>
             </div>
         </div>
 
@@ -65,5 +67,36 @@
             <p>{{ producto[2] }}</p>
         </div>
     </div>
+
+    <script>
+    function agregarAlCarrito(productoId, btnId) {
+        const btn = document.getElementById(btnId);
+        const nombre = btn ? btn.dataset.nombre : '';
+        if (btn) btn.disabled = true;
+
+        fetch(`/agregar_carrito/${productoId}`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cantidad: 1 })
+        })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(result => {
+            if (result.ok && result.data.ok) {
+                alert((nombre || 'Producto') + ' agregado al carrito');
+            } else {
+                alert('Error: ' + (result.data.error || 'No se pudo agregar al carrito'));
+            }
+        })
+        .catch(err => {
+            console.error('Error al agregar al carrito:', err);
+            alert('Error de red al agregar al carrito');
+        })
+        .finally(() => { if (btn) btn.disabled = false; });
+    }
+    </script>
+    {% include 'footer.html' %} 
 </body>
 </html>

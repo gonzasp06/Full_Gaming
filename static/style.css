@@ -913,3 +913,59 @@ h1 {
 .btn-agregar-carrito {
   margin-top: 16px;   /* separación del stock */
 }
+
+
+/* ============================= */
+/* FOOTER / ZÓCALO               */
+/* ============================= */
+
+.site-footer{
+  background: #1c1c1f;
+  color: #ddd;
+  margin-top: 80px;
+}
+
+.footer-container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 30px;
+}
+
+.footer-col h4{
+  color: #fff;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.footer-col a{
+  display: block;
+  color: #bbb;
+  text-decoration: none;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.footer-col a:hover{
+  color: #6A44F2;
+}
+
+.footer-redes{
+  display: flex;
+  gap: 10px;
+}
+
+.footer-redes img{
+  width: 28px;
+  filter: brightness(0.9);
+}
+
+.footer-bottom{
+  border-top: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  padding: 15px;
+  font-size: 0.8rem;
+  color: #999;
+}

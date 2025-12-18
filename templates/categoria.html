@@ -26,7 +26,9 @@
                     
                     <!-- IMAGEN CON BADGES -->
                     <div class="product-image-wrapper">
-                        <img src="{{ producto[6] }}" alt="{{ producto[1] }}" class="product-image">
+                        <a href="{{ url_for('ver_producto', producto_id=producto[0]) }}">
+                            <img src="{{ producto[6] }}" alt="{{ producto[1] }}" class="product-image">
+                        </a>
                         
                         <!-- BADGE STOCK (arriba izquierda) -->
                         <span class="badge-stock {% if producto[5] > 0 %}stock-disponible{% else %}agotado{% endif %}">
@@ -37,7 +39,7 @@
 
                     <!-- INFO DEL PRODUCTO -->
                     <div class="product-info">
-                        <h5 class="product-name">{{ producto[1] }}</h5>
+                        <h5 class="product-name"><a href="{{ url_for('ver_producto', producto_id=producto[0]) }}">{{ producto[1] }}</a></h5>
                         
                         <!-- PRECIO -->
                         <div class="product-price">
@@ -88,6 +90,6 @@
             .catch(error => console.error('Error:', error));
         }
     </script>
-   
+   {% include 'footer.html' %} 
 </body>
 </html>
