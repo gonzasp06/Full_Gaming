@@ -34,7 +34,6 @@ class UsuarioService:
 
     
     # BUSCAR USUARIO POR EMAIL
-   
     def buscar_usuario(self, email):
 
         cursor = self.conexion.cursor()
@@ -93,4 +92,40 @@ class UsuarioService:
             print(f"Hash type: {type(hash_guardado)}, Hash value: {hash_guardado}")
             return None
     
+        # OBTENER TODOS LOS USUARIOS
+    def obtener_todos(self):
+
+        try:
+            cursor = self.conexion.cursor()
+            query = "SELECT idusuario, nombre, apellido, email, is_admin FROM usuario"
+            cursor.execute(query)
+            usuarios = cursor.fetchall()
+            cursor.close()
+            return usuarios
+        except Exception as e:
+            return []
+
+    # ACTUALIZAR ROL DE USUARIO
+    def actualizar_rol(self, user_id, is_admin):
+        try:
+            cursor = self.conexion.cursor()
+            query = "UPDATE usuario SET is_admin = %s WHERE idusuario = %s"
+            cursor.execute(query, (is_admin, user_id))
+            self.conexion.commit()
+            cursor.close()
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    # ELIMINAR USUARIO
+    def eliminar_usuario(self, user_id):
+        try:
+            cursor = self.conexion.cursor()
+            query = "DELETE FROM usuario WHERE idusuario = %s"
+            cursor.execute(query, (user_id,))
+            self.conexion.commit()
+            cursor.close()
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
     

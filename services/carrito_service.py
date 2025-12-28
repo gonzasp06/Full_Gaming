@@ -81,7 +81,7 @@ class CarritoService:
         """Vacía completamente el carrito"""
         if 'carrito' in session:
             session['carrito'] = {}
-            session.modified = True
+            session.modified = True  
     
     def calcular_total(self, producto_service):
         """

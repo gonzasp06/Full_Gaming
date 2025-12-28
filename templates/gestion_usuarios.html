@@ -38,14 +38,20 @@
                 <td>{{ "Si" if usuario[4] else "No" }}</td>
                 <td class="text-end">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="toggle{{ usuario[0] }}" {% if usuario[4] %}checked{% endif %} onchange="toggleAdmin('{{ usuario[0] }}')">
+                        {% if usuario[0] == session.get('usuario_id') %}
+                            <input class="form-check-input" type="checkbox" id="toggle{{ usuario[0] }}" {% if usuario[4] %}checked{% endif %} disabled title="No puedes cambiar tu propio rol mientras estás logueado">
+                        {% else %}
+                            <input class="form-check-input" type="checkbox" id="toggle{{ usuario[0] }}" {% if usuario[4] %}checked{% endif %} onchange="toggleAdmin('{{ usuario[0] }}')">
+                        {% endif %}
                         <label class="form-check-label" for="toggle{{ usuario[0] }}">Admin</label>
                     </div>
                 </td>
                 <td class="text-end">
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarEliminacionModal{{ usuario[0] }}">
-                        Eliminar
-                    </button>
+                    {% if usuario[0] == session.get('usuario_id') %}
+                        <button type="button" class="btn btn-danger" disabled title="No puedes eliminar tu propia cuenta mientras estás logueado">Eliminar</button>
+                    {% else %}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarEliminacionModal{{ usuario[0] }}">Eliminar</button>
+                    {% endif %}
                     <!-- ventanita emergente para confirmar-->
                     <div class="modal fade" id="confirmarEliminacionModal{{ usuario[0] }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -75,7 +81,8 @@
     <script>
         // CAMBIAR ROLES
         function toggleAdmin(userId) {
-            var isChecked = document.getElementById("toggle" + userId).checked;
+            var checkbox = document.getElementById("toggle" + userId);
+            var isChecked = checkbox.checked;
             fetch("/actualizar_rol/" + userId, {
                 method: "POST",
                 body: JSON.stringify({ isAdmin: isChecked }),
@@ -83,37 +90,43 @@
                     "Content-Type": "application/json"
                 }
             })
-            .then(response => {
+            .then(async response => {
                 if (response.ok) {
                     console.log("Rol del usuario actualizado exitosamente");
                     location.reload();// actualiza pag
-                } 
-                else {
-                    console.error("Error al actualizar el rol del usuario");
+                } else {
+                    const data = await response.json().catch(()=>null);
+                    const msg = data && data.error ? data.error : "Error al actualizar el rol del usuario";
+                    alert(msg);
+                    // revertir cambio visual si hubo error
+                    checkbox.checked = !isChecked;
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
+                alert("Error de red al actualizar rol");
+                checkbox.checked = !isChecked;
             });
         }
         // ELIMINAR USUARIOS
         function eliminarUsuario(userId) {
-            console.log("Eliminar usuario con ID:", userId);
+            if (!confirm("¿Deseas eliminar este usuario?")) return;
             fetch("/eliminar/" + userId, {
                 method: "POST"
             })
-            .then(response => {
+            .then(async response => {
                 if (response.ok) {
                     console.log("Usuario eliminado correctamente");
-                    var modal = new bootstrap.Modal(document.getElementById('confirmarEliminacionModal' + userId));
-                    modal.show();
                     location.reload();
                 } else {
-                    console.error("Error al eliminar el usuario");
+                    const data = await response.json().catch(()=>null);
+                    const msg = data && data.error ? data.error : "Error al eliminar el usuario";
+                    alert(msg);
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
+                alert("Error de red al eliminar usuario");
             });
         }
     </script>

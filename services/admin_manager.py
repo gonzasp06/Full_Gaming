@@ -10,7 +10,10 @@ class AdminManager:
     
     def es_admin(self):
         """Verifica si el usuario actual es admin"""
-        return session.get('es_admin') == 1
+        try:
+            return int(session.get('es_admin', 0)) == 1
+        except (TypeError, ValueError):
+            return False
     
     def es_logueado(self):
         """Verifica si el usuario está logueado"""

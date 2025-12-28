@@ -17,7 +17,6 @@ from services.pedido_service import PedidoService
 
 # print("ProductoService:", ProductoService)
 
-
 app = Flask(__name__)
 
 # ============================================
@@ -221,6 +220,59 @@ def actualizar_producto(id_producto):
     service.editar_producto(id_producto, nombre, descripcion, categoria, precio, cantidad, ruta)
 
     return redirect('/gestion_productos')
+
+
+# ==================== GESTION DE USUARIOS ====================
+@app.route('/usuarios')
+@admin_manager.requerir_admin
+def gestion_usuarios():
+    service = UsuarioService()
+    usuarios = service.obtener_todos()
+    return render_template('gestion_usuarios.html', usuarios=usuarios)
+
+
+@app.route('/actualizar_rol/<int:user_id>', methods=['POST'])
+@admin_manager.requerir_admin
+def actualizar_rol(user_id):
+    data = request.get_json() or {}
+    is_admin = data.get('isAdmin', False)
+
+    # Evitar autodescenso: un admin no puede quitarse permisos mientras esté logueado
+    try:
+        if int(session.get('usuario_id', 0)) == int(user_id) and not is_admin:
+            return jsonify({"ok": False, "error": "No puedes quitarte los permisos de administrador mientras estás logueado."}), 400
+    except Exception:
+        pass
+
+    service = UsuarioService()
+    resultado = service.actualizar_rol(user_id, 1 if is_admin else 0)
+    if resultado.get('ok'):
+        try:
+            if int(session.get('usuario_id', 0)) == int(user_id):
+                session['es_admin'] = 1 if is_admin else 0
+        except Exception:
+            pass
+        return jsonify({"ok": True}), 200
+    else:
+        return jsonify({"ok": False, "error": resultado.get('error')}), 400
+
+
+@app.route('/eliminar/<int:user_id>', methods=['POST'])
+@admin_manager.requerir_admin
+def eliminar_usuario(user_id):
+    # Evitar que un admin se elimine a sí mismo mientras está logueado
+    try:
+        if int(session.get('usuario_id', 0)) == int(user_id):
+            return jsonify({"ok": False, "error": "No puedes eliminar tu propia cuenta mientras estás logueado."}), 400
+    except Exception:
+        pass
+
+    service = UsuarioService()
+    resultado = service.eliminar_usuario(user_id)
+    if resultado.get('ok'):
+        return jsonify({"ok": True}), 200
+    else:
+        return jsonify({"ok": False, "error": resultado.get('error')}), 400
 
 
 @app.route('/cargar_producto', methods=['POST'])
