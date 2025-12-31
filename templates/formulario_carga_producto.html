@@ -9,9 +9,13 @@
     <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}">
     <!-- Vinculacion con Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Quill CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <!-- Scripts de Bootstrap y jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Quill JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
 </head>
 <body>
@@ -26,7 +30,8 @@
             </div>
             <div class="form-group">
                 <label for="descripcion" class="form-label">Descripción:</label>
-                <input type="text" id="descripcion" name="descripcion" class="form-control"> 
+                <div id="descripcion-editor" style="height:150px;"></div>
+                <input type="hidden" id="descripcion" name="descripcion">
             </div>
             <div class="form-group">
                 <label for="categoria" class="form-label">Categoria:</label>
@@ -57,12 +62,15 @@
     <div id="resultado"></div>
 
     <script>
+        // Inicializar Quill
+        var quill = new Quill('#descripcion-editor', { theme: 'snow' });
+
         document.getElementById("formularioProducto").addEventListener("submit", function(event) {
             event.preventDefault();
 
             // Obtener datos del formulario
             var nombre = document.getElementById("nombre").value;
-            var descripcion = document.getElementById("descripcion").value;
+            var descripcion = quill.root.innerHTML;
             var categoria = document.getElementById("categoria").value;
             var precio = document.getElementById("precio").value;
             var cantidad = document.getElementById("cantidad").value;

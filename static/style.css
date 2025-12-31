@@ -417,6 +417,85 @@ h1 {
   color: #fff;
 }
 
+/* Quill editor styling to match form controls */
+.ql-container {
+  background-color: transparent;
+  border: 1px solid #3C308C;
+  border-radius: 8px;
+  box-shadow: none;
+}
+.ql-toolbar {
+  background-color: transparent;
+  border: 1px solid #3C308C;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  color: #fff;
+}
+.ql-editor {
+  min-height: 150px;
+  background-color: #28304892;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 0 0 8px 8px;
+}
+.ql-editor:focus {
+  outline: none;
+  background-color: #272D40;
+  box-shadow: 0 0 0 0.15rem rgba(106, 68, 242, 0.4);
+}
+.ql-editor.ql-blank::before {
+  color: #aaa;
+}
+/* Dark toolbar styles */
+.ql-toolbar {
+  background-color: #272D40; /* dark background */
+  border: 1px solid #3C308C;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  color: #fff;
+  padding: 6px 8px;
+}
+.ql-toolbar .ql-formats {
+  margin-right: 8px;
+}
+.ql-toolbar button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px;
+}
+.ql-toolbar button:hover {
+  background: rgba(106,68,242,0.12);
+}
+.ql-toolbar button.ql-active, .ql-toolbar button.ql-selected {
+  background: rgba(106,68,242,0.25);
+  color: #fff;
+}
+.ql-toolbar .ql-picker {
+  color: #fff;
+  background: transparent;
+  border: none;
+}
+.ql-toolbar .ql-picker-label:hover,
+.ql-toolbar .ql-picker-options .ql-picker-item:hover {
+  background: rgba(106, 68, 242, 0.12);
+}
+.ql-toolbar .ql-picker-options {
+  background: #272D40;
+  border: 1px solid #3C308C;
+  color: #fff;
+}
+.ql-snow .ql-stroke {
+  stroke: #fff;
+}
+.ql-snow .ql-fill {
+  fill: #fff;
+}
+.ql-snow .ql-picker-label, .ql-snow .ql-picker-options .ql-picker-item {
+  color: #fff;
+}
+
 /* Botón */
 .form-container .btn-primary {
   background-color: #3C308C;

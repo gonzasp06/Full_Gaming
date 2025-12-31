@@ -164,6 +164,7 @@ def es_admin_logueado():
 
 def usuario_logueado():
     return 'usuario_id' in session
+
 # -----------------------------------------
 # FORM LOGIN (VISTA SIMPLE)
 # -----------------------------------------
