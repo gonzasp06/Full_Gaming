@@ -77,9 +77,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    alert('✓ ' + nombreProducto + ' agregado al carrito');
+                    mostrarNotificacion('✓ ' + nombreProducto + ' agregado al carrito');
                 } else {
-                    alert('❌ Error: ' + data.error);
+                    mostrarNotificacion('❌ Error: ' + data.error, true);
                 }
             })
             .catch(error => console.error('Error:', error));

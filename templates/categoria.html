@@ -74,6 +74,17 @@
     </footer>
 
     <script>
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notif = document.createElement('div');
+            notif.className = 'notificacion' + (esError ? ' error' : '');
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+        
         function agregarAlCarrito(idProducto, nombreProducto) {
             fetch('/agregar_carrito/' + idProducto, {
                 method: 'POST',
@@ -83,9 +94,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    alert('✓ ' + nombreProducto + ' agregado al carrito');
+                    mostrarNotificacion('✓ ' + nombreProducto + ' agregado al carrito');
                 } else {
-                    alert('❌ Error: ' + data.error);
+                    mostrarNotificacion('❌ Error: ' + data.error, true);
                 }
             })
             .catch(error => console.error('Error:', error));
