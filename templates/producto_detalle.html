@@ -126,16 +126,27 @@
         .then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(result => {
             if (result.ok && result.data.ok) {
-                alert((nombre || 'Producto') + ' agregado al carrito');
+                mostrarNotificacion('✓ ' + (nombre || 'Producto') + ' agregado al carrito');
             } else {
-                alert('Error: ' + (result.data.error || 'No se pudo agregar al carrito'));
+                mostrarNotificacion('❌ Error: ' + (result.data.error || 'No se pudo agregar al carrito'), true);
             }
         })
         .catch(err => {
             console.error('Error al agregar al carrito:', err);
-            alert('Error de red al agregar al carrito');
+            mostrarNotificacion('❌ Error de red al agregar al carrito', true);
         })
         .finally(() => { if (btn) btn.disabled = false; });
+    }
+    
+    function mostrarNotificacion(mensaje, esError = false) {
+        const notif = document.createElement('div');
+        notif.className = 'notificacion' + (esError ? ' error' : '');
+        notif.textContent = mensaje;
+        document.body.appendChild(notif);
+        setTimeout(() => {
+            notif.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notif.remove(), 300);
+        }, 3000);
     }
     </script>
     {% include 'footer.html' %}
