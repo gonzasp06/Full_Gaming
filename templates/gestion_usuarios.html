@@ -79,6 +79,17 @@
 </div>
 
     <script>
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notif = document.createElement('div');
+            notif.className = 'notificacion' + (esError ? ' error' : '');
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+        
         // CAMBIAR ROLES
         function toggleAdmin(userId) {
             var checkbox = document.getElementById("toggle" + userId);
@@ -97,36 +108,35 @@
                 } else {
                     const data = await response.json().catch(()=>null);
                     const msg = data && data.error ? data.error : "Error al actualizar el rol del usuario";
-                    alert(msg);
+                    mostrarNotificacion('❌ ' + msg, true);
                     // revertir cambio visual si hubo error
                     checkbox.checked = !isChecked;
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("Error de red al actualizar rol");
+                mostrarNotificacion('❌ Error de red al actualizar rol', true);
                 checkbox.checked = !isChecked;
             });
         }
         // ELIMINAR USUARIOS
         function eliminarUsuario(userId) {
-            if (!confirm("¿Deseas eliminar este usuario?")) return;
             fetch("/eliminar/" + userId, {
                 method: "POST"
             })
             .then(async response => {
                 if (response.ok) {
-                    console.log("Usuario eliminado correctamente");
-                    location.reload();
+                    mostrarNotificacion('✓ Usuario eliminado correctamente');
+                    setTimeout(() => location.reload(), 1500);
                 } else {
                     const data = await response.json().catch(()=>null);
                     const msg = data && data.error ? data.error : "Error al eliminar el usuario";
-                    alert(msg);
+                    mostrarNotificacion('❌ ' + msg, true);
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("Error de red al eliminar usuario");
+                mostrarNotificacion('❌ Error de red al eliminar usuario', true);
             });
         }
     </script>

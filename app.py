@@ -188,9 +188,13 @@ def gestion_productos():
 @app.route('/eliminar_producto/<int:id_producto>')
 @admin_manager.requerir_admin
 def eliminar_producto(id_producto):
-    service = ProductoService()
-    service.eliminar_producto(id_producto)
-    return redirect('/gestion_productos')
+    try:
+        service = ProductoService()
+        service.eliminar_producto(id_producto)
+        return redirect('/gestion_productos')
+    except Exception as e:
+        print(f"Error al eliminar producto: {str(e)}")
+        return redirect('/gestion_productos')
 
 @app.route('/editar_producto/<int:id_producto>')
 @admin_manager.requerir_admin

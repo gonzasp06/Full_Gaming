@@ -96,10 +96,18 @@ class ProductoService:
     
     def eliminar_producto(self, id_producto):
         cursor = self.conexion.cursor()
-        cursor.execute('DELETE FROM catalogo.producto WHERE id= %s', (id_producto,))
-        self.conexion.commit()
-        cursor.close()
-        return True
+        try:
+            # Primero eliminar los items del pedido que hacen referencia a este producto
+            cursor.execute('DELETE FROM catalogo.pedido_items WHERE producto_id = %s', (id_producto,))
+            # Luego eliminar el producto
+            cursor.execute('DELETE FROM catalogo.producto WHERE id= %s', (id_producto,))
+            self.conexion.commit()
+            cursor.close()
+            return True
+        except Exception as e:
+            self.conexion.rollback()
+            cursor.close()
+            raise e
     
     def buscar_productos(self, termino):
         cursor = self.conexion.cursor()
