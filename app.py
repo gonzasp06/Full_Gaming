@@ -188,9 +188,13 @@ def gestion_productos():
 @app.route('/eliminar_producto/<int:id_producto>')
 @admin_manager.requerir_admin
 def eliminar_producto(id_producto):
-    service = ProductoService()
-    service.eliminar_producto(id_producto)
-    return redirect('/gestion_productos')
+    try:
+        service = ProductoService()
+        service.eliminar_producto(id_producto)
+        return redirect('/gestion_productos')
+    except Exception as e:
+        print(f"Error al eliminar producto: {str(e)}")
+        return redirect('/gestion_productos')
 
 @app.route('/editar_producto/<int:id_producto>')
 @admin_manager.requerir_admin
@@ -399,6 +403,30 @@ def logout():
     """Cerrar sesión"""
     session.clear()
     return redirect(url_for('mostrar_catalogo'))
+
+
+@app.route('/perfil')
+def perfil():
+    """Mostrar página de perfil del usuario"""
+    if 'usuario_id' not in session:
+        return redirect('/acceso')
+    
+    usuario_id = session.get('usuario_id')
+    usuario_nombre = session.get('usuario_nombre')
+    usuario_email = session.get('usuario_email')
+    
+    # Obtener datos del usuario desde la BD
+    service = UsuarioService()
+    usuario_datos = service.obtener_usuario_por_id(usuario_id)
+    
+    # Obtener últimos pedidos (por ahora vacío, después conectamos)
+    pedidos_recientes = []
+    
+    return render_template('perfil.html', 
+                         usuario=usuario_datos,
+                         usuario_nombre=usuario_nombre,
+                         usuario_email=usuario_email,
+                         pedidos_recientes=pedidos_recientes)
 
 
 @app.route('/procesar_compra', methods=['POST'])

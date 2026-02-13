@@ -92,7 +92,7 @@ class UsuarioService:
             print(f"Hash type: {type(hash_guardado)}, Hash value: {hash_guardado}")
             return None
     
-        # OBTENER TODOS LOS USUARIOS
+    # OBTENER TODOS LOS USUARIOS
     def obtener_todos(self):
 
         try:
@@ -104,6 +104,26 @@ class UsuarioService:
             return usuarios
         except Exception as e:
             return []
+
+    # OBTENER USUARIO POR ID
+    def obtener_usuario_por_id(self, usuario_id):
+        try:
+            cursor = self.conexion.cursor()
+            query = "SELECT idusuario, nombre, apellido, email, is_admin FROM usuario WHERE idusuario = %s"
+            cursor.execute(query, (usuario_id,))
+            usuario = cursor.fetchone()
+            cursor.close()
+            if usuario:
+                return {
+                    "id": usuario[0],
+                    "nombre": usuario[1],
+                    "apellido": usuario[2],
+                    "email": usuario[3],
+                    "is_admin": usuario[4]
+                }
+            return None
+        except Exception as e:
+            return None
 
     # ACTUALIZAR ROL DE USUARIO
     def actualizar_rol(self, user_id, is_admin):
