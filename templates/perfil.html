@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container-fluid perfil-container">
+        <!-- BOTÓN VOLVER ATRÁS -->
+        <div class="perfil-volver">
+            <a href="/" onclick="history.back()" class="volver-btn">
+                <span class="icon">←</span>
+                <span>Volver</span>
+            </a>
+        </div>
+
+        <div class="perfil-header">
+            <h1 class="perfil-logo">FULLGAMING</h1>
+            <p class="perfil-subtitle">Centro de Comandos</p>
+        </div>
+
+        <div class="perfil-content-wrapper">
+            <div class="perfil-content">
+                <!-- SIDEBAR -->
+                <div class="perfil-sidebar">
+                    <div class="perfil-card perfil-usuario">
+                        <div class="avatar-perfil">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        <h3 class="perfil-nombre">{{ usuario_nombre }}</h3>
+                        <p class="perfil-email">{{ usuario_email }}</p>
+                    </div>
+
+                    <nav class="perfil-nav">
+                        <a href="#resumen" class="perfil-nav-item active" onclick="cambiarSeccion('resumen')">
+                            <span class="icon">📊</span>
+                            <span>Resumen</span>
+                        </a>
+                        <a href="#direcciones" class="perfil-nav-item" onclick="cambiarSeccion('direcciones')">
+                            <span class="icon">📍</span>
+                            <span>Direcciones</span>
+                        </a>
+                        <a href="#cuenta" class="perfil-nav-item" onclick="cambiarSeccion('cuenta')">
+                            <span class="icon">⚙️</span>
+                            <span>Mi Cuenta</span>
+                        </a>
+                        <a href="/logout" class="perfil-nav-item logout">
+                            <span class="icon">🚪</span>
+                            <span>Cerrar sesión</span>
+                        </a>
+                    </nav>
+
+                    <!-- Dirección Principal -->
+                    <div class="perfil-card">
+                        <h4 style="margin-bottom: 15px;">Dirección Principal</h4>
+                        <div id="direccion-info" class="sin-direccion-sidebar">
+                            <p>📍 No tienes una dirección registrada</p>
+                            <button class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTENIDO PRINCIPAL -->
+                <div class="perfil-main">
+                    <!-- CARDS SUPERIORES: Pedidos e Información (dos columnas) -->
+                    <div class="perfil-top-cards">
+                        <!-- Pedidos Recientes -->
+                        <div>
+                            <div class="perfil-card">
+                                <h4>Pedidos Recientes</h4>
+                                <div class="pedidos-container">
+                                    {% if pedidos_recientes|length > 0 %}
+                                        <table class="table table-dark table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Pedido</th>
+                                                    <th>Fecha</th>
+                                                    <th>Total</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for pedido in pedidos_recientes %}
+                                                <tr>
+                                                    <td>#{{ pedido.id }}</td>
+                                                    <td>{{ pedido.fecha }}</td>
+                                                    <td>${{ pedido.total }}</td>
+                                                    <td><span class="badge bg-info">{{ pedido.estado }}</span></td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        <div class="sin-pedidos">
+                                            <p>🛍️ No tienes pedidos aún</p>
+                                            <a href="/" class="btn btn-sm" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
+                                                Explorar Productos
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información de Cuenta -->
+                        <div>
+                            <div class="perfil-card">
+                                <div class="card-header-perfil">
+                                    <h4>Información de Cuenta</h4>
+                                    <a href="#" class="editar-btn" onclick="abrirEdicion()">Editar</a>
+                                </div>
+                                <div id="info-cuenta" class="info-cuenta">
+                                    <div class="info-item">
+                                        <label>Nombre</label>
+                                        <p>{{ usuario_nombre }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Email</label>
+                                        <p>{{ usuario_email }}</p>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Teléfono</label>
+                                        <p class="texto-gris">No proporcionado</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- SECCIÓN RESUMEN (contenido debajo de los cards) -->
+                <div id="seccion-resumen" class="perfil-section active">
+                </div>
+
+                <!-- SECCIÓN DIRECCIONES -->
+                <div id="seccion-direcciones" class="perfil-section">
+                    <div class="perfil-card">
+                        <div class="card-header-perfil">
+                            <h4>Mis Direcciones</h4>
+                            <button class="btn btn-sm" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
+                                + Agregar Dirección
+                            </button>
+                        </div>
+                        <div class="direcciones-list">
+                            <div class="sin-direccion">
+                                <p>📍 No tienes direcciones guardadas</p>
+                                <p class="texto-gris">Las direcciones te ayudarán a completar compras más rápido</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN CUENTA -->
+                <div id="seccion-cuenta" class="perfil-section">
+                    <div class="perfil-card">
+                        <h4 style="margin-bottom: 30px;">Editar Información de Cuenta</h4>
+                        <form id="form-cuenta" onsubmit="guardarCuenta(event)">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Nombre</label>
+                                    <input type="text" class="form-control" value="{{ usuario_nombre }}" placeholder="Tu nombre">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" value="{{ usuario_email }}" placeholder="Tu email">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Teléfono</label>
+                                <input type="tel" class="form-control" placeholder="+54 9 11 2345-6789">
+                            </div>
+                            <div class="mb-3">
+                                <label>Nueva Contraseña (opcional)</label>
+                                <input type="password" class="form-control" placeholder="Dejar en blanco para no cambiar">
+                            </div>
+                            <div class="button-group">
+                                <button type="submit" class="btn" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
+                                    Guardar Cambios
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="cambiarSeccion('resumen')">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cambiarSeccion(seccion) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.perfil-section').forEach(s => {
+                s.classList.remove('active');
+            });
+            // Actualizar nav activo
+            document.querySelectorAll('.perfil-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Mostrar la sección seleccionada
+            const sectionEl = document.getElementById(`seccion-${seccion}`);
+            if (sectionEl) {
+                sectionEl.classList.add('active');
+            }
+
+            // Marcar el nav como activo
+            event.target.closest('.perfil-nav-item').classList.add('active');
+        }
+
+        function abrirEdicion() {
+            cambiarSeccion('cuenta');
+        }
+
+        function guardarCuenta(event) {
+            event.preventDefault();
+            // Aquí irá la lógica para guardar cambios
+            mostrarNotificacion('✓ Cambios guardados correctamente');
+        }
+
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notif = document.createElement('div');
+            notif.className = 'notificacion' + (esError ? ' error' : '');
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+    </script>
+
+</body>
+</html>

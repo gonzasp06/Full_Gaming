@@ -405,6 +405,30 @@ def logout():
     return redirect(url_for('mostrar_catalogo'))
 
 
+@app.route('/perfil')
+def perfil():
+    """Mostrar página de perfil del usuario"""
+    if 'usuario_id' not in session:
+        return redirect('/acceso')
+    
+    usuario_id = session.get('usuario_id')
+    usuario_nombre = session.get('usuario_nombre')
+    usuario_email = session.get('usuario_email')
+    
+    # Obtener datos del usuario desde la BD
+    service = UsuarioService()
+    usuario_datos = service.obtener_usuario_por_id(usuario_id)
+    
+    # Obtener últimos pedidos (por ahora vacío, después conectamos)
+    pedidos_recientes = []
+    
+    return render_template('perfil.html', 
+                         usuario=usuario_datos,
+                         usuario_nombre=usuario_nombre,
+                         usuario_email=usuario_email,
+                         pedidos_recientes=pedidos_recientes)
+
+
 @app.route('/procesar_compra', methods=['POST'])
 def procesar_compra():
     """Procesar compra y guardar en BD"""
