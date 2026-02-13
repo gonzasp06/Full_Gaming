@@ -60,3 +60,51 @@ class PedidoService:
             if cursor:
                 cursor.close()
             return {"ok": False, "error": str(e)}
+    def obtener_pedidos_recientes(self, usuario_id, limite=5):
+        """
+        Obtiene los últimos pedidos de un usuario
+        
+        Args:
+            usuario_id: ID del usuario
+            limite: cantidad de pedidos a retornar (default 5)
+        
+        Retorna: lista de dicts con los pedidos
+        """
+        cursor = None
+        try:
+            cursor = self.conexion.cursor()
+            
+            query = """
+                SELECT id, usuario_id, email, total, estado, fecha
+                FROM pedidos
+                WHERE usuario_id = %s
+                ORDER BY fecha DESC
+                LIMIT %s
+            """
+            cursor.execute(query, (usuario_id, limite))
+            pedidos = cursor.fetchall()
+            cursor.close()
+            
+            resultado = []
+            for pedido in pedidos:
+                # Formatear fecha: si es datetime, convertir a string DD/MM/YYYY
+                fecha_str = 'N/A'
+                if pedido[5]:
+                    if hasattr(pedido[5], 'strftime'):
+                        fecha_str = pedido[5].strftime('%d/%m/%Y')
+                    else:
+                        fecha_str = str(pedido[5])
+                
+                resultado.append({
+                    "id": pedido[0],
+                    "usuario_id": pedido[1],
+                    "email": pedido[2],
+                    "total": pedido[3],
+                    "estado": pedido[4],
+                    "fecha": fecha_str
+                })
+            
+            return resultado
+        except Exception as e:
+            print(f"Error obtener_pedidos_recientes: {e}")
+            return []
