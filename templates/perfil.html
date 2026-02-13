@@ -92,7 +92,7 @@
                                                 <tr>
                                                     <td>#{{ pedido.id }}</td>
                                                     <td>{{ pedido.fecha }}</td>
-                                                    <td>${{ pedido.total }}</td>
+                                                    <td>${{ "%d" | format(pedido.total) }}</td>
                                                     <td><span class="badge bg-info">{{ pedido.estado }}</span></td>
                                                 </tr>
                                                 {% endfor %}
@@ -283,6 +283,7 @@
             } else if (seccion === 'direcciones') {
                 navItems[1]?.classList.add('active');
                 cargarDirecciones();
+                cargarDireccionPrincipal();
                 cargarProvincias();
             } else if (seccion === 'cuenta') {
                 navItems[2]?.classList.add('active');
@@ -383,6 +384,7 @@
                     form.reset();
                     toggleFormularioDireccion();
                     cargarDirecciones();
+                    cargarDireccionPrincipal();
                 } else {
                     mostrarNotificacion('❌ ' + (data.error || 'Error al guardar'), true);
                 }
@@ -429,6 +431,69 @@
             }
         }
 
+        // ============ CARGAR DIRECCIÓN PRINCIPAL EN SIDEBAR ============
+        async function cargarDireccionPrincipal() {
+            try {
+                const res = await fetch('/api/direcciones');
+                const data = await res.json();
+                
+                const direccionInfo = document.getElementById('direccion-info');
+                if (!direccionInfo) return;
+
+                if (data.ok && data.direcciones && data.direcciones.length > 0) {
+                    // Buscar la dirección principal
+                    const direccionPrincipal = data.direcciones.find(dir => dir.es_principal);
+                    
+                    if (direccionPrincipal) {
+                        // Mostrar dirección principal
+                        direccionInfo.innerHTML = `
+                            <div style="margin-bottom: 15px;">
+                                <p style="font-weight: bold; margin-bottom: 5px;">⭐ ${direccionPrincipal.calle} ${direccionPrincipal.numero}</p>
+                                ${direccionPrincipal.piso_departamento ? `<p style="margin: 3px 0; font-size: 0.9em;">${direccionPrincipal.piso_departamento}</p>` : ''}
+                                <p style="margin: 3px 0; color: #999;">${direccionPrincipal.municipio}, ${direccionPrincipal.provincia}</p>
+                                <p style="margin: 3px 0; color: #999; font-size: 0.85em;">CP: ${direccionPrincipal.codigo_postal}</p>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')" style="width: 100%; margin-top: 10px;">
+                                Editar
+                            </button>
+                        `;
+                    } else if (data.direcciones.length > 0) {
+                        // Hay direcciones pero ninguna es principal, mostrar la primera
+                        const dir = data.direcciones[0];
+                        direccionInfo.innerHTML = `
+                            <div style="margin-bottom: 15px;">
+                                <p style="font-weight: bold; margin-bottom: 5px;">${dir.calle} ${dir.numero}</p>
+                                ${dir.piso_departamento ? `<p style="margin: 3px 0; font-size: 0.9em;">${dir.piso_departamento}</p>` : ''}
+                                <p style="margin: 3px 0; color: #999;">${dir.municipio}, ${dir.provincia}</p>
+                                <p style="margin: 3px 0; color: #999; font-size: 0.85em;">CP: ${dir.codigo_postal}</p>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')" style="width: 100%; margin-top: 10px;">
+                                Editar
+                            </button>
+                        `;
+                    } else {
+                        // No hay direcciones
+                        direccionInfo.innerHTML = `
+                            <p>📍 No tienes una dirección registrada</p>
+                            <button type="button" class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')">
+                                Agregar
+                            </button>
+                        `;
+                    }
+                } else {
+                    // Error o sin direcciones
+                    direccionInfo.innerHTML = `
+                        <p>📍 No tienes una dirección registrada</p>
+                        <button type="button" class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')">
+                            Agregar
+                        </button>
+                    `;
+                }
+            } catch (err) {
+                console.error('Error cargando dirección principal:', err);
+            }
+        }
+
         // ============ DIRECCIONES - ELIMINAR ============
         function eliminarDireccion(id) {
             if (confirm('¿Confirmas que deseas eliminar esta dirección?')) {
@@ -440,6 +505,7 @@
                     if (data.ok) {
                         mostrarNotificacion('✓ Dirección eliminada');
                         cargarDirecciones();
+                        cargarDireccionPrincipal();
                     } else {
                         mostrarNotificacion('❌ Error al eliminar', true);
                     }
@@ -530,6 +596,7 @@
         // ============ INICIALIZACIÓN ============
         document.addEventListener('DOMContentLoaded', function() {
             cargarDirecciones();
+            cargarDireccionPrincipal();
         });
     </script>
 
