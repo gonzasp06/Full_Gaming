@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div id="modal-confirmacion" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-title">Eliminar Dirección</h2>
+            <p class="modal-description">¿Estás seguro de que deseas eliminar esta dirección? Esta acción no se puede deshacer.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid perfil-container">
         <!-- BOTÓN VOLVER ATRÁS -->
         <div class="perfil-volver">
@@ -406,16 +419,21 @@
 
                 if (data.ok && data.direcciones && data.direcciones.length > 0) {
                     listaDirecciones.innerHTML = data.direcciones.map(dir => `
-                        <div class="perfil-card" style="margin-bottom: 15px;">
-                            <div class="card-header-perfil">
-                                <h5>${dir.calle} ${dir.numero}${dir.piso_departamento ? ', ' + dir.piso_departamento : ''}</h5>
-                                <button type="button" onclick="eliminarDireccion(${dir.id})" class="btn btn-sm" style="background: #e74c3c; color: white; border: none;">
-                                    🗑️ Eliminar
-                                </button>
+                        <div class="perfil-card" style="margin-bottom: 15px; position: relative;">
+                            ${dir.es_principal ? '<div style="position: absolute; top: 10px; right: 10px; background: #FFD700; color: #333; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">⭐ Principal</div>' : ''}
+                            <div class="card-header-perfil" style="align-items: flex-start; margin-bottom: 15px;">
+                                <div style="flex: 1;">
+                                    <h5 style="margin: 0 0 8px 0;">${dir.calle} ${dir.numero}</h5>
+                                    ${dir.piso_departamento ? `<p style="margin: 0 0 8px 0; color: #999; font-size: 14px;">${dir.piso_departamento}</p>` : ''}
+                                    <p style="margin: 0;">📍 ${dir.municipio}, ${dir.provincia}</p>
+                                    <p style="margin: 5px 0; color: #999; font-size: 13px;">CP: ${dir.codigo_postal}</p>
+                                </div>
                             </div>
-                            <p style="margin: 10px 0;">📍 ${dir.municipio}, ${dir.provincia}</p>
-                            <p style="margin: 5px 0; color: #999;">Código: ${dir.codigo_postal}</p>
-                            ${dir.es_principal ? '<p style="color: #FFD700; font-weight: bold;">⭐ Dirección Principal</p>' : ''}
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${!dir.es_principal ? `<button type="button" onclick="establecerPrincipal(${dir.id})" class="btn btn-sm" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none; flex: 1;">⭐ Hacer Principal</button>` : ''}
+                                <button type="button" onclick="editarDireccion(${dir.id})" class="btn btn-sm" style="background: #3498db; color: white; border: none; flex: 1;">✏️ Editar</button>
+                                <button type="button" onclick="eliminarDireccion(${dir.id})" class="btn btn-sm" style="background: #e74c3c; color: white; border: none; flex: 1;">🗑️ Eliminar</button>
+                            </div>
                         </div>
                     `).join('');
                 } else {
@@ -494,27 +512,207 @@
             }
         }
 
+        // ============ MODAL DE CONFIRMACIÓN ============
+        let direccionAEliminar = null;
+
+        function abrirModalEliminar(id) {
+            direccionAEliminar = id;
+            const modal = document.getElementById('modal-confirmacion');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function cerrarModal() {
+            const modal = document.getElementById('modal-confirmacion');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+            direccionAEliminar = null;
+        }
+
+        function confirmarEliminacion() {
+            if (direccionAEliminar === null) return;
+
+            const id = direccionAEliminar;
+            cerrarModal();
+
+            fetch(`/api/direcciones/${id}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    mostrarNotificacion('✓ Dirección eliminada');
+                    cargarDirecciones();
+                    cargarDireccionPrincipal();
+                } else {
+                    mostrarNotificacion('❌ Error al eliminar', true);
+                }
+            })
+            .catch(err => {
+                mostrarNotificacion('❌ Error de conexión', true);
+                console.error(err);
+            });
+        }
+
         // ============ DIRECCIONES - ELIMINAR ============
         function eliminarDireccion(id) {
-            if (confirm('¿Confirmas que deseas eliminar esta dirección?')) {
-                fetch(`/api/direcciones/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.ok) {
-                        mostrarNotificacion('✓ Dirección eliminada');
-                        cargarDirecciones();
-                        cargarDireccionPrincipal();
-                    } else {
-                        mostrarNotificacion('❌ Error al eliminar', true);
+            abrirModalEliminar(id);
+        }
+
+        // ============ ESTABLECER DIRECCIÓN COMO PRINCIPAL ============
+        function establecerPrincipal(id) {
+            fetch(`/api/direcciones/${id}/principal`, {
+                method: 'PUT'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    mostrarNotificacion('✓ Dirección establecida como principal');
+                    cargarDirecciones();
+                    cargarDireccionPrincipal();
+                } else {
+                    mostrarNotificacion('❌ Error al cambiar dirección principal', true);
+                }
+            })
+            .catch(err => {
+                mostrarNotificacion('❌ Error de conexión', true);
+                console.error(err);
+            });
+        }
+
+        // ============ EDITAR DIRECCIÓN ============
+        async function editarDireccion(id) {
+            try {
+                // Cargar datos de la dirección
+                const res = await fetch(`/api/direcciones/${id}`);
+                const data = await res.json();
+
+                if (data.ok && data.direccion) {
+                    const dir = data.direccion;
+                    
+                    // Llenar el formulario con los datos actuales
+                    document.querySelector('select[name="provincia"]').value = dir.provincia;
+                    
+                    // Cargar municipios
+                    await cargarMunicipiosEdicion(dir.provincia);
+                    document.querySelector('select[name="municipio"]').value = dir.municipio;
+                    
+                    // Llenar otros campos
+                    document.querySelector('input[name="calle"]').value = dir.calle;
+                    document.querySelector('input[name="numero"]').value = dir.numero;
+                    document.querySelector('input[name="piso_departamento"]').value = dir.piso_departamento || '';
+                    
+                    // Cargar código postal
+                    const inputCP = document.querySelector('input[name="codigo_postal"]');
+                    if (inputCP) {
+                        inputCP.value = dir.codigo_postal;
                     }
-                })
-                .catch(err => {
-                    mostrarNotificacion('❌ Error de conexión', true);
-                    console.error(err);
-                });
+                    
+                    document.querySelector('input[name="es_principal"]').checked = dir.es_principal;
+                    
+                    // Cambiar el formulario para edición
+                    const formulario = document.getElementById('formulario-direccion');
+                    if (formulario) {
+                        formulario.style.display = 'block';
+                        formulario.onsubmit = (event) => guardarEdicionDireccion(event, id);
+                        
+                        // Cambiar el botón
+                        const btnSubmit = formulario.querySelector('button[type="submit"]');
+                        if (btnSubmit) {
+                            btnSubmit.textContent = 'Guardar Cambios';
+                        }
+                    }
+                    
+                    // Desplazarse al formulario
+                    cambiarSeccion('direcciones');
+                    setTimeout(() => {
+                        formulario.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                } else {
+                    mostrarNotificacion('❌ Error al cargar dirección', true);
+                }
+            } catch (err) {
+                mostrarNotificacion('❌ Error al cargar dirección', true);
+                console.error(err);
             }
+        }
+
+        // Cargar municipios para edición
+        async function cargarMunicipiosEdicion(provincia) {
+            try {
+                const res = await fetch(`/api/municipios/${encodeURIComponent(provincia)}`);
+                const data = await res.json();
+                
+                if (data.ok && data.municipios) {
+                    const selectMunicipio = document.querySelector('select[name="municipio"]');
+                    if (selectMunicipio) {
+                        selectMunicipio.innerHTML = '<option value="">Selecciona municipio</option>';
+                        data.municipios.forEach(m => {
+                            const option = document.createElement('option');
+                            option.value = m;
+                            option.textContent = m;
+                            selectMunicipio.appendChild(option);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error cargando municipios:', err);
+            }
+        }
+
+        // ============ GUARDAR EDICIÓN DE DIRECCIÓN ============
+        function guardarEdicionDireccion(event, id) {
+            event.preventDefault();
+
+            const form = event.target;
+            const datos = {
+                provincia: form.querySelector('select[name="provincia"]').value,
+                municipio: form.querySelector('select[name="municipio"]').value,
+                calle: form.querySelector('input[name="calle"]').value,
+                numero: form.querySelector('input[name="numero"]').value,
+                piso_departamento: form.querySelector('input[name="piso_departamento"]').value,
+                codigo_postal: form.querySelector('input[name="codigo_postal"]').value,
+                es_principal: form.querySelector('input[name="es_principal"]').checked
+            };
+
+            if (!datos.provincia || !datos.municipio || !datos.calle || !datos.numero) {
+                mostrarNotificacion('❌ Completa todos los campos obligatorios', true);
+                return;
+            }
+
+            fetch(`/api/direcciones/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    mostrarNotificacion('✓ Dirección actualizada correctamente');
+                    form.reset();
+                    toggleFormularioDireccion();
+                    
+                    // Restaurar botón
+                    const btnSubmit = form.querySelector('button[type="submit"]');
+                    if (btnSubmit) {
+                        btnSubmit.textContent = 'Guardar Dirección';
+                    }
+                    form.onsubmit = (event) => guardarDireccion(event);
+                    
+                    cargarDirecciones();
+                    cargarDireccionPrincipal();
+                } else {
+                    mostrarNotificacion('❌ ' + (data.error || 'Error al guardar'), true);
+                }
+            })
+            .catch(err => {
+                mostrarNotificacion('❌ Error de conexión', true);
+                console.error(err);
+            });
         }
 
         // ============ DIRECCIONES - CARGAR PROVINCIAS ============
@@ -592,6 +790,22 @@
                 }
             }
         }
+
+        // ============ INICIALIZACIÓN ============
+        // ============ CERRAR MODAL AL HACER CLICK FUERA ============
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('modal-confirmacion');
+            if (modal && event.target === modal) {
+                cerrarModal();
+            }
+        });
+
+        // ============ CERRAR MODAL CON TECLA ESC ============
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
 
         // ============ INICIALIZACIÓN ============
         document.addEventListener('DOMContentLoaded', function() {

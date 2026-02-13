@@ -127,6 +127,10 @@
         .then(result => {
             if (result.ok && result.data.ok) {
                 mostrarNotificacion('✓ ' + (nombre || 'Producto') + ' agregado al carrito');
+                // Actualizar el contador del carrito
+                if (window.actualizarContadorCarrito) {
+                    window.actualizarContadorCarrito();
+                }
             } else {
                 mostrarNotificacion('❌ Error: ' + (result.data.error || 'No se pudo agregar al carrito'), true);
             }
