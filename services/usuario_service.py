@@ -109,7 +109,7 @@ class UsuarioService:
     def obtener_usuario_por_id(self, usuario_id):
         try:
             cursor = self.conexion.cursor()
-            query = "SELECT idusuario, nombre, apellido, email, is_admin FROM usuario WHERE idusuario = %s"
+            query = "SELECT idusuario, nombre, apellido, email, is_admin, telefono FROM usuario WHERE idusuario = %s"
             cursor.execute(query, (usuario_id,))
             usuario = cursor.fetchone()
             cursor.close()
@@ -119,7 +119,8 @@ class UsuarioService:
                     "nombre": usuario[1],
                     "apellido": usuario[2],
                     "email": usuario[3],
-                    "is_admin": usuario[4]
+                    "is_admin": usuario[4],
+                    "telefono": usuario[5]
                 }
             return None
         except Exception as e:
@@ -146,6 +147,62 @@ class UsuarioService:
             self.conexion.commit()
             cursor.close()
             return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    # OBTENER PERFIL COMPLETO DEL USUARIO
+    def obtener_perfil(self, usuario_id):
+        try:
+            cursor = self.conexion.cursor()
+            query = "SELECT idusuario, nombre, apellido, email, telefono FROM usuario WHERE idusuario = %s"
+            cursor.execute(query, (usuario_id,))
+            usuario = cursor.fetchone()
+            cursor.close()
+            if usuario:
+                return {
+                    "id": usuario[0],
+                    "nombre": usuario[1],
+                    "apellido": usuario[2],
+                    "email": usuario[3],
+                    "telefono": usuario[4]
+                }
+            return None
+        except Exception as e:
+            print(f"Error obtener_perfil: {e}")
+            return None
+
+    # ACTUALIZAR PERFIL DEL USUARIO
+    def actualizar_perfil(self, usuario_id, nombre, apellido, email, telefono):
+        try:
+            cursor = self.conexion.cursor()
+            query = """
+                UPDATE usuario 
+                SET nombre = %s, apellido = %s, email = %s, telefono = %s 
+                WHERE idusuario = %s
+            """
+            cursor.execute(query, (nombre, apellido, email, telefono, usuario_id))
+            self.conexion.commit()
+            cursor.close()
+            return {"ok": True, "mensaje": "Perfil actualizado correctamente"}
+        except mysql.connector.Error as e:
+            if e.errno == 1062:  # Duplicate entry
+                return {"ok": False, "error": "El email ya está en uso"}
+            return {"ok": False, "error": str(e)}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    # CAMBIAR CONTRASEÑA
+    def cambiar_contraseña(self, usuario_id, contraseña_nueva):
+        try:
+            # Cifrar nueva contraseña
+            hashed = bcrypt.hashpw(contraseña_nueva.encode('utf-8'), bcrypt.gensalt())
+            
+            cursor = self.conexion.cursor()
+            query = "UPDATE usuario SET contraseña = %s WHERE idusuario = %s"
+            cursor.execute(query, (hashed, usuario_id))
+            self.conexion.commit()
+            cursor.close()
+            return {"ok": True, "mensaje": "Contraseña actualizada correctamente"}
         except Exception as e:
             return {"ok": False, "error": str(e)}
     

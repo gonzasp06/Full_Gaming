@@ -38,15 +38,15 @@
                     </div>
 
                     <nav class="perfil-nav">
-                        <a href="#resumen" class="perfil-nav-item active" onclick="cambiarSeccion('resumen')">
+                        <a href="javascript:void(0)" class="perfil-nav-item active" onclick="cambiarSeccion('resumen'); return false;">
                             <span class="icon">📊</span>
                             <span>Resumen</span>
                         </a>
-                        <a href="#direcciones" class="perfil-nav-item" onclick="cambiarSeccion('direcciones')">
+                        <a href="javascript:void(0)" class="perfil-nav-item" onclick="cambiarSeccion('direcciones'); return false;">
                             <span class="icon">📍</span>
                             <span>Direcciones</span>
                         </a>
-                        <a href="#cuenta" class="perfil-nav-item" onclick="cambiarSeccion('cuenta')">
+                        <a href="javascript:void(0)" class="perfil-nav-item" onclick="cambiarSeccion('cuenta'); return false;">
                             <span class="icon">⚙️</span>
                             <span>Mi Cuenta</span>
                         </a>
@@ -61,7 +61,7 @@
                         <h4 style="margin-bottom: 15px;">Dirección Principal</h4>
                         <div id="direccion-info" class="sin-direccion-sidebar">
                             <p>📍 No tienes una dirección registrada</p>
-                            <button class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')">
+                            <button type="button" class="btn btn-sm btn-direccion" onclick="cambiarSeccion('direcciones')">
                                 Agregar
                             </button>
                         </div>
@@ -70,7 +70,7 @@
 
                 <!-- CONTENIDO PRINCIPAL -->
                 <div class="perfil-main">
-                    <!-- CARDS SUPERIORES: Pedidos e Información (dos columnas) -->
+                    <!-- CARDS SUPERIORES: Pedidos e Información -->
                     <div class="perfil-top-cards">
                         <!-- Pedidos Recientes -->
                         <div>
@@ -115,7 +115,7 @@
                             <div class="perfil-card">
                                 <div class="card-header-perfil">
                                     <h4>Información de Cuenta</h4>
-                                    <a href="#" class="editar-btn" onclick="abrirEdicion()">Editar</a>
+                                    <a href="javascript:void(0)" class="editar-btn" onclick="cambiarSeccion('cuenta')">Editar</a>
                                 </div>
                                 <div id="info-cuenta" class="info-cuenta">
                                     <div class="info-item">
@@ -128,67 +128,120 @@
                                     </div>
                                     <div class="info-item">
                                         <label>Teléfono</label>
-                                        <p class="texto-gris">No proporcionado</p>
+                                        <p id="info-telefono">{{ usuario_telefono if usuario_telefono else '📱 No proporcionado' }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                <!-- SECCIÓN RESUMEN (contenido debajo de los cards) -->
-                <div id="seccion-resumen" class="perfil-section active">
-                </div>
+                    <!-- SECCIÓN RESUMEN -->
+                    <div id="seccion-resumen" class="perfil-section active">
+                    </div>
 
-                <!-- SECCIÓN DIRECCIONES -->
-                <div id="seccion-direcciones" class="perfil-section">
-                    <div class="perfil-card">
-                        <div class="card-header-perfil">
-                            <h4>Mis Direcciones</h4>
-                            <button class="btn btn-sm" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
-                                + Agregar Dirección
-                            </button>
-                        </div>
-                        <div class="direcciones-list">
-                            <div class="sin-direccion">
-                                <p>📍 No tienes direcciones guardadas</p>
-                                <p class="texto-gris">Las direcciones te ayudarán a completar compras más rápido</p>
+                    <!-- SECCIÓN DIRECCIONES -->
+                    <div id="seccion-direcciones" class="perfil-section">
+                        <div class="perfil-card">
+                            <div class="card-header-perfil">
+                                <h4>Mis Direcciones</h4>
+                                <button type="button" class="btn btn-sm" onclick="toggleFormularioDireccion()" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
+                                    + Agregar Dirección
+                                </button>
+                            </div>
+
+                            <!-- Formulario para agregar dirección -->
+                            <div id="formulario-direccion" style="display: none; margin-bottom: 30px;">
+                                <form onsubmit="guardarDireccion(event)">
+                                    <div class="mb-3">
+                                        <label>Provincia</label>
+                                        <select name="provincia" class="form-control" required>
+                                            <option value="">Selecciona provincia</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Municipio</label>
+                                        <select name="municipio" class="form-control" required>
+                                            <option value="">Selecciona municipio</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Calle</label>
+                                        <input type="text" name="calle" class="form-control" placeholder="Ej: Avenida 9 de Julio" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label>Número</label>
+                                            <input type="text" name="numero" class="form-control" placeholder="Ej: 1234" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label>Piso/Departamento (opcional)</label>
+                                            <input type="text" name="piso_departamento" class="form-control" placeholder="Ej: 5to piso, Depto A">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Código Postal</label>
+                                        <input type="text" name="codigo_postal" class="form-control" placeholder="Ej: 1425" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label style="display: flex; align-items: center; gap: 10px;">
+                                            <input type="checkbox" name="es_principal">
+                                            Marcar como dirección principal
+                                        </label>
+                                    </div>
+                                    <div class="button-group">
+                                        <button type="submit" class="btn" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
+                                            Guardar Dirección
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="toggleFormularioDireccion()">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Lista de direcciones -->
+                            <div class="direcciones-list" id="lista-direcciones">
+                                <div class="sin-direccion">
+                                    <p>📍 No tienes direcciones guardadas</p>
+                                    <p class="texto-gris">Las direcciones te ayudarán a completar compras más rápido</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- SECCIÓN CUENTA -->
-                <div id="seccion-cuenta" class="perfil-section">
-                    <div class="perfil-card">
-                        <h4 style="margin-bottom: 30px;">Editar Información de Cuenta</h4>
-                        <form id="form-cuenta" onsubmit="guardarCuenta(event)">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label>Nombre</label>
-                                    <input type="text" class="form-control" value="{{ usuario_nombre }}" placeholder="Tu nombre">
+                    <!-- SECCIÓN CUENTA -->
+                    <div id="seccion-cuenta" class="perfil-section">
+                        <div class="perfil-card">
+                            <h4 style="margin-bottom: 30px;">Editar Información de Cuenta</h4>
+                            <form id="form-cuenta" onsubmit="guardarCuenta(event)">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Nombre</label>
+                                        <input type="text" name="nombre" class="form-control" value="{{ usuario_nombre }}" placeholder="Tu nombre" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Email</label>
+                                        <input type="email" name="email" class="form-control" value="{{ usuario_email }}" placeholder="Tu email" required>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label>Email</label>
-                                    <input type="email" class="form-control" value="{{ usuario_email }}" placeholder="Tu email">
+                                <div class="mb-3">
+                                    <label>Teléfono</label>
+                                    <input type="tel" name="telefono" class="form-control" placeholder="+54 9 11 2345-6789" value="{{ usuario_telefono if usuario_telefono else '' }}">
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label>Teléfono</label>
-                                <input type="tel" class="form-control" placeholder="+54 9 11 2345-6789">
-                            </div>
-                            <div class="mb-3">
-                                <label>Nueva Contraseña (opcional)</label>
-                                <input type="password" class="form-control" placeholder="Dejar en blanco para no cambiar">
-                            </div>
-                            <div class="button-group">
-                                <button type="submit" class="btn" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
-                                    Guardar Cambios
-                                </button>
-                                <button type="button" class="btn btn-secondary" onclick="cambiarSeccion('resumen')">
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
+                                <div class="mb-3">
+                                    <label>Nueva Contraseña (opcional)</label>
+                                    <input type="password" name="contraseña_nueva" class="form-control" placeholder="Dejar en blanco para no cambiar">
+                                </div>
+                                <div class="button-group">
+                                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
+                                        Guardar Cambios
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="cambiarSeccion('resumen')">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -196,36 +249,7 @@
     </div>
 
     <script>
-        function cambiarSeccion(seccion) {
-            // Ocultar todas las secciones
-            document.querySelectorAll('.perfil-section').forEach(s => {
-                s.classList.remove('active');
-            });
-            // Actualizar nav activo
-            document.querySelectorAll('.perfil-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // Mostrar la sección seleccionada
-            const sectionEl = document.getElementById(`seccion-${seccion}`);
-            if (sectionEl) {
-                sectionEl.classList.add('active');
-            }
-
-            // Marcar el nav como activo
-            event.target.closest('.perfil-nav-item').classList.add('active');
-        }
-
-        function abrirEdicion() {
-            cambiarSeccion('cuenta');
-        }
-
-        function guardarCuenta(event) {
-            event.preventDefault();
-            // Aquí irá la lógica para guardar cambios
-            mostrarNotificacion('✓ Cambios guardados correctamente');
-        }
-
+        // ============ UTILIDADES ============
         function mostrarNotificacion(mensaje, esError = false) {
             const notif = document.createElement('div');
             notif.className = 'notificacion' + (esError ? ' error' : '');
@@ -236,6 +260,277 @@
                 setTimeout(() => notif.remove(), 300);
             }, 3000);
         }
+
+        function cambiarSeccion(seccion) {
+            console.log('Cambiando a sección:', seccion);
+            
+            document.querySelectorAll('.perfil-section').forEach(s => {
+                s.classList.remove('active');
+            });
+            document.querySelectorAll('.perfil-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            const sectionEl = document.getElementById(`seccion-${seccion}`);
+            if (sectionEl) {
+                sectionEl.classList.add('active');
+            }
+
+            // Marcar nav como activo
+            const navItems = document.querySelectorAll('.perfil-nav-item');
+            if (seccion === 'resumen') {
+                navItems[0]?.classList.add('active');
+            } else if (seccion === 'direcciones') {
+                navItems[1]?.classList.add('active');
+                cargarDirecciones();
+                cargarProvincias();
+            } else if (seccion === 'cuenta') {
+                navItems[2]?.classList.add('active');
+            }
+        }
+
+        // ============ PERFIL - ACTUALIZAR DATOS ============
+        function guardarCuenta(event) {
+            event.preventDefault();
+
+            const nombre = document.querySelector('input[name="nombre"]').value.trim();
+            const email = document.querySelector('input[name="email"]').value.trim();
+            const telefono = document.querySelector('input[name="telefono"]').value.trim();
+
+            if (!nombre || !email) {
+                mostrarNotificacion('❌ Nombre y email son obligatorios', true);
+                return;
+            }
+
+            // Dividir nombre en nombre y apellido
+            const partes = nombre.split(' ');
+            const nombreParte = partes[0];
+            const apellidoParte = partes.slice(1).join(' ') || '';
+
+            const datos = {
+                nombre: nombreParte,
+                apellido: apellidoParte,
+                email: email,
+                telefono: telefono
+            };
+
+            fetch('/api/perfil/actualizar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    mostrarNotificacion('✓ Perfil actualizado correctamente');
+                    // Actualizar el teléfono en la información de cuenta
+                    const infoBailoTelefono = document.getElementById('info-telefono');
+                    if (infoBailoTelefono) {
+                        infoBailoTelefono.textContent = telefono || '📱 No proporcionado';
+                    }
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarNotificacion('❌ ' + (data.error || 'Error al actualizar'), true);
+                }
+            })
+            .catch(err => {
+                mostrarNotificacion('❌ Error de conexión', true);
+                console.error(err);
+            });
+        }
+
+        // ============ DIRECCIONES - TOGGLE FORMULARIO ============
+        function toggleFormularioDireccion() {
+            const formulario = document.getElementById('formulario-direccion');
+            if (formulario) {
+                formulario.style.display = formulario.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // ============ DIRECCIONES - GUARDAR ============
+        function guardarDireccion(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const datos = {
+                provincia: form.querySelector('select[name="provincia"]').value,
+                municipio: form.querySelector('select[name="municipio"]').value,
+                calle: form.querySelector('input[name="calle"]').value,
+                numero: form.querySelector('input[name="numero"]').value,
+                piso_departamento: form.querySelector('input[name="piso_departamento"]').value,
+                codigo_postal: form.querySelector('input[name="codigo_postal"]').value,
+                es_principal: form.querySelector('input[name="es_principal"]').checked
+            };
+
+            if (!datos.provincia || !datos.municipio || !datos.calle || !datos.numero) {
+                mostrarNotificacion('❌ Completa todos los campos obligatorios', true);
+                return;
+            }
+
+            fetch('/api/direcciones/crear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    mostrarNotificacion('✓ Dirección guardada correctamente');
+                    form.reset();
+                    toggleFormularioDireccion();
+                    cargarDirecciones();
+                } else {
+                    mostrarNotificacion('❌ ' + (data.error || 'Error al guardar'), true);
+                }
+            })
+            .catch(err => {
+                mostrarNotificacion('❌ Error de conexión', true);
+                console.error(err);
+            });
+        }
+
+        // ============ DIRECCIONES - CARGAR LISTA ============
+        async function cargarDirecciones() {
+            try {
+                const res = await fetch('/api/direcciones');
+                const data = await res.json();
+                
+                const listaDirecciones = document.getElementById('lista-direcciones');
+                if (!listaDirecciones) return;
+
+                if (data.ok && data.direcciones && data.direcciones.length > 0) {
+                    listaDirecciones.innerHTML = data.direcciones.map(dir => `
+                        <div class="perfil-card" style="margin-bottom: 15px;">
+                            <div class="card-header-perfil">
+                                <h5>${dir.calle} ${dir.numero}${dir.piso_departamento ? ', ' + dir.piso_departamento : ''}</h5>
+                                <button type="button" onclick="eliminarDireccion(${dir.id})" class="btn btn-sm" style="background: #e74c3c; color: white; border: none;">
+                                    🗑️ Eliminar
+                                </button>
+                            </div>
+                            <p style="margin: 10px 0;">📍 ${dir.municipio}, ${dir.provincia}</p>
+                            <p style="margin: 5px 0; color: #999;">Código: ${dir.codigo_postal}</p>
+                            ${dir.es_principal ? '<p style="color: #FFD700; font-weight: bold;">⭐ Dirección Principal</p>' : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    listaDirecciones.innerHTML = `
+                        <div class="sin-direccion">
+                            <p>📍 No tienes direcciones guardadas</p>
+                            <p class="texto-gris">Las direcciones te ayudarán a completar compras más rápido</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error('Error cargando direcciones:', err);
+            }
+        }
+
+        // ============ DIRECCIONES - ELIMINAR ============
+        function eliminarDireccion(id) {
+            if (confirm('¿Confirmas que deseas eliminar esta dirección?')) {
+                fetch(`/api/direcciones/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        mostrarNotificacion('✓ Dirección eliminada');
+                        cargarDirecciones();
+                    } else {
+                        mostrarNotificacion('❌ Error al eliminar', true);
+                    }
+                })
+                .catch(err => {
+                    mostrarNotificacion('❌ Error de conexión', true);
+                    console.error(err);
+                });
+            }
+        }
+
+        // ============ DIRECCIONES - CARGAR PROVINCIAS ============
+        async function cargarProvincias() {
+            try {
+                const res = await fetch('/api/provincias');
+                const data = await res.json();
+                
+                if (data.ok && data.provincias) {
+                    const selectProvincia = document.querySelector('select[name="provincia"]');
+                    if (selectProvincia && selectProvincia.options.length === 1) {
+                        data.provincias.forEach(p => {
+                            const option = document.createElement('option');
+                            option.value = p;
+                            option.textContent = p;
+                            selectProvincia.appendChild(option);
+                        });
+                        selectProvincia.addEventListener('change', cargarMunicipios);
+                    }
+                }
+            } catch (err) {
+                console.error('Error cargando provincias:', err);
+            }
+        }
+
+        // ============ DIRECCIONES - CARGAR MUNICIPIOS ============
+        async function cargarMunicipios(event) {
+            const provincia = event.target.value;
+            if (!provincia) return;
+
+            try {
+                const res = await fetch(`/api/municipios/${encodeURIComponent(provincia)}`);
+                const data = await res.json();
+                
+                if (data.ok && data.municipios) {
+                    const selectMunicipio = document.querySelector('select[name="municipio"]');
+                    if (selectMunicipio) {
+                        selectMunicipio.innerHTML = '<option value="">Selecciona municipio</option>';
+                        data.municipios.forEach(m => {
+                            const option = document.createElement('option');
+                            option.value = m;
+                            option.textContent = m;
+                            selectMunicipio.appendChild(option);
+                        });
+                        selectMunicipio.addEventListener('change', cargarCodigoPostal);
+                    }
+                }
+            } catch (err) {
+                console.error('Error cargando municipios:', err);
+            }
+        }
+
+        // ============ DIRECCIONES - CARGAR CÓDIGO POSTAL ============
+        async function cargarCodigoPostal(event) {
+            const provincia = document.querySelector('select[name="provincia"]').value;
+            const municipio = event.target.value;
+
+            if (!provincia || !municipio) return;
+
+            try {
+                const res = await fetch(`/api/codigo-postal/${encodeURIComponent(provincia)}/${encodeURIComponent(municipio)}`);
+                const data = await res.json();
+                
+                const inputCodigoPostal = document.querySelector('input[name="codigo_postal"]');
+                if (inputCodigoPostal && data.ok) {
+                    inputCodigoPostal.value = data.codigo_postal;
+                } else if (inputCodigoPostal) {
+                    inputCodigoPostal.value = municipio;
+                }
+            } catch (err) {
+                console.error('Error cargando código postal:', err);
+                const inputCodigoPostal = document.querySelector('input[name="codigo_postal"]');
+                if (inputCodigoPostal) {
+                    inputCodigoPostal.value = municipio;
+                }
+            }
+        }
+
+        // ============ INICIALIZACIÓN ============
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarDirecciones();
+        });
     </script>
 
 </body>

@@ -201,12 +201,23 @@
                 return;
             }
             
-            // Si está logueado, verificar si tiene dirección
-            // Por ahora mostraremos el cartel (después validaremos en el backend)
-            document.getElementById('cartelUltimoPaso').classList.add('active');
-            
-            // Si quisiera procesar directamente sin dirección:
-            // procesarCompraReal();
+            // Si está logueado, verificar si tiene dirección en la BD
+            fetch('/api/direcciones')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok && data.direcciones && data.direcciones.length > 0) {
+                        // Tiene dirección, proceder con la compra
+                        procesarCompraReal();
+                    } else {
+                        // No tiene dirección, mostrar cartel
+                        document.getElementById('cartelUltimoPaso').classList.add('active');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error verificando dirección:', err);
+                    // Si hay error, mostrar el cartel por seguridad
+                    document.getElementById('cartelUltimoPaso').classList.add('active');
+                });
         }
 
         // Función para procesar compra real (después de validaciones)

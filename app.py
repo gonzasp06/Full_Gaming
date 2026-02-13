@@ -13,12 +13,12 @@ from math import ceil
 import bcrypt #incripta contraseña 
 from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService
-from services.pedido_service import PedidoService 
+from services.pedido_service import PedidoService
+from routes.perfil_routes import registrar_endpoints_perfil
 
 # print("ProductoService:", ProductoService)
 
 app = Flask(__name__)
-
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -42,6 +42,9 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Importante para cookies cross-s
 def make_session_permanent():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=7)
+
+# Registrar endpoints del perfil
+registrar_endpoints_perfil(app)
 
 # conexión a base de datos
 conexion = conectar_base_datos()
@@ -419,13 +422,15 @@ def perfil():
     service = UsuarioService()
     usuario_datos = service.obtener_usuario_por_id(usuario_id)
     
-    # Obtener últimos pedidos (por ahora vacío, después conectamos)
-    pedidos_recientes = []
+    # Obtener últimos pedidos del usuario
+    pedido_service = PedidoService()
+    pedidos_recientes = pedido_service.obtener_pedidos_recientes(usuario_id, limite=5)
     
     return render_template('perfil.html', 
                          usuario=usuario_datos,
                          usuario_nombre=usuario_nombre,
                          usuario_email=usuario_email,
+                         usuario_telefono=usuario_datos.get('telefono') if usuario_datos else '',
                          pedidos_recientes=pedidos_recientes)
 
 
