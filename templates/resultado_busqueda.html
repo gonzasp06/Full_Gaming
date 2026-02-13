@@ -78,6 +78,10 @@
             .then(data => {
                 if (data.ok) {
                     mostrarNotificacion('✓ ' + nombreProducto + ' agregado al carrito');
+                    // Actualizar el contador del carrito
+                    if (window.actualizarContadorCarrito) {
+                        window.actualizarContadorCarrito();
+                    }
                 } else {
                     mostrarNotificacion('❌ Error: ' + data.error, true);
                 }

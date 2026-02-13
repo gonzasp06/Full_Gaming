@@ -56,10 +56,11 @@
                             </a>
                         {% endif %}
                         
-                        <!-- Botón Carrito con imagen -->
-                        <a href="/carrito" class="nav-btn">
+                        <!-- Botón Carrito con imagen e indicador -->
+                        <a href="/carrito" class="nav-btn carrito-btn" id="carrito-link">
                             <img src="{{ url_for('static', filename='images/carrito.png') }}" alt="Carrito" class="nav-btn-img">
                             <span>Carrito</span>
+                            <span class="carrito-badge" id="carrito-count">0</span>
                         </a>
                     </div>
 
@@ -82,5 +83,28 @@
             </nav>
 
         </header>
+
+        <script>
+            // Cargar cantidad inicial del carrito
+            function actualizarContadorCarrito() {
+                fetch('/api/carrito/cantidad')
+                    .then(res => res.json())
+                    .then(data => {
+                        const badgeEl = document.getElementById('carrito-count');
+                        if (badgeEl) {
+                            const cantidad = data.cantidad || 0;
+                            badgeEl.textContent = cantidad > 99 ? '99+' : cantidad;
+                            badgeEl.style.display = cantidad > 0 ? 'flex' : 'none';
+                        }
+                    })
+                    .catch(err => console.error('Error al cargar carrito:', err));
+            }
+
+            // Actualizar al cargar la página
+            document.addEventListener('DOMContentLoaded', actualizarContadorCarrito);
+
+            // Hacer función global para que otros scripts la puedan usar
+            window.actualizarContadorCarrito = actualizarContadorCarrito;
+        </script>
     </body>
 </html>

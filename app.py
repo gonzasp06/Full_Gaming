@@ -401,6 +401,17 @@ def vaciar_carrito():
     return jsonify({"ok": True}), 200
 
 
+@app.route('/api/carrito/cantidad', methods=['GET'])
+def obtener_cantidad_carrito():
+    """Obtener la cantidad total de items en el carrito"""
+    carrito = carrito_service.obtener_carrito()
+    
+    # Sumar todas las cantidades de los productos
+    cantidad_total = sum(carrito.values()) if carrito else 0
+    
+    return jsonify({"ok": True, "cantidad": cantidad_total}), 200
+
+
 @app.route('/logout')
 def logout():
     """Cerrar sesión"""

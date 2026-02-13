@@ -165,6 +165,41 @@ def registrar_endpoints_perfil(app):
             return jsonify({"ok": False, "error": str(e)}), 500
 
 
+    @app.route('/api/direcciones/<int:direccion_id>', methods=['GET'])
+    def obtener_direccion_detalles(direccion_id):
+        """Obtener detalles de una dirección específica"""
+        if 'usuario_id' not in session:
+            return jsonify({"ok": False, "error": "No autorizado"}), 401
+        
+        try:
+            usuario_id = session.get('usuario_id')
+            service = DireccionService()
+            direccion = service.obtener_direccion(direccion_id, usuario_id)
+            
+            if direccion:
+                return jsonify({"ok": True, "direccion": direccion})
+            else:
+                return jsonify({"ok": False, "error": "Dirección no encontrada"}), 404
+        except Exception as e:
+            return jsonify({"ok": False, "error": str(e)}), 500
+
+
+    @app.route('/api/direcciones/<int:direccion_id>/principal', methods=['PUT'])
+    def establecer_principal(direccion_id):
+        """Establecer dirección como principal"""
+        if 'usuario_id' not in session:
+            return jsonify({"ok": False, "error": "No autorizado"}), 401
+        
+        try:
+            usuario_id = session.get('usuario_id')
+            service = DireccionService()
+            resultado = service.establecer_como_principal(direccion_id, usuario_id)
+            
+            return jsonify(resultado)
+        except Exception as e:
+            return jsonify({"ok": False, "error": str(e)}), 500
+
+
     @app.route('/api/provincias', methods=['GET'])
     def obtener_provincias():
         """Obtener lista de provincias"""

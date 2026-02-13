@@ -247,3 +247,28 @@ class DireccionService:
         except Exception as e:
             print(f"Error obtener_direccion_principal: {e}")
             return None
+
+    # ESTABLECER DIRECCIÓN COMO PRINCIPAL
+    def establecer_como_principal(self, direccion_id, usuario_id):
+        try:
+            cursor = self.conexion.cursor()
+            
+            # Desmarcar todas las direcciones de este usuario como principal
+            cursor.execute(
+                "UPDATE direcciones SET es_principal = FALSE WHERE usuario_id = %s",
+                (usuario_id,)
+            )
+            
+            # Marcar esta dirección como principal
+            cursor.execute(
+                "UPDATE direcciones SET es_principal = TRUE WHERE id = %s AND usuario_id = %s",
+                (direccion_id, usuario_id)
+            )
+            
+            self.conexion.commit()
+            cursor.close()
+            
+            return {"ok": True, "mensaje": "Dirección establecida como principal"}
+        except Exception as e:
+            print(f"Error establecer_como_principal: {e}")
+            return {"ok": False, "error": str(e)}
