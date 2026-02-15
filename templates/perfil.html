@@ -237,9 +237,29 @@
                                         <input type="email" name="email" class="form-control" value="{{ usuario_email }}" placeholder="Tu email" required>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Teléfono</label>
+                                        <input type="tel" name="telefono" class="form-control" placeholder="+54 9 11 2345-6789" value="{{ usuario_telefono if usuario_telefono else '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>DNI</label>
+                                        <input type="text" name="dni" class="form-control" placeholder="XX.XXX.XXX" value="{{ usuario_dni if usuario_dni else '' }}">
+                                    </div>
+                                </div>
                                 <div class="mb-3">
-                                    <label>Teléfono</label>
-                                    <input type="tel" name="telefono" class="form-control" placeholder="+54 9 11 2345-6789" value="{{ usuario_telefono if usuario_telefono else '' }}">
+                                    <label>Dirección</label>
+                                    <input type="text" name="direccion" class="form-control" placeholder="Calle y número" value="{{ usuario_direccion if usuario_direccion else '' }}">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Provincia</label>
+                                        <input type="text" name="provincia" class="form-control" placeholder="Tu provincia" value="{{ usuario_provincia if usuario_provincia else '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Código Postal</label>
+                                        <input type="text" name="codigo_postal" class="form-control" placeholder="XXXX" value="{{ usuario_codigo_postal if usuario_codigo_postal else '' }}">
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label>Nueva Contraseña (opcional)</label>
@@ -307,9 +327,14 @@
         function guardarCuenta(event) {
             event.preventDefault();
 
-            const nombre = document.querySelector('input[name="nombre"]').value.trim();
-            const email = document.querySelector('input[name="email"]').value.trim();
-            const telefono = document.querySelector('input[name="telefono"]').value.trim();
+            const form = document.getElementById('form-cuenta');
+            const nombre = form.querySelector('input[name="nombre"]').value.trim();
+            const email = form.querySelector('input[name="email"]').value.trim();
+            const telefono = form.querySelector('input[name="telefono"]').value.trim();
+            const dni = form.querySelector('input[name="dni"]').value.trim();
+            const direccion = form.querySelector('input[name="direccion"]').value.trim();
+            const provincia = form.querySelector('input[name="provincia"]').value.trim();
+            const codigo_postal = form.querySelector('input[name="codigo_postal"]').value.trim();
 
             if (!nombre || !email) {
                 mostrarNotificacion('❌ Nombre y email son obligatorios', true);
@@ -325,7 +350,11 @@
                 nombre: nombreParte,
                 apellido: apellidoParte,
                 email: email,
-                telefono: telefono
+                telefono: telefono,
+                dni: dni,
+                direccion: direccion,
+                provincia: provincia,
+                codigo_postal: codigo_postal
             };
 
             fetch('/api/perfil/actualizar', {

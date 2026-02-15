@@ -109,7 +109,7 @@ class UsuarioService:
     def obtener_usuario_por_id(self, usuario_id):
         try:
             cursor = self.conexion.cursor()
-            query = "SELECT idusuario, nombre, apellido, email, is_admin, telefono FROM usuario WHERE idusuario = %s"
+            query = "SELECT idusuario, nombre, apellido, email, is_admin, telefono, direccion, provincia, codigo_postal, dni FROM usuario WHERE idusuario = %s"
             cursor.execute(query, (usuario_id,))
             usuario = cursor.fetchone()
             cursor.close()
@@ -120,7 +120,11 @@ class UsuarioService:
                     "apellido": usuario[2],
                     "email": usuario[3],
                     "is_admin": usuario[4],
-                    "telefono": usuario[5]
+                    "telefono": usuario[5],
+                    "direccion": usuario[6],
+                    "provincia": usuario[7],
+                    "codigo_postal": usuario[8],
+                    "dni": usuario[9]
                 }
             return None
         except Exception as e:
@@ -154,7 +158,7 @@ class UsuarioService:
     def obtener_perfil(self, usuario_id):
         try:
             cursor = self.conexion.cursor()
-            query = "SELECT idusuario, nombre, apellido, email, telefono FROM usuario WHERE idusuario = %s"
+            query = "SELECT idusuario, nombre, apellido, email, telefono, direccion, provincia, codigo_postal, dni FROM usuario WHERE idusuario = %s"
             cursor.execute(query, (usuario_id,))
             usuario = cursor.fetchone()
             cursor.close()
@@ -164,7 +168,11 @@ class UsuarioService:
                     "nombre": usuario[1],
                     "apellido": usuario[2],
                     "email": usuario[3],
-                    "telefono": usuario[4]
+                    "telefono": usuario[4],
+                    "direccion": usuario[5],
+                    "provincia": usuario[6],
+                    "codigo_postal": usuario[7],
+                    "dni": usuario[8]
                 }
             return None
         except Exception as e:
@@ -172,15 +180,16 @@ class UsuarioService:
             return None
 
     # ACTUALIZAR PERFIL DEL USUARIO
-    def actualizar_perfil(self, usuario_id, nombre, apellido, email, telefono):
+    def actualizar_perfil(self, usuario_id, nombre, apellido, email, telefono, direccion=None, provincia=None, codigo_postal=None, dni=None):
         try:
             cursor = self.conexion.cursor()
             query = """
                 UPDATE usuario 
-                SET nombre = %s, apellido = %s, email = %s, telefono = %s 
+                SET nombre = %s, apellido = %s, email = %s, telefono = %s, 
+                    direccion = %s, provincia = %s, codigo_postal = %s, dni = %s
                 WHERE idusuario = %s
             """
-            cursor.execute(query, (nombre, apellido, email, telefono, usuario_id))
+            cursor.execute(query, (nombre, apellido, email, telefono, direccion, provincia, codigo_postal, dni, usuario_id))
             self.conexion.commit()
             cursor.close()
             return {"ok": True, "mensaje": "Perfil actualizado correctamente"}
