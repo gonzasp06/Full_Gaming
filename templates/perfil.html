@@ -205,7 +205,7 @@
                                         <button type="submit" class="btn" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
                                             Guardar Dirección
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="toggleFormularioDireccion()">
+                                        <button type="button" class="btn btn-secondary" onclick="toggleFormularioDireccion(); direccionEnEdicion = null; document.querySelector('button[type=submit]').textContent = 'Guardar Dirección';">
                                             Cancelar
                                         </button>
                                     </div>
@@ -282,6 +282,9 @@
     </div>
 
     <script>
+        // Variable global para rastrear si estamos editando
+        let direccionEnEdicion = null;
+
         // ============ UTILIDADES ============
         function mostrarNotificacion(mensaje, esError = false) {
             const notif = document.createElement('div');
@@ -395,6 +398,12 @@
         // ============ DIRECCIONES - GUARDAR ============
         function guardarDireccion(event) {
             event.preventDefault();
+
+            // Si estamos editando una dirección, llamar a la función de edición
+            if (direccionEnEdicion) {
+                guardarEdicionDireccion(event, direccionEnEdicion);
+                return;
+            }
 
             const form = event.target;
             const datos = {
@@ -645,13 +654,15 @@
                     const formulario = document.getElementById('formulario-direccion');
                     if (formulario) {
                         formulario.style.display = 'block';
-                        formulario.onsubmit = (event) => guardarEdicionDireccion(event, id);
                         
                         // Cambiar el botón
                         const btnSubmit = formulario.querySelector('button[type="submit"]');
                         if (btnSubmit) {
                             btnSubmit.textContent = 'Guardar Cambios';
                         }
+                        
+                        // Guardar el ID en la variable global
+                        direccionEnEdicion = id;
                     }
                     
                     // Desplazarse al formulario
@@ -659,6 +670,14 @@
                     setTimeout(() => {
                         formulario.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 100);
+                } else {
+                    mostrarNotificacion('❌ Error al cargar dirección', true);
+                }
+            } catch (err) {
+                mostrarNotificacion('❌ Error al cargar dirección', true);
+                console.error(err);
+            }
+        }
                 } else {
                     mostrarNotificacion('❌ Error al cargar dirección', true);
                 }
@@ -730,7 +749,9 @@
                     if (btnSubmit) {
                         btnSubmit.textContent = 'Guardar Dirección';
                     }
-                    form.onsubmit = (event) => guardarDireccion(event);
+                    
+                    // Limpiar el estado de edición
+                    direccionEnEdicion = null;
                     
                     cargarDirecciones();
                     cargarDireccionPrincipal();
