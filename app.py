@@ -13,12 +13,12 @@ from math import ceil
 import bcrypt #incripta contraseña 
 from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService
-from services.pedido_service import PedidoService 
+from services.pedido_service import PedidoService
+from routes.perfil_routes import registrar_endpoints_perfil
 
 # print("ProductoService:", ProductoService)
 
 app = Flask(__name__)
-
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -42,6 +42,9 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Importante para cookies cross-s
 def make_session_permanent():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=7)
+
+# Registrar endpoints del perfil
+registrar_endpoints_perfil(app)
 
 # conexión a base de datos
 conexion = conectar_base_datos()
@@ -188,9 +191,13 @@ def gestion_productos():
 @app.route('/eliminar_producto/<int:id_producto>')
 @admin_manager.requerir_admin
 def eliminar_producto(id_producto):
-    service = ProductoService()
-    service.eliminar_producto(id_producto)
-    return redirect('/gestion_productos')
+    try:
+        service = ProductoService()
+        service.eliminar_producto(id_producto)
+        return redirect('/gestion_productos')
+    except Exception as e:
+        print(f"Error al eliminar producto: {str(e)}")
+        return redirect('/gestion_productos')
 
 @app.route('/editar_producto/<int:id_producto>')
 @admin_manager.requerir_admin
@@ -394,11 +401,48 @@ def vaciar_carrito():
     return jsonify({"ok": True}), 200
 
 
+@app.route('/api/carrito/cantidad', methods=['GET'])
+def obtener_cantidad_carrito():
+    """Obtener la cantidad total de items en el carrito"""
+    carrito = carrito_service.obtener_carrito()
+    
+    # Sumar todas las cantidades de los productos
+    cantidad_total = sum(carrito.values()) if carrito else 0
+    
+    return jsonify({"ok": True, "cantidad": cantidad_total}), 200
+
+
 @app.route('/logout')
 def logout():
     """Cerrar sesión"""
     session.clear()
     return redirect(url_for('mostrar_catalogo'))
+
+
+@app.route('/perfil')
+def perfil():
+    """Mostrar página de perfil del usuario"""
+    if 'usuario_id' not in session:
+        return redirect('/acceso')
+    
+    usuario_id = session.get('usuario_id')
+    usuario_nombre = session.get('usuario_nombre')
+    usuario_email = session.get('usuario_email')
+    
+    # Obtener datos del usuario desde la BD
+    service = UsuarioService()
+    usuario_datos = service.obtener_usuario_por_id(usuario_id)
+    
+    # Obtener últimos pedidos del usuario
+    pedido_service = PedidoService()
+    pedidos_recientes = pedido_service.obtener_pedidos_recientes(usuario_id, limite=5)
+    
+    return render_template('perfil.html', 
+                         usuario=usuario_datos,
+                         usuario_nombre=usuario_nombre,
+                         usuario_email=usuario_email,
+                         usuario_telefono=usuario_datos.get('telefono') if usuario_datos else '',
+                         pedidos_recientes=pedidos_recientes)
 
 
 @app.route('/procesar_compra', methods=['POST'])

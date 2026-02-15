@@ -46,13 +46,13 @@
                                         <span>{{ item.nombre }}</span>
                                     </div>
                                 </td>
-                                <td>${{ "%.2f"|format(item.precio) }}</td>
+                                <td>${{ "%d"|format(item.precio) }}</td>
                                 <td>
                                     <input type="number" class="form-control" style="width: 80px;" 
                                            min="1" value="{{ item.cantidad }}" 
                                            onchange="actualizarCantidad({{ item.id }}, this.value)">
                                 </td>
-                                <td><strong>${{ "%.2f"|format(item.subtotal) }}</strong></td>
+                                <td><strong>${{ "%d"|format(item.subtotal) }}</strong></td>
                                 <td>
                                     <button class="btn btn-danger btn-sm" 
                                             onclick="eliminarDelCarrito({{ item.id }})">
@@ -74,7 +74,7 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal:</span>
-                            <strong>${{ "%.2f"|format(total) }}</strong>
+                            <strong>${{ "%d"|format(total) }}</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Envío:</span>
@@ -83,7 +83,7 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-4">
                             <span style="font-size: 18px;">Total:</span>
-                            <strong style="font-size: 18px; color: #3C308C;">${{ "%.2f"|format(total) }}</strong>
+                            <strong style="font-size: 18px; color: #3C308C;">${{ "%d"|format(total) }}</strong>
                         </div>
                         
 
@@ -103,27 +103,144 @@
         {% endif %}
     </div>
 
+    <!-- MODAL 1: Usuario NO logueado -->
+    <div class="modal-overlay" id="modalNoLogueado">
+        <div class="modal-content-custom">
+            <h2>🔒 ¡Espera un momento!</h2>
+            <p>Para realizar una compra necesitas iniciar sesión o crear una cuenta en FullGaming.</p>
+            <div class="modal-buttons">
+                <button class="btn-modal primary" onclick="irAIniciarSesion()">
+                    Iniciar Sesión
+                </button>
+                <button class="btn-modal warning" onclick="irARegistrarse()">
+                    Registrarse
+                </button>
+                <button class="btn-modal secondary" onclick="cerrarModal('modalNoLogueado')">
+                    Seguir Comprando
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Usuario logueado sin dirección -->
+    <div class="modal-overlay" id="modalSinDireccion">
+        <div class="modal-content-custom">
+            <h2>⚠️ ¡Último paso!</h2>
+            <p>Necesitamos tu dirección de entrega antes de poder procesar tu compra.</p>
+            <div class="modal-buttons">
+                <button class="btn-modal primary" onclick="irADirecciones()">
+                    Agregar Dirección
+                </button>
+                <button class="btn-modal secondary" onclick="cerrarModal('modalSinDireccion')">
+                    Volver al Carrito
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARTEL FLOTANTE: Último paso (alternativa visual) -->
+    <div class="cartel-flotante" id="cartelUltimoPaso">
+        <h3>⭐ ¡Último paso!</h3>
+        <p>Modifica tu dirección antes de poder realizar una compra</p>
+        <div class="cartel-botones">
+            <button class="btn-ir" onclick="irADirecciones()">Ir a Dirección</button>
+            <button class="btn-cancelar" onclick="cerrarCartel()">Cancelar</button>
+        </div>
+    </div>
+
     <script>
-                function procesarCompra() {
-            if (confirm('¿Confirmar compra?')) {
-                fetch('/procesar_compra', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'}
-                })
-                .then(response => response.json())
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notif = document.createElement('div');
+            notif.className = 'notificacion' + (esError ? ' error' : '');
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        // Función para cerrar modal
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Función para cerrar cartel flotante
+        function cerrarCartel() {
+            const cartel = document.getElementById('cartelUltimoPaso');
+            cartel.style.animation = 'slideOutBottom 0.4s ease-out';
+            setTimeout(() => {
+                cartel.classList.remove('active');
+            }, 400);
+        }
+
+        // Redirigir a iniciar sesión
+        function irAIniciarSesion() {
+            window.location.href = '/acceso';
+        }
+
+        // Redirigir a registrarse
+        function irARegistrarse() {
+            window.location.href = '/registro';
+        }
+
+        // Redirigir a agregar dirección
+        function irADirecciones() {
+            window.location.href = '/perfil';
+        }
+
+        // Función mejorada de procesarCompra
+        function procesarCompra() {
+            // Verificar si el usuario está logueado (usando variable Flask)
+            const estaLogueado = {{ 'true' if session.get('usuario_id') else 'false' }};
+            
+            if (!estaLogueado) {
+                // Mostrar modal de no logueado
+                document.getElementById('modalNoLogueado').classList.add('active');
+                return;
+            }
+            
+            // Si está logueado, verificar si tiene dirección en la BD
+            fetch('/api/direcciones')
+                .then(res => res.json())
                 .then(data => {
-                    if (data.ok) {
-                        alert('✓ ¡Compra exitosa! Pedido #' + data.pedido_id + '\n\nTotal: $' + data.total.toFixed(2));
-                        location.href = '/';
+                    if (data.ok && data.direcciones && data.direcciones.length > 0) {
+                        // Tiene dirección, proceder con la compra
+                        procesarCompraReal();
                     } else {
-                        alert('❌ Error: ' + data.error);
+                        // No tiene dirección, mostrar cartel
+                        document.getElementById('cartelUltimoPaso').classList.add('active');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('❌ Error en la compra');
+                .catch(err => {
+                    console.error('Error verificando dirección:', err);
+                    // Si hay error, mostrar el cartel por seguridad
+                    document.getElementById('cartelUltimoPaso').classList.add('active');
                 });
-            }
+        }
+
+        // Función para procesar compra real (después de validaciones)
+        function procesarCompraReal() {
+            fetch('/procesar_compra', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    mostrarNotificacion('✓ ¡Compra exitosa! Pedido #' + data.pedido_id);
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    mostrarNotificacion('❌ Error: ' + data.error, true);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error en la compra', true);
+            });
         }
 
         function actualizarCantidad(productoId, cantidad) {
@@ -137,7 +254,7 @@
                 if (data.ok) {
                     location.reload();
                 } else {
-                    alert('Error: ' + data.error);
+                    mostrarNotificacion('Error: ' + data.error, true);
                 }
             });
         }

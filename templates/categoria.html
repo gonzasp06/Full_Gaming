@@ -43,7 +43,7 @@
                         
                         <!-- PRECIO -->
                         <div class="product-price">
-                            <span class="price">${{ "%.2f"|format(producto[4]|float) }}</span>
+                            <span class="price">${{ producto[4] }}</span>
                         </div>
                         
                         <!-- CANTIDAD DISPONIBLE (pequeño, abajo) -->
@@ -95,6 +95,10 @@
             .then(data => {
                 if (data.ok) {
                     mostrarNotificacion('✓ ' + nombreProducto + ' agregado al carrito');
+                    // Actualizar el contador del carrito
+                    if (window.actualizarContadorCarrito) {
+                        window.actualizarContadorCarrito();
+                    }
                 } else {
                     mostrarNotificacion('❌ Error: ' + data.error, true);
                 }

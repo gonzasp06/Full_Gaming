@@ -58,7 +58,7 @@
                                 Editar
                             </a>
 
-                            <a class="btn-eliminar" href="/eliminar_producto/{{ p[0] }}" onclick="return confirm('¿Seguro quieres eliminar este producto?');">
+                            <a class="btn-eliminar" onclick="eliminarProducto({{ p[0] }});" style="cursor: pointer;">
                                 <img src="/static/images/eliminar.png" alt="Eliminar">
                                 Eliminar
                             </a>
@@ -69,6 +69,26 @@
             </tbody>
         </table>
     </div>
+    
+    <script>
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notif = document.createElement('div');
+            notif.className = 'notificacion' + (esError ? ' error' : '');
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+        
+        function eliminarProducto(productoId) {
+            if (confirm('¿Seguro quieres eliminar este producto?')) {
+                window.location.href = '/eliminar_producto/' + productoId;
+            }
+        }
+    </script>
+    
     {% include 'footer.html' %}
 </body>
 </html>
