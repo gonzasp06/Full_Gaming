@@ -13,6 +13,10 @@ class UsuarioService:
     # CREAR USUARIO
     
     def crear_usuario(self, nombre, apellido, email, contraseña):
+        # Validar que el email no exista ya
+        usuario_existente = self.buscar_usuario(email)
+        if usuario_existente:
+            return {"ok": False, "error": "El correo ingresado ya existe como cliente, por favor iniciá sesión."}
 
         # Cifrar contraseña
         hashed = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
@@ -30,6 +34,8 @@ class UsuarioService:
             return {"ok": True}
 
         except mysql.connector.Error as error:
+            if error.errno == 1062:  # Duplicate entry
+                return {"ok": False, "error": "El correo ingresado ya existe como cliente, por favor iniciá sesión."}
             return {"ok": False, "error": str(error)}
 
     

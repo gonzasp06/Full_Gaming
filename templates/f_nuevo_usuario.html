@@ -15,9 +15,12 @@
 
 </head>
 <body>
-    {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    <header>
+        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    </header>
     
-    <div class="form-container">
+    <main>
+        <div class="form-container">
         <h1 class="text-center">Nueva cuenta</h1>
         <form id="formularioUsuario" action="/nuevo_usuario" method="post" enctype="multipart/form-data">
             <div class="form-group">
@@ -31,44 +34,274 @@
             <div class="form-group">
                 <label for="email" class="form-label">Email:</label>
                 <input type="email" id="email" name="email" class="form-control" required>
+                <small id="validacion-email" style="display: none; color: #dc3545; margin-top: 5px;"></small>
             </div>
             <div class="form-group">
                 <label for="contraseña" class="form-label">Contraseña:</label>
-                <input type="password" id="contraseña" name="contraseña" class="form-control" required>
+                <div style="position: relative;">
+                    <input type="password" id="contraseña" name="contraseña" class="form-control" required style="padding-right: 40px;">
+                    <svg id="togglePassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </div>
+                <!-- Indicador de fortaleza -->
+                <div style="margin-top: 8px;">
+                    <div style="display: flex; gap: 4px; height: 6px;">
+                        <div id="fortaleza1" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
+                        <div id="fortaleza2" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
+                        <div id="fortaleza3" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
+                    </div>
+                    <small id="texto-fortaleza" style="display: block; margin-top: 5px; color: #666;">Fortaleza: Escribe una contraseña</small>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="repetir_contraseña" class="form-label">Repetir Contraseña:</label>
+                <div style="position: relative;">
+                    <input type="password" id="repetir_contraseña" name="repetir_contraseña" class="form-control" required style="padding-right: 40px;">
+                    <svg id="toggleRepetir" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <small id="validacion-contraseña" style="display: none; color: #dc3545; margin-top: 5px;">Las contraseñas no coinciden</small>
+                </div>
             </div>
             <br>
             <button type="submit" class="btn btn-primary" value="Crear Usuario">Crear Usuario</button>
         </form>
         <p id="resultado" class="text-center mt-3"></p>
     </div>
+    </main>
     
     <script>
-        document.getElementById("formularioUsuario").addEventListener("submit", function(event) {
-            event.preventDefault();
-            // Obtener datos del formulario
-            var nombre = document.getElementById("nombre").value;
-            var apellido = document.getElementById("apellido").value;
-            var email = document.getElementById("email").value;
-            var contraseña = document.getElementById("contraseña").value;
-            // Construir objeto 
-            var formData = new FormData();
-            formData.append("nombre", nombre);
-            formData.append("apellido", apellido);
-            formData.append("email", email);
-            formData.append("contraseña", contraseña);
-            // Envia solicitud POST para carga del producto
-            fetch("/cargar_usuario", {
-                method: "POST",
-                body: formData 
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("resultado").innerText = data.mensaje;
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("resultado").innerText = "Error al crear cuenta";
-            });
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputContraseña = document.getElementById("contraseña");
+            const inputRepetir = document.getElementById("repetir_contraseña");
+            const inputEmail = document.getElementById("email");
+            const togglePassword = document.getElementById("togglePassword");
+            const toggleRepetir = document.getElementById("toggleRepetir");
+            
+            // Dominios de email permitidos
+            const dominiosPermitidos = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "protonmail.com", "icloud.com", "mail.com"];
+            
+            // ============ VALIDACIÓN DE EMAIL ============
+            if (inputEmail) {
+                inputEmail.addEventListener("input", function() {
+                    const email = this.value.trim();
+                    const validacionEmail = document.getElementById("validacion-email");
+                    
+                    if (email.length === 0) {
+                        validacionEmail.style.display = "none";
+                        return;
+                    }
+                    
+                    // Validar que tenga @
+                    if (!email.includes("@")) {
+                        validacionEmail.textContent = "El email debe contener @";
+                        validacionEmail.style.display = "block";
+                        return;
+                    }
+                    
+                    // Obtener dominio del email
+                    const partes = email.split("@");
+                    if (partes.length !== 2) {
+                        validacionEmail.textContent = "Formato de email inválido";
+                        validacionEmail.style.display = "block";
+                        return;
+                    }
+                    
+                    const dominio = partes[1].toLowerCase();
+                    
+                    // Validar que sea un dominio permitido
+                    if (!dominiosPermitidos.includes(dominio)) {
+                        validacionEmail.textContent = `Dominio no permitido. Usa: ${dominiosPermitidos.join(", ")}`;
+                        validacionEmail.style.display = "block";
+                        return;
+                    }
+                    
+                    // Email válido
+                    validacionEmail.style.display = "none";
+                });
+            }
+            
+            // ============ EVALUADOR DE FORTALEZA DE CONTRASEÑA ============
+            function evaluarFortaleza(password) {
+                let fortaleza = 0;
+                let requisitos = [];
+                
+                if (password.length >= 8) {
+                    fortaleza += 1;
+                    requisitos.push("✓ Longitud (8+ caracteres)");
+                }
+                if (/[a-z]/.test(password)) {
+                    fortaleza += 1;
+                    requisitos.push("✓ Minúsculas");
+                }
+                if (/[A-Z]/.test(password)) {
+                    fortaleza += 1;
+                    requisitos.push("✓ Mayúsculas");
+                }
+                if (/[0-9]/.test(password)) {
+                    fortaleza += 1;
+                    requisitos.push("✓ Números");
+                }
+                if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+                    fortaleza += 1;
+                    requisitos.push("✓ Caracteres especiales");
+                }
+                
+                return { fortaleza, requisitos };
+            }
+            
+            // Evento para mostrar fortaleza en tiempo real
+            if (inputContraseña) {
+                inputContraseña.addEventListener("input", function() {
+                    const password = this.value;
+                    const { fortaleza, requisitos } = evaluarFortaleza(password);
+                    
+                    const fortaleza1 = document.getElementById("fortaleza1");
+                    const fortaleza2 = document.getElementById("fortaleza2");
+                    const fortaleza3 = document.getElementById("fortaleza3");
+                    const textoFortaleza = document.getElementById("texto-fortaleza");
+                    
+                    // Resetear colores
+                    fortaleza1.style.backgroundColor = "#e0e0e0";
+                    fortaleza2.style.backgroundColor = "#e0e0e0";
+                    fortaleza3.style.backgroundColor = "#e0e0e0";
+                    
+                    if (password.length === 0) {
+                        textoFortaleza.textContent = "Fortaleza: Escribe una contraseña";
+                        textoFortaleza.style.color = "#666";
+                        return;
+                    }
+                    
+                    // Mostrar colores según fortaleza
+                    if (fortaleza <= 2) {
+                        // DÉBIL - Rojo
+                        fortaleza1.style.backgroundColor = "#dc3545";
+                        textoFortaleza.textContent = "🔴 Contraseña débil - Agregá más caracteres";
+                        textoFortaleza.style.color = "#dc3545";
+                    } else if (fortaleza === 3 || fortaleza === 4) {
+                        // MEDIA - Amarillo
+                        fortaleza1.style.backgroundColor = "#ffc107";
+                        fortaleza2.style.backgroundColor = "#ffc107";
+                        textoFortaleza.textContent = "🟡 Contraseña media - Podría ser más fuerte";
+                        textoFortaleza.style.color = "#ffc107";
+                    } else if (fortaleza === 5) {
+                        // FUERTE - Verde
+                        fortaleza1.style.backgroundColor = "#28a745";
+                        fortaleza2.style.backgroundColor = "#28a745";
+                        fortaleza3.style.backgroundColor = "#28a745";
+                        textoFortaleza.textContent = "🟢 Contraseña fuerte - Excelente";
+                        textoFortaleza.style.color = "#28a745";
+                    }
+                });
+            }
+            
+            // ============ TOGGLE CONTRASEÑA ============
+            if (togglePassword) {
+                togglePassword.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    if (inputContraseña.type === "password") {
+                        inputContraseña.type = "text";
+                        togglePassword.style.stroke = "#6A44F2";
+                    } else {
+                        inputContraseña.type = "password";
+                        togglePassword.style.stroke = "currentColor";
+                    }
+                });
+            }
+            
+            // ============ TOGGLE REPETIR ============
+            if (toggleRepetir) {
+                toggleRepetir.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    if (inputRepetir.type === "password") {
+                        inputRepetir.type = "text";
+                        toggleRepetir.style.stroke = "#6A44F2";
+                    } else {
+                        inputRepetir.type = "password";
+                        toggleRepetir.style.stroke = "currentColor";
+                    }
+                });
+            }
+
+            // ============ VALIDACIÓN DE CONTRASEÑAS ============
+            if (inputRepetir) {
+                inputRepetir.addEventListener("input", function() {
+                    const contraseña = inputContraseña.value;
+                    const repetir = this.value;
+                    const validacion = document.getElementById("validacion-contraseña");
+                    
+                    if (repetir.length > 0 && contraseña !== repetir) {
+                        validacion.style.display = "block";
+                    } else {
+                        validacion.style.display = "none";
+                    }
+                });
+            }
+
+            // ============ ENVÍO DEL FORMULARIO ============
+            const formulario = document.getElementById("formularioUsuario");
+            if (formulario) {
+                formulario.addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    
+                    // Validar email
+                    const email = inputEmail.value.trim();
+                    if (!email.includes("@") || !dominiosPermitidos.includes(email.split("@")[1].toLowerCase())) {
+                        document.getElementById("resultado").innerText = "❌ Email inválido";
+                        document.getElementById("resultado").style.color = "#dc3545";
+                        return;
+                    }
+                    
+                    // Validar que las contraseñas coincidan
+                    const contraseña = inputContraseña.value;
+                    const repetir = inputRepetir.value;
+                    
+                    if (contraseña !== repetir) {
+                        document.getElementById("resultado").innerText = "❌ Las contraseñas no coinciden";
+                        document.getElementById("resultado").style.color = "#dc3545";
+                        return;
+                    }
+                    
+                    // Obtener datos del formulario
+                    var nombre = document.getElementById("nombre").value;
+                    var apellido = document.getElementById("apellido").value;
+                    var contraseña_form = document.getElementById("contraseña").value;
+                    // Construir objeto 
+                    var formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("apellido", apellido);
+                    formData.append("email", email);
+                    formData.append("contraseña", contraseña_form);
+                    // Envia solicitud POST para carga del producto
+                    fetch("/cargar_usuario", {
+                        method: "POST",
+                        body: formData,
+                        credentials: 'include'  // Incluir cookies en la solicitud
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ok) {
+                            document.getElementById("resultado").innerText = data.mensaje;
+                            document.getElementById("resultado").style.color = "#28a745";
+                            // Redirigir al home después de 2 segundos
+                            setTimeout(() => {
+                                window.location.href = "/";
+                            }, 2000);
+                        } else {
+                            document.getElementById("resultado").innerText = "❌ " + (data.error || "Error al crear cuenta");
+                            document.getElementById("resultado").style.color = "#dc3545";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        document.getElementById("resultado").innerText = "❌ Error al crear cuenta";
+                        document.getElementById("resultado").style.color = "#dc3545";
+                    });
+                });
+            }
         });
     </script>
     {% include 'footer.html' %} 

@@ -39,6 +39,7 @@ def registrar_endpoints_perfil(app):
                 session['usuario_nombre'] = datos.get('nombre')
                 session['usuario_email'] = datos.get('email')
                 session['usuario_telefono'] = datos.get('telefono', '')
+                session['usuario_dni'] = datos.get('dni', '')
             
             return jsonify(resultado)
         except Exception as e:

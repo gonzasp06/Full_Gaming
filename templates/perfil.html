@@ -143,6 +143,10 @@
                                         <label>Teléfono</label>
                                         <p id="info-telefono">{{ usuario_telefono if usuario_telefono else '📱 No proporcionado' }}</p>
                                     </div>
+                                    <div class="info-item">
+                                        <label>DNI</label>
+                                        <p id="info-dni">{{ usuario_dni if usuario_dni else '🆔 No proporcionado' }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -375,6 +379,11 @@
                     const infoBailoTelefono = document.getElementById('info-telefono');
                     if (infoBailoTelefono) {
                         infoBailoTelefono.textContent = telefono || '📱 No proporcionado';
+                    }
+                    // Actualizar el DNI en la información de cuenta
+                    const infoDni = document.getElementById('info-dni');
+                    if (infoDni) {
+                        infoDni.textContent = dni || '🆔 No proporcionado';
                     }
                     setTimeout(() => location.reload(), 1500);
                 } else {

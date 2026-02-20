@@ -7,7 +7,7 @@ class PedidoService:
     def __init__(self):
         self.conexion = conectar_base_datos()
 
-    def crear_pedido(self, usuario_id, email, total, items):
+    def crear_pedido(self, usuario_id, email, total, items, direccion=None, provincia=None, codigo_postal=None, dni=None, telefono=None):
         """
         Crea un pedido y sus items en BD
         
@@ -23,12 +23,12 @@ class PedidoService:
         try:
             cursor = self.conexion.cursor()
             
-            # Insertar pedido
+            # Insertar pedido con todos los datos
             query_pedido = """
-                INSERT INTO pedidos (usuario_id, email, total, estado)
-                VALUES (%s, %s, %s, 'completado')
+                INSERT INTO pedidos (usuario_id, email, total, estado, direccion, provincia, codigo_postal, dni, telefono)
+                VALUES (%s, %s, %s, 'completado', %s, %s, %s, %s, %s)
             """
-            cursor.execute(query_pedido, (usuario_id, email, total))
+            cursor.execute(query_pedido, (usuario_id, email, total, direccion, provincia, codigo_postal, dni, telefono))
             self.conexion.commit()
             
             pedido_id = cursor.lastrowid

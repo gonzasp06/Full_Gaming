@@ -15,9 +15,12 @@
 </head>
 
 <body>
-    {% include 'navbar.html' %}  <!-- incluye el navabar.html-->
+    <header>
+        {% include 'navbar.html' %}  <!-- incluye el navabar.html-->
+    </header>
 
-    <div class="form-container table-container">
+    <main>
+        <div class="form-container table-container">
 
         <h1 class="my-4">Gestión de Productos</h1>
         <a href="/formulario" class="btn-agregar-producto">
@@ -69,6 +72,7 @@
             </tbody>
         </table>
     </div>
+    </main>
     
     <script>
         function mostrarNotificacion(mensaje, esError = false) {
