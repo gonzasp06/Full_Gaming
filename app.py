@@ -122,6 +122,16 @@ def cargar_usuario():
     )
 
     if resultado["ok"]:
+        # Obtener los datos del usuario recién creado
+        usuario = service.buscar_usuario(datos['email'])
+        if usuario:
+            # Marcar sesión como permanente PRIMERO
+            session.permanent = True
+            # Luego inicializar sesión automáticamente
+            session['usuario_id'] = usuario['id']
+            session['usuario_email'] = usuario['email']
+            session['usuario_nombre'] = usuario['nombre']
+            session['es_admin'] = usuario['is_admin']
         return jsonify({"mensaje": "Cuenta creada"}), 200
     else:
         return jsonify({"error": resultado["error"]}), 400
@@ -429,9 +439,13 @@ def perfil():
     usuario_nombre = session.get('usuario_nombre')
     usuario_email = session.get('usuario_email')
     
-    # Obtener datos del usuario desde la BD
+    # Obtener datos del usuario desde la BD (siempre actualizado)
     service = UsuarioService()
     usuario_datos = service.obtener_usuario_por_id(usuario_id)
+    
+    # Usar los datos de BD como fuente principal
+    usuario_telefono = usuario_datos.get('telefono', '') if usuario_datos else ''
+    usuario_dni = usuario_datos.get('dni', '') if usuario_datos else ''
     
     # Obtener últimos pedidos del usuario
     pedido_service = PedidoService()
@@ -441,7 +455,8 @@ def perfil():
                          usuario=usuario_datos,
                          usuario_nombre=usuario_nombre,
                          usuario_email=usuario_email,
-                         usuario_telefono=usuario_datos.get('telefono') if usuario_datos else '',
+                         usuario_telefono=usuario_telefono,
+                         usuario_dni=usuario_dni,
                          pedidos_recientes=pedidos_recientes)
 
 
@@ -467,8 +482,47 @@ def procesar_compra():
         usuario_id = session.get('usuario_id')
         email = session.get('usuario_email', 'anonimo@email.com')
         
-        # Crear pedido en BD
-        resultado = service_pedido.crear_pedido(usuario_id, email, total, items_compra)
+        # Inicializar variables de dirección y contacto
+        direccion = None
+        provincia = None
+        codigo_postal = None
+        dni = None
+        telefono = None
+        
+        # Si el usuario está logueado, obtener su dirección principal y datos de contacto
+        if usuario_id:
+            from services.direccion_service import DireccionService
+            from services.usuario_service import UsuarioService
+            
+            # Obtener dirección principal
+            service_direccion = DireccionService()
+            direcciones = service_direccion.obtener_direcciones(usuario_id)
+            
+            if direcciones:
+                # Obtener la dirección principal o la primera
+                dir_principal = next((d for d in direcciones if d.get('es_principal')), direcciones[0])
+                direccion = f"{dir_principal.get('calle', '')} {dir_principal.get('numero', '')}"
+                if dir_principal.get('piso_departamento'):
+                    direccion += f", {dir_principal.get('piso_departamento')}"
+                provincia = dir_principal.get('provincia')
+                codigo_postal = dir_principal.get('codigo_postal')
+            
+            # Obtener datos de contacto del usuario
+            service_usuario = UsuarioService()
+            usuario_datos = service_usuario.obtener_usuario_por_id(usuario_id)
+            if usuario_datos:
+                dni = usuario_datos.get('dni')
+                telefono = usuario_datos.get('telefono')
+        
+        # Crear pedido en BD con todos los datos
+        resultado = service_pedido.crear_pedido(
+            usuario_id, email, total, items_compra,
+            direccion=direccion,
+            provincia=provincia,
+            codigo_postal=codigo_postal,
+            dni=dni,
+            telefono=telefono
+        )
         
         if not resultado['ok']:
             return jsonify({"ok": False, "error": resultado['error']}), 500

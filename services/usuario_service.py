@@ -13,6 +13,10 @@ class UsuarioService:
     # CREAR USUARIO
     
     def crear_usuario(self, nombre, apellido, email, contraseña):
+        # Validar que el email no exista ya
+        usuario_existente = self.buscar_usuario(email)
+        if usuario_existente:
+            return {"ok": False, "error": "El correo ingresado ya existe como cliente, por favor iniciá sesión."}
 
         # Cifrar contraseña
         hashed = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
@@ -30,6 +34,8 @@ class UsuarioService:
             return {"ok": True}
 
         except mysql.connector.Error as error:
+            if error.errno == 1062:  # Duplicate entry
+                return {"ok": False, "error": "El correo ingresado ya existe como cliente, por favor iniciá sesión."}
             return {"ok": False, "error": str(error)}
 
     
@@ -109,7 +115,7 @@ class UsuarioService:
     def obtener_usuario_por_id(self, usuario_id):
         try:
             cursor = self.conexion.cursor()
-            query = "SELECT idusuario, nombre, apellido, email, is_admin, telefono FROM usuario WHERE idusuario = %s"
+            query = "SELECT idusuario, nombre, apellido, email, is_admin, telefono, dni FROM usuario WHERE idusuario = %s"
             cursor.execute(query, (usuario_id,))
             usuario = cursor.fetchone()
             cursor.close()
@@ -120,7 +126,8 @@ class UsuarioService:
                     "apellido": usuario[2],
                     "email": usuario[3],
                     "is_admin": usuario[4],
-                    "telefono": usuario[5]
+                    "telefono": usuario[5],
+                    "dni": usuario[6]
                 }
             return None
         except Exception as e:
@@ -172,15 +179,15 @@ class UsuarioService:
             return None
 
     # ACTUALIZAR PERFIL DEL USUARIO
-    def actualizar_perfil(self, usuario_id, nombre, apellido, email, telefono):
+    def actualizar_perfil(self, usuario_id, nombre, apellido, email, telefono, dni=None):
         try:
             cursor = self.conexion.cursor()
             query = """
                 UPDATE usuario 
-                SET nombre = %s, apellido = %s, email = %s, telefono = %s 
+                SET nombre = %s, apellido = %s, email = %s, telefono = %s, dni = %s
                 WHERE idusuario = %s
             """
-            cursor.execute(query, (nombre, apellido, email, telefono, usuario_id))
+            cursor.execute(query, (nombre, apellido, email, telefono, dni, usuario_id))
             self.conexion.commit()
             cursor.close()
             return {"ok": True, "mensaje": "Perfil actualizado correctamente"}

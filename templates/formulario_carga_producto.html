@@ -19,9 +19,12 @@
 
 </head>
 <body>
-    {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    <header>
+        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    </header>
 
-    <div class="container py-6 form-container">
+    <main>
+        <div class="container py-6 form-container">
         <h1 class="text-center">Nuevo Producto</h1>
         <form id="formularioProducto" action="/cargar_producto" method="post" enctype="multipart/form-data">
             <div class="form-group">
@@ -58,6 +61,7 @@
             <button type="submit" class="btn btn-primary" value="Cargar Producto" >Cargar Producto</button>
         </form>
     </div>
+    </main>
 
     <div id="resultado"></div>
 

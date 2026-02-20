@@ -14,9 +14,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-    {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    <header>
+        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+    </header>
 
-    <div class="form-container table-container">
+    <main>
+        <div class="form-container table-container">
     <h1 class="">Listado de Usuarios</h1>
     <table class="table table-striped">
         <thead>
@@ -77,6 +80,7 @@
         </tbody>
     </table>
 </div>
+    </main>
 
     <script>
         function mostrarNotificacion(mensaje, esError = false) {

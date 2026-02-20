@@ -143,6 +143,10 @@
                                         <label>Teléfono</label>
                                         <p id="info-telefono">{{ usuario_telefono if usuario_telefono else '📱 No proporcionado' }}</p>
                                     </div>
+                                    <div class="info-item">
+                                        <label>DNI</label>
+                                        <p id="info-dni">{{ usuario_dni if usuario_dni else '🆔 No proporcionado' }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -237,9 +241,15 @@
                                         <input type="email" name="email" class="form-control" value="{{ usuario_email }}" placeholder="Tu email" required>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label>Teléfono</label>
-                                    <input type="tel" name="telefono" class="form-control" placeholder="+54 9 11 2345-6789" value="{{ usuario_telefono if usuario_telefono else '' }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Teléfono</label>
+                                        <input type="tel" name="telefono" class="form-control" placeholder="+54 9 11 2345-6789" value="{{ usuario_telefono if usuario_telefono else '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>DNI</label>
+                                        <input type="text" name="dni" class="form-control" placeholder="Ej: 12345678" value="{{ usuario_dni if usuario_dni else '' }}">
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label>Nueva Contraseña (opcional)</label>
@@ -310,6 +320,7 @@
             const nombre = document.querySelector('input[name="nombre"]').value.trim();
             const email = document.querySelector('input[name="email"]').value.trim();
             const telefono = document.querySelector('input[name="telefono"]').value.trim();
+            const dni = document.querySelector('input[name="dni"]').value.trim();
 
             if (!nombre || !email) {
                 mostrarNotificacion('❌ Nombre y email son obligatorios', true);
@@ -325,7 +336,8 @@
                 nombre: nombreParte,
                 apellido: apellidoParte,
                 email: email,
-                telefono: telefono
+                telefono: telefono,
+                dni: dni
             };
 
             fetch('/api/perfil/actualizar', {
@@ -343,6 +355,11 @@
                     const infoBailoTelefono = document.getElementById('info-telefono');
                     if (infoBailoTelefono) {
                         infoBailoTelefono.textContent = telefono || '📱 No proporcionado';
+                    }
+                    // Actualizar el DNI en la información de cuenta
+                    const infoDni = document.getElementById('info-dni');
+                    if (infoDni) {
+                        infoDni.textContent = dni || '🆔 No proporcionado';
                     }
                     setTimeout(() => location.reload(), 1500);
                 } else {
