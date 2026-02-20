@@ -89,6 +89,16 @@ class DireccionService:
             cursor.execute(query, (usuario_id, calle, numero, piso_departamento, codigo_postal, provincia, municipio, es_principal))
             self.conexion.commit()
             direccion_id = cursor.lastrowid
+            
+            # Si es principal, sincronizar con tabla usuario
+            if es_principal:
+                direccion_completa = f"{calle} {numero}"
+                cursor.execute(
+                    "UPDATE usuario SET direccion = %s, provincia = %s, codigo_postal = %s WHERE idusuario = %s",
+                    (direccion_completa, provincia, codigo_postal, usuario_id)
+                )
+                self.conexion.commit()
+            
             cursor.close()
             
             return {"ok": True, "id": direccion_id, "mensaje": "Dirección creada correctamente"}
@@ -120,6 +130,16 @@ class DireccionService:
             """
             cursor.execute(query, (calle, numero, piso_departamento, codigo_postal, provincia, municipio, es_principal, direccion_id, usuario_id))
             self.conexion.commit()
+            
+            # Si es principal, sincronizar con tabla usuario
+            if es_principal:
+                direccion_completa = f"{calle} {numero}"
+                cursor.execute(
+                    "UPDATE usuario SET direccion = %s, provincia = %s, codigo_postal = %s WHERE idusuario = %s",
+                    (direccion_completa, provincia, codigo_postal, usuario_id)
+                )
+                self.conexion.commit()
+            
             cursor.close()
             
             return {"ok": True, "mensaje": "Dirección actualizada correctamente"}
@@ -253,6 +273,18 @@ class DireccionService:
         try:
             cursor = self.conexion.cursor()
             
+            # Obtener datos de la dirección que será principal
+            cursor.execute(
+                "SELECT calle, numero, provincia, codigo_postal FROM direcciones WHERE id = %s AND usuario_id = %s",
+                (direccion_id, usuario_id)
+            )
+            direccion = cursor.fetchone()
+            
+            if not direccion:
+                return {"ok": False, "error": "Dirección no encontrada"}
+            
+            calle, numero, provincia, codigo_postal = direccion
+            
             # Desmarcar todas las direcciones de este usuario como principal
             cursor.execute(
                 "UPDATE direcciones SET es_principal = FALSE WHERE usuario_id = %s",
@@ -263,6 +295,13 @@ class DireccionService:
             cursor.execute(
                 "UPDATE direcciones SET es_principal = TRUE WHERE id = %s AND usuario_id = %s",
                 (direccion_id, usuario_id)
+            )
+            
+            # Sincronizar con tabla usuario
+            direccion_completa = f"{calle} {numero}"
+            cursor.execute(
+                "UPDATE usuario SET direccion = %s, provincia = %s, codigo_postal = %s WHERE idusuario = %s",
+                (direccion_completa, provincia, codigo_postal, usuario_id)
             )
             
             self.conexion.commit()

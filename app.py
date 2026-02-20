@@ -455,8 +455,11 @@ def perfil():
                          usuario=usuario_datos,
                          usuario_nombre=usuario_nombre,
                          usuario_email=usuario_email,
-                         usuario_telefono=usuario_telefono,
-                         usuario_dni=usuario_dni,
+                         usuario_telefono=usuario_datos.get('telefono') if usuario_datos else '',
+                         usuario_direccion=usuario_datos.get('direccion') if usuario_datos else '',
+                         usuario_provincia=usuario_datos.get('provincia') if usuario_datos else '',
+                         usuario_codigo_postal=usuario_datos.get('codigo_postal') if usuario_datos else '',
+                         usuario_dni=usuario_datos.get('dni') if usuario_datos else '',
                          pedidos_recientes=pedidos_recientes)
 
 
