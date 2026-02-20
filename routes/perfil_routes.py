@@ -29,6 +29,9 @@ def registrar_endpoints_perfil(app):
                 datos.get('apellido'),
                 datos.get('email'),
                 datos.get('telefono'),
+                datos.get('direccion'),
+                datos.get('provincia'),
+                datos.get('codigo_postal'),
                 datos.get('dni')
             )
             
