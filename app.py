@@ -454,6 +454,7 @@ def perfil():
     return render_template('perfil.html', 
                          usuario=usuario_datos,
                          usuario_nombre=usuario_nombre,
+                         usuario_apellido=usuario_datos.get('apellido') if usuario_datos else '',
                          usuario_email=usuario_email,
                          usuario_telefono=usuario_datos.get('telefono') if usuario_datos else '',
                          usuario_direccion=usuario_datos.get('direccion') if usuario_datos else '',
