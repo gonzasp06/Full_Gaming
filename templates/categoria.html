@@ -64,11 +64,10 @@
                     </div>
 
                     <!-- BOTÓN COMPRAR -->
-                    <button class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
-                    onclick="event.stopPropagation(); agregarAlCarrito({{ producto[0] }}, {{ producto[1] | tojson }})"
-                    ondblclick="event.stopPropagation();"
-                    {% if producto[5] == 0 %}disabled{% endif %}>
-                    {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
+                    <button class="btn-comprar" 
+                            onclick="agregarAlCarrito({{ producto[0] }}, '{{ producto[1] | escape }}')"
+                            {% if producto[5] == 0 %}disabled{% endif %}>
+                        {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
                     </button>
                 </div>
             </div>
@@ -98,13 +97,19 @@
         }
         
         function agregarAlCarrito(idProducto, nombreProducto) {
+            console.log('Agregando producto:', idProducto, nombreProducto);
+            
             fetch('/agregar_carrito/' + idProducto, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({cantidad: 1})
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.ok) {
                     mostrarNotificacion('✓ ' + nombreProducto + ' agregado al carrito');
                     // Actualizar el contador del carrito
@@ -112,10 +117,13 @@
                         window.actualizarContadorCarrito();
                     }
                 } else {
-                    mostrarNotificacion('❌ Error: ' + data.error, true);
+                    mostrarNotificacion('❌ Error: ' + (data.error || 'Error desconocido'), true);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error en fetch:', error);
+                mostrarNotificacion('❌ Error al agregar al carrito', true);
+            });
         }
     </script>
     {% include 'footer.html' %}  
