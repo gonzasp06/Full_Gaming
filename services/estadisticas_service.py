@@ -271,7 +271,7 @@ class EstadisticasService:
     
     def obtener_usuarios_mas_activos(self, limite=10):
         """
-        Obtiene los usuarios con más compras
+        Obtiene los usuarios con más compras (solo usuarios registrados)
         
         Args:
             limite: cantidad de usuarios a mostrar (default 10)
@@ -287,13 +287,13 @@ class EstadisticasService:
                     u.nombre,
                     u.apellido,
                     u.email,
-                    COUNT(p.id) as cantidad_pedidos,
+                    COUNT(DISTINCT p.id) as cantidad_pedidos,
                     COALESCE(SUM(p.total), 0) as total_gastado
                 FROM usuario u
                 LEFT JOIN pedidos p ON u.idusuario = p.usuario_id
                 WHERE u.idusuario IS NOT NULL
+                AND p.id IS NOT NULL
                 GROUP BY u.idusuario, u.nombre, u.apellido, u.email
-                HAVING COUNT(p.id) > 0
                 ORDER BY COALESCE(SUM(p.total), 0) DESC
                 LIMIT %s
             """

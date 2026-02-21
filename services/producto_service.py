@@ -45,7 +45,7 @@ class ProductoService:
     def agregar_producto(self, nombre, descripcion, categoria, precio, cantidad, ruta_imagen):
         """Inserta un producto en la base de datos y devuelve un dict con el resultado.
 
-        Retorna: {'ok': True} o {'ok': False, 'error': 'mensaje'}
+        Retorna: {'ok': True, 'producto_id': id} o {'ok': False, 'error': 'mensaje'}
         """
         cursor = None
         try:
@@ -56,7 +56,8 @@ class ProductoService:
             """
             cursor.execute(query, (nombre, descripcion, categoria, precio, cantidad, ruta_imagen))
             self.conexion.commit()
-            return {"ok": True}
+            producto_id = cursor.lastrowid
+            return {"ok": True, "producto_id": producto_id}
         except Exception as e:
             # Intentar cerrar el cursor si existe
             try:

@@ -1,0 +1,11 @@
+/* ARCHIVO MAESTRO - IMPORTA TODOS LOS CSS */
+@import url('./1-base.css');
+@import url('./2-navbar.css');
+@import url('./3-carrusel.css');
+@import url('./4-productos.css');
+@import url('./5-formularios.css');
+@import url('./6-producto-detalle.css');
+@import url('./7-perfil.css');
+@import url('./8-modales.css');
+@import url('./9-footer.css');
+@import url('./10-categorias.css');

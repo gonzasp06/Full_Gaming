@@ -329,7 +329,12 @@ def cargar_producto():
     )
 
     if resultado.get("ok"):
-        return jsonify({"mensaje": "Producto cargado correctamente"}), 200
+        return jsonify({
+            "ok": True,
+            "mensaje": "🎉 ¡Producto agregado exitosamente!",
+            "submensaje": f"'{nombre}' ha sido añadido a tu catálogo",
+            "producto_id": resultado.get("producto_id")
+        }), 200
     else:
         # Si hubo un archivo guardado y la inserción falló, eliminar el archivo para no dejar basura
         try:

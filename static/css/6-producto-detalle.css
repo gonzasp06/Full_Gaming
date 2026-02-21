@@ -1,0 +1,300 @@
+/* ============================= */
+/* VISTA DETALLE DE PRODUCTO    */
+/* ============================= */
+
+.producto-detalle-container {
+  max-width: 1100px;        /* ancho cómodo en el centro */
+  margin: 40px auto 60px;   /* separación arriba y abajo */
+  padding: 10px 20px;
+  flex: 1;
+}
+
+/* Columna de la imagen */
+.producto-detalle-imagen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.producto-detalle-imagen img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 600px;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+}
+
+/* Columna de info (titulo, precio, stock, botón) */
+.producto-detalle-titulo {
+  text-align: center;
+  font-size: 2.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Centramos todo el bloque de info debajo del título */
+.producto-detalle-titulo,
+.producto-detalle-categoria,
+.producto-detalle-precio,
+.producto-detalle-stock {
+  align-self: center;
+  text-align: center;
+}
+
+.producto-detalle-categoria {
+  color: #555;
+}
+
+.producto-detalle-categoria span {
+  font-weight: 600;
+  color: #3C308C;
+}
+
+.producto-detalle-precio {
+  font-family: 'Horizon', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #6A44F2;
+  margin: 12px 0;
+}
+
+.producto-detalle-stock {
+  color: #333;
+}
+
+.producto-detalle-stock span {
+  font-weight: 600;
+}
+
+/* Botón agregar al carrito (centrado) */
+.btn-agregar-carrito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;                 /* separa icono del texto */
+  padding: 10px 22px;
+  border-radius: 8px;
+  background-color: #3C308C;
+  color: #fff;
+  font-family: 'Horizon', sans-serif;
+  font-weight: 520;
+  text-decoration: none;
+  border: none;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-agregar-carrito:hover {
+  background-color: #6A44F2;
+  transform: translateY(-1px);
+}
+
+.btn-agregar-carrito img {
+  width: 20px;
+  height: auto;
+}
+
+/* Bloque de descripción abajo */
+.producto-detalle-descripcion {
+  margin-top: 50px;
+}
+
+/* Título "Descripción" centrado y más grande */
+.producto-detalle-descripcion h2 {
+  font-family: 'Horizon', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #6A44F2;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.producto-detalle-descripcion p{
+  max-width: 900px;
+  margin: 0 auto;
+  color: #444;
+  line-height: 1.75;
+}
+
+.producto-info-wrapper{
+  width: 100%;
+  max-width: 420px;   /* 🔥 clave: todos comparten el mismo ancho */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Texto de la descripción igual que antes */
+.producto-detalle-descripcion p {
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Fuerza que toda la columna de info quede centrada */
+.col-md-7 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Ajuste fino del botón debajo del stock */
+.btn-agregar-carrito {
+  margin-top: 16px;   /* separación del stock */
+}
+
+/* ====== META (ID/SKU) ====== */
+.producto-meta{
+  margin-bottom: 10px;
+}
+.badge-meta{
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #666;
+  background: #f3f3f6;
+  border: 1px solid #e6e6ee;
+}
+
+/* ====== STOCK PRO ====== */
+.stock-wrap{
+  margin: 10px 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #f7f7fa;
+  border: 1px solid #ececf2;
+}
+
+.stock-ok{ color: #1a7f37; font-weight: 700; }
+.stock-low{ color: #b25b00; font-weight: 700; }
+.stock-out{ color: #b42318; font-weight: 700; }
+
+.stock-num{
+  font-weight: 800;
+  color: #333;
+  padding-left: 10px;
+  border-left: 1px solid #e3e3ea;
+}
+
+/* ====== BENEFICIOS más compactos ====== */
+.beneficios-lista{
+  margin-top: 14px;
+  gap: 8px;
+}
+.beneficio-icono{
+  width: 20px;
+  height: 20px;
+}
+.beneficio-texto{
+  font-size: 0.94rem;
+}
+
+/* ====== COMPRA (cantidad + botón) ====== */
+.compra-wrap{
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.qty-control{
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2e2ea;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.qty-btn{
+  width: 44px;
+  height: 40px;
+  border: 0;
+  background: #f3f3f6;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.qty-input{
+  width: 60px;
+  height: 40px;
+  border: 0;
+  text-align: center;
+  outline: none;
+  font-weight: 700;
+  color: #333;
+}
+
+/* botón más pro */
+.btn-agregar-carrito{
+  min-width: 260px;
+  height: 44px;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+}
+
+/* ====== Separador antes de descripción ====== */
+.producto-detalle-descripcion{
+  margin-top: 55px;
+  padding-top: 35px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+/* ============================= */
+/* BENEFICIOS - ESTILO LISTA     */
+/* ============================= */
+
+.beneficios-lista{
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ✅ centra cada item */
+  gap: 10px;
+}
+
+/* Cada línea: ícono + texto centrados como bloque */
+.beneficio-linea{
+  display: inline-flex;      /* ✅ ancho = contenido */
+  align-items: center;
+  justify-content: center;   /* ✅ centra icono+texto */
+  gap: 10px;
+  padding: 0;
+}
+
+/* Icono */
+.beneficio-icono{
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Texto gris */
+.beneficio-texto{
+  color: #5f5f66;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;        /* ✅ por si hay salto de línea */
+}
+
+/* Link centrado también */
+.beneficio-link{
+  margin-left: 8px;
+  font-size: 0.92rem;
+  color: #3C308C;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.beneficio-link:hover{
+  text-decoration: underline;
+}
