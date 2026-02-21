@@ -15,6 +15,7 @@ from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService
 from services.pedido_service import PedidoService
 from routes.perfil_routes import registrar_endpoints_perfil
+from routes.estadisticas_routes import registrar_endpoints_estadisticas
 
 # print("ProductoService:", ProductoService)
 
@@ -45,6 +46,9 @@ def make_session_permanent():
 
 # Registrar endpoints del perfil
 registrar_endpoints_perfil(app)
+
+# Registrar endpoints de estadísticas
+registrar_endpoints_estadisticas(app)
 
 # conexión a base de datos
 conexion = conectar_base_datos()

@@ -72,6 +72,7 @@
             <nav class="segundo_nav">
                 <ul>
                     {% if session.get('es_admin') == 1 %}
+                    <li><a href="/estadisticas">📊 Estadísticas</a></li>
                     <li><a href="/gestion_productos">Gestión de productos</a></li>
                     <li><a href="/usuarios">Gestión de usuarios</a></li>
                     {% endif %}
