@@ -6,7 +6,7 @@
     <title>FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
     <!--Estilo CSS-->
-    <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"  href="{{ url_for('static', filename='css/index.css') }}">
     <!-- Vinculacion con Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- Quill CSS -->
@@ -51,6 +51,10 @@
                 <input type="text" id="precio" name="precio" class="form-control">
             </div>
             <div class="form-group">
+                <label for="costo" class="form-label">Costo / Inversión:</label>
+                <input type="text" id="costo" name="costo" class="form-control" placeholder="Costo real del producto">
+            </div>
+            <div class="form-group">
                 <label for="cantidad" class="form-label">Cantidad:</label>
                 <input type="number" id="cantidad" name="cantidad" class="form-control" min="0">
             </div>
@@ -78,6 +82,7 @@
             var descripcion = quill.root.innerHTML;
             var categoria = document.getElementById("categoria").value;
             var precio = document.getElementById("precio").value;
+            var costo = document.getElementById("costo").value;
             var cantidad = document.getElementById("cantidad").value;
             var foto = document.getElementById("foto").files[0];
 
@@ -88,6 +93,7 @@
             formData.append("descripcion", descripcion);
             formData.append("categoria", categoria);
             formData.append("precio", precio);
+            formData.append("costo", costo);
             formData.append("cantidad", cantidad);
             formData.append("foto", foto);
 
@@ -98,13 +104,67 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("resultado").innerText = data.mensaje;
+                if (data.ok) {
+                    // Mostrar modal de éxito
+                    mostrarModalExito(data.mensaje, data.submensaje);
+                    // Limpiar formulario
+                    document.getElementById("formularioProducto").reset();
+                    quill.setContents([]);
+                } else {
+                    mostrarModalError(data.error || "Error al cargar el producto");
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
-                document.getElementById("resultado").innerText = "Error al cargar el producto";
+                mostrarModalError("Error al cargar el producto. Intenta nuevamente");
             });
         });
+
+        function mostrarModalExito(titulo, subtitulo) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-icon">✨</div>
+                    <h2 class="modal-title">${titulo}</h2>
+                    <p class="modal-description">${subtitulo}</p>
+                    <div class="modal-buttons">
+                        <button class="modal-btn primary" onclick="cerrarModal(this)">Continuar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.modal-btn').addEventListener('click', function() {
+                cerrarModal(this);
+            });
+        }
+
+        function mostrarModalError(mensaje) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-icon" style="color: #e74c3c;">⚠️</div>
+                    <h2 class="modal-title" style="color: #e74c3c;">Error</h2>
+                    <p class="modal-description">${mensaje}</p>
+                    <div class="modal-buttons">
+                        <button class="modal-btn primary" onclick="cerrarModal(this)">Intentar de nuevo</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.modal-btn').addEventListener('click', function() {
+                cerrarModal(this);
+            });
+        }
+
+        function cerrarModal(btn) {
+            const modal = btn.closest('.modal-overlay');
+            modal.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => modal.remove(), 300);
+        }
     </script>
     {% include 'footer.html' %} 
 </body>

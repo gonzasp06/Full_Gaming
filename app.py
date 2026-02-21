@@ -5,6 +5,7 @@ from datetime import timedelta
 from database import conectar_base_datos
 from services.admin_manager import AdminManager
 from services.carrito_service import CarritoService
+from migrations import agregar_columna_costo_si_no_existe
 
 #Subir foto tipo archivo al servidor
 import os
@@ -20,6 +21,10 @@ from routes.estadisticas_routes import registrar_endpoints_estadisticas
 # print("ProductoService:", ProductoService)
 
 app = Flask(__name__)
+
+# ==================== MIGRACIONES ====================
+# Ejecutar migraciones al iniciar la app
+agregar_columna_costo_si_no_existe()
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -230,6 +235,7 @@ def actualizar_producto(id_producto):
     categoria = request.form['categoria']
     precio = request.form['precio']
     cantidad = request.form['cantidad']
+    costo = request.form.get('costo', 0)
 
     foto = request.files.get('foto')
     ruta = None
@@ -239,7 +245,7 @@ def actualizar_producto(id_producto):
         ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         foto.save(ruta)
 
-    service.editar_producto(id_producto, nombre, descripcion, categoria, precio, cantidad, ruta)
+    service.editar_producto(id_producto, nombre, descripcion, categoria, precio, cantidad, ruta, costo)
 
     return redirect('/gestion_productos')
 
@@ -306,6 +312,7 @@ def cargar_producto():
     categoria = request.form.get('categoria')
     precio = request.form.get('precio')
     cantidad = request.form.get('cantidad')
+    costo = request.form.get('costo', 0)
 
     foto = request.files.get('foto')
 
@@ -325,11 +332,17 @@ def cargar_producto():
         categoria=categoria,
         precio=precio,
         cantidad=cantidad,
-        ruta_imagen=ruta_imagen
+        ruta_imagen=ruta_imagen,
+        costo=costo
     )
 
     if resultado.get("ok"):
-        return jsonify({"mensaje": "Producto cargado correctamente"}), 200
+        return jsonify({
+            "ok": True,
+            "mensaje": "🎉 ¡Producto agregado exitosamente!",
+            "submensaje": f"'{nombre}' ha sido añadido a tu catálogo",
+            "producto_id": resultado.get("producto_id")
+        }), 200
     else:
         # Si hubo un archivo guardado y la inserción falló, eliminar el archivo para no dejar basura
         try:

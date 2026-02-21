@@ -147,3 +147,25 @@ def registrar_endpoints_estadisticas(app):
             return jsonify(resultado)
         else:
             return jsonify(resultado), 500
+    
+    @app.route('/api/estadisticas/ingresos-vs-egresos')
+    @admin_manager.requerir_admin
+    def api_ingresos_vs_egresos():
+        """API: Ingresos vs Egresos por mes (últimos 12 meses)"""
+        resultado = estadisticas_service.obtener_ingresos_vs_egresos_por_mes(12)
+        
+        if resultado['ok']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 500
+    
+    @app.route('/api/estadisticas/evolucion-ingresos')
+    @admin_manager.requerir_admin
+    def api_evolucion_ingresos():
+        """API: Evolución de ingresos por mes (últimos 12 meses)"""
+        resultado = estadisticas_service.obtener_evolucion_ingresos_mensual()
+        
+        if resultado['ok']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 500

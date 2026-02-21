@@ -271,7 +271,7 @@ class EstadisticasService:
     
     def obtener_usuarios_mas_activos(self, limite=10):
         """
-        Obtiene los usuarios con más compras
+        Obtiene los usuarios con más compras (solo usuarios registrados)
         
         Args:
             limite: cantidad de usuarios a mostrar (default 10)
@@ -287,13 +287,13 @@ class EstadisticasService:
                     u.nombre,
                     u.apellido,
                     u.email,
-                    COUNT(p.id) as cantidad_pedidos,
+                    COUNT(DISTINCT p.id) as cantidad_pedidos,
                     COALESCE(SUM(p.total), 0) as total_gastado
                 FROM usuario u
                 LEFT JOIN pedidos p ON u.idusuario = p.usuario_id
                 WHERE u.idusuario IS NOT NULL
+                AND p.id IS NOT NULL
                 GROUP BY u.idusuario, u.nombre, u.apellido, u.email
-                HAVING COUNT(p.id) > 0
                 ORDER BY COALESCE(SUM(p.total), 0) DESC
                 LIMIT %s
             """
@@ -452,3 +452,118 @@ class EstadisticasService:
             if cursor:
                 cursor.close()
             return {"ok": False, "error": str(e)}
+    
+    # =================== MÉTODOS DE BALANCE ===================
+
+    def obtener_ingresos_vs_egresos_por_mes(self, cantidad_meses=12):
+        """
+        Calcula ingresos vs egresos (costos) agrupados por mes
+        """
+        try:
+            # Crear una nueva conexión para este método
+            conexion = conectar_base_datos()
+            cursor = conexion.cursor()
+            
+            # Consulta simplificada para obtener ingresos
+            query_ingresos = """
+                SELECT 
+                    YEAR(p.fecha) AS anio,
+                    MONTH(p.fecha) AS numero_mes,
+                    COALESCE(SUM(p.total), 0) AS ingresos
+                FROM pedidos p
+                WHERE p.fecha >= DATE_SUB(CURDATE(), INTERVAL %s MONTH)
+                GROUP BY YEAR(p.fecha), MONTH(p.fecha)
+            """
+            
+            cursor.execute(query_ingresos, (cantidad_meses,))
+            ingresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
+            
+            # Consulta para obtener egresos
+            query_egresos = """
+                SELECT 
+                    YEAR(p.fecha) AS anio,
+                    MONTH(p.fecha) AS numero_mes,
+                    COALESCE(SUM(COALESCE(pr.costo, 0) * pi.cantidad), 0) AS egresos
+                FROM pedidos p
+                LEFT JOIN pedido_items pi ON p.id = pi.pedido_id
+                LEFT JOIN producto pr ON pi.producto_id = pr.id
+                WHERE p.fecha >= DATE_SUB(CURDATE(), INTERVAL %s MONTH)
+                GROUP BY YEAR(p.fecha), MONTH(p.fecha)
+            """
+            
+            cursor.execute(query_egresos, (cantidad_meses,))
+            egresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
+            
+            cursor.close()
+            conexion.close()
+            
+            meses_nombre = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+            
+            # Combinar datos
+            datos = []
+            todas_las_claves = set(list(ingresos_data.keys()) + list(egresos_data.keys()))
+            
+            for anio, numero_mes in sorted(todas_las_claves):
+                if 1 <= numero_mes <= 12:
+                    ingresos = float(ingresos_data.get((anio, numero_mes), 0))
+                    egresos = float(egresos_data.get((anio, numero_mes), 0))
+                    datos.append({
+                        "mes": meses_nombre[numero_mes - 1],
+                        "numero_mes": numero_mes,
+                        "ingresos": int(ingresos),
+                        "egresos": int(egresos),
+                        "balance": int(ingresos - egresos)
+                    })
+            
+            return {"ok": True, "datos": datos}
+        except Exception as e:
+            print(f"Error en obtener_ingresos_vs_egresos_por_mes: {str(e)}")
+            return {"ok": True, "datos": []}
+    
+    def obtener_evolucion_ingresos_mensual(self):
+        """
+        Obtiene la evolución de ingresos por mes (últimos 12 meses)
+        """
+        try:
+            # Crear una nueva conexión para este método
+            conexion = conectar_base_datos()
+            cursor = conexion.cursor()
+            
+            query = """
+                SELECT 
+                    YEAR(p.fecha) AS anio,
+                    MONTH(p.fecha) AS numero_mes,
+                    COALESCE(SUM(p.total), 0) AS ingresos
+                FROM pedidos p
+                WHERE p.fecha >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                GROUP BY YEAR(p.fecha), MONTH(p.fecha)
+                ORDER BY anio ASC, numero_mes ASC
+            """
+            
+            cursor.execute(query)
+            resultados = cursor.fetchall()
+            
+            cursor.close()
+            conexion.close()
+            
+            meses_nombre = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+            
+            datos = []
+            for row in resultados:
+                if row and len(row) >= 3:
+                    numero_mes = int(row[1]) if row[1] else 1
+                    ingresos = float(row[2]) if row[2] else 0
+                    
+                    if 1 <= numero_mes <= 12:
+                        datos.append({
+                            "mes": f"{meses_nombre[numero_mes - 1]} {int(row[0])}",
+                            "mes_corto": meses_nombre[numero_mes - 1],
+                            "ingresos": int(ingresos)
+                        })
+            
+            return {"ok": True, "datos": datos}
+        except Exception as e:
+            print(f"Error en obtener_evolucion_ingresos_mensual: {str(e)}")
+            return {"ok": True, "datos": []}

@@ -1,0 +1,391 @@
+/* PRIMER NAVAR (LOGO, EXPLORADOR, ACCEDER Y CARRITO */
+.primer_nav {
+    width: 100%;
+    background-color: #272D40;
+    padding: 12px 20px;
+}
+
+.nav-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+}
+
+/* Logo */
+.logo img {
+    height: 45px;
+    width: auto;
+}
+
+/*Centro (barra de búsqueda) */
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/*Botones navbar acceder y carrito */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-btn {
+    background: #3C308C;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* espacio entre imagen y texto */
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    font-weight: 520; /*negrita*/
+    font-family: 'Horizon', sans-serif;
+}
+
+.nav-btn img.nav-btn-img {
+    width: 20px; /* tamaño de la imagen */
+    height: auto;
+}
+.nav-btn:hover {
+    background: #6A44F2;
+}
+
+/* Badge contador del carrito */
+.carrito-badge {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #E74C3C, #C0392B);
+    color: white;
+    border: 2px solid #272D40;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    animation: badgePulse 0.3s ease;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.carrito-btn {
+    position: relative;
+}
+
+@keyframes badgePulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* USUARIO LOGUEADO EN NAVBAR */
+.nav-user-logueado {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: rgba(106, 68, 242, 0.1);
+    border-radius: 8px;
+    border: 1px solid #6A44F2;
+}
+
+.nav-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 6px 8px;
+    border-radius: 6px;
+}
+
+.nav-user-profile:hover {
+    background: rgba(106, 68, 242, 0.2);
+    transform: scale(1.05);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background: #3C308C;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFD700;
+    flex-shrink: 0;
+}
+
+.user-avatar svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.nav-user-name {
+    color: #6A44F2;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.nav-btn-logout {
+    background: #dc3545;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.nav-btn-logout:hover {
+    background: #c82333;
+    text-decoration: none;
+    color: white;
+}
+
+
+/* BARRA EXPLORADORA */
+
+/* Contenedor del buscador con imagen encima */
+.barra_exploradora {
+  position: relative;
+  width: 100%;
+  max-width: 500px; 
+  display: flex;
+  justify-content: center;
+}
+
+.barra_exploradora .nav-search {
+  width: 100%;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  padding-right: 45px;  /* Espacio para la lupa */
+}
+
+/* Botón con la imagen encima del input */
+.search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.search-btn img {
+  width: 22px; 
+  height: auto;
+  opacity: 0.8;
+}
+
+.search-btn img:hover {
+  opacity: 1;
+}
+
+
+/* SEGUNDO NAVAR (CATEGORIAS Y GESTION DE PRODUCTOS) */
+
+.segundo_nav {
+  width: 100%;
+  background: transparent; /* Sin fondo */
+  padding: 10px 0;
+
+  display: flex;
+  justify-content: center; /* Centrar completamente */
+}
+
+.segundo_nav ul {
+  list-style: none;
+  display: flex;
+  gap: 40px; /* Separación entre opciones */
+  margin: 0;
+  padding: 0;
+}
+
+.segundo_nav li a {
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 600;
+
+  color: #272D40; /* Color del texto */
+  transition: 0.2s ease;
+}
+
+.segundo_nav li a:hover {
+  color: #6A44F2; 
+}
+/* ============================= */
+/* NAVBAR ADMINISTRADOR - PREMIUM  */
+/* ============================= */
+
+.admin-nav {
+  width: 100%;
+  background: linear-gradient(90deg, #1a1f2e 0%, #232a3e 100%);
+  border-top: 2px solid #6A44F2;
+  border-bottom: 2px solid rgba(106, 68, 242, 0.3);
+  padding: 0;
+  box-shadow: 0 4px 15px rgba(106, 68, 242, 0.2);
+}
+
+.admin-nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #6A44F2, #3C308C);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(106, 68, 242, 0.3);
+  animation: adminBadgePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes adminBadgePulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(106, 68, 242, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(106, 68, 242, 0.6);
+  }
+}
+
+.admin-nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+  flex: 1;
+  justify-content: center;
+}
+
+.admin-nav-item {
+  position: relative;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: rgba(106, 68, 242, 0.1);
+  color: #B5B3F2;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-nav-link:hover {
+  background: linear-gradient(135deg, rgba(106, 68, 242, 0.25), rgba(60, 48, 140, 0.25));
+  color: #FFD700;
+  border-color: #6A44F2;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(106, 68, 242, 0.2);
+}
+
+.admin-nav-link:active {
+  transform: translateY(0);
+}
+
+.admin-icon {
+  font-size: 18px;
+  display: inline-block;
+}
+
+.admin-label {
+  font-family: 'Horizon', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-nav-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .admin-badge {
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-nav-menu {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .admin-nav-link {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .admin-label {
+    display: none;
+  }
+
+  .admin-icon {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-nav-container {
+    padding: 12px 10px;
+  }
+
+  .admin-nav-menu {
+    gap: 6px;
+  }
+
+  .admin-nav-link {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .admin-badge {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+}

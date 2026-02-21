@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas - FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -14,10 +14,11 @@
 
         .estadisticas-container {
             width: 100%;
-            padding: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #f5f5f5;
             box-sizing: border-box;
-            overflow-x: hidden;
         }
 
         .estadisticas-header {
@@ -107,29 +108,30 @@
 
         .grafico-container {
             background-color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            max-height: 300px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            width: 100%;
+            aspect-ratio: 1 / 1.2;
             min-width: 0;
+            overflow: hidden;
         }
 
         .grafico-container canvas {
-            max-height: 220px;
-            max-width: 100%;
+            width: 100% !important;
+            height: 100% !important;
+            flex: 1;
         }
 
         .grafico-titulo {
             color: #333;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
             border-bottom: 2px solid #f39c12;
-            padding-bottom: 6px;
+            padding-bottom: 8px;
+            flex-shrink: 0;
         }
 
         .tabla-section {
@@ -210,15 +212,35 @@
 
         .dos-columnas {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
             width: 100%;
-            overflow: hidden;
+            margin: 0 auto 30px;
+            max-width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .dos-columnas {
+                gap: 25px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .dos-columnas {
+                gap: 20px;
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
             .dos-columnas {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .grafico-container {
+                aspect-ratio: 1 / 1.1;
             }
 
             .graficos-section {
@@ -233,6 +255,22 @@
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dos-columnas {
+                gap: 15px;
+            }
+
+            .grafico-container {
+                aspect-ratio: 1 / 1.05;
+                padding: 15px;
+            }
+
+            .grafico-titulo {
+                font-size: 12px;
+                margin-bottom: 8px;
             }
         }
     </style>
@@ -251,7 +289,10 @@
         {% if resumen %}
             <div class="estadisticas-header">
                 <h1>📊 Dashboard de Estadísticas</h1>
-                <div class="fecha" id="fecha-actualizacion">Última actualización: {{ resumen.fecha_generacion }}</div>
+                <div>
+                    <div class="fecha" id="fecha-actualizacion">Última actualización: {{ resumen.fecha_generacion }}</div>
+                    <button id="btn-refrescar" style="margin-top: 10px; padding: 8px 16px; background: #6A44F2; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">🔄 Refrescar Datos</button>
+                </div>
             </div>
 
             <!-- TARJETAS DE RESUMEN GENERAL -->
@@ -305,6 +346,21 @@
                 <div class="grafico-container">
                     <div class="grafico-titulo">📁 Ingresos por Categoría</div>
                     <canvas id="grafico-categorias"></canvas>
+                </div>
+            </div>
+
+            <!-- NUEVOS GRÁFICOS -->
+            <div class="dos-columnas">
+                <!-- Gráfico: Ingresos vs Egresos -->
+                <div class="grafico-container">
+                    <div class="grafico-titulo">💰 Ingresos vs Egresos</div>
+                    <canvas id="grafico-ingresos-egresos"></canvas>
+                </div>
+
+                <!-- Gráfico: Evolución de Ingresos -->
+                <div class="grafico-container">
+                    <div class="grafico-titulo">📈 Evolución de Ingresos</div>
+                    <canvas id="grafico-evolucion"></canvas>
                 </div>
             </div>
 
@@ -412,6 +468,53 @@
     </div>
 
     <script>
+        // Auto-refresh de datos cada 30 segundos
+        setInterval(function() {
+            actualizarEstadisticas();
+        }, 30000);
+
+        function actualizarEstadisticas() {
+            fetch('/api/estadisticas/resumen')
+                .then(response => response.json())
+                .then(data => {
+                    // Actualizar ventas totales
+                    const ventasEl = document.querySelector('.tarjeta.ventas .tarjeta-valor');  
+                    if (ventasEl) {
+                        ventasEl.textContent = '$' + data.ventas_totales.toLocaleString('es-AR');
+                    }
+                    
+                    // Actualizar cantidad de pedidos
+                    const pedidosEl = document.querySelectorAll('.tarjeta.pedidos .tarjeta-valor')[0];
+                    if (pedidosEl) {
+                        pedidosEl.textContent = data.cantidad_pedidos;
+                    }
+                    
+                    // Actualizar fecha
+                    const fechaEl = document.getElementById('fecha-actualizacion');
+                    if (fechaEl) {
+                        const ahora = new Date().toLocaleString('es-AR');
+                        fechaEl.textContent = 'Última actualización: ' + ahora;
+                    }
+                    
+                    console.log('Estadísticas actualizadas');
+                })
+                .catch(error => console.error('Error actualizando estadísticas:', error));
+        }
+
+        // Botón refrescar
+        document.getElementById('btn-refrescar').addEventListener('click', function() {
+            this.textContent = '⏳ Cargando...';
+            this.disabled = true;
+            
+            actualizarEstadisticas();
+            
+            setTimeout(() => {
+                this.textContent = '🔄 Refrescar Datos';
+                this.disabled = false;
+                location.reload();  // Recargar la página completa
+            }, 1000);
+        });
+
         // Datos de los gráficos
         const datosProductos = {
             labels: [
@@ -446,15 +549,22 @@
                 data: datosProductos,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            bottom: 30
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 15,
+                                padding: 10,
                                 font: {
-                                    size: 12
-                                }
+                                    size: 11
+                                },
+                                boxWidth: 12,
+                                usePointStyle: true
                             }
                         }
                     }
@@ -496,7 +606,12 @@
                         data: datoCategorias,
                         options: {
                             responsive: true,
-                            maintainAspectRatio: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    bottom: 20
+                                }
+                            },
                             plugins: {
                                 legend: {
                                     display: false
@@ -517,6 +632,130 @@
                 }
             })
             .catch(error => console.error('Error cargando categorías:', error));
+
+        // =================== GRÁFICO: INGRESOS VS EGRESOS ===================
+        fetch('/api/estadisticas/ingresos-vs-egresos')
+            .then(response => response.json())
+            .then(data => {
+                if (data.datos && data.datos.length > 0) {
+                    const datosBalanceData = {
+                        labels: data.datos.map(d => d.mes),
+                        datasets: [
+                            {
+                                label: "Ingresos ($)",
+                                data: data.datos.map(d => d.ingresos),
+                                backgroundColor: '#2ecc71',
+                                borderColor: '#27ae60',
+                                borderWidth: 2
+                            },
+                            {
+                                label: "Egresos ($)",
+                                data: data.datos.map(d => d.egresos),
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 2
+                            }
+                        ]
+                    };
+                    
+                    const ctxBalance = document.getElementById('grafico-ingresos-egresos');
+                    new Chart(ctxBalance, {
+                        type: 'bar',
+                        data: datosBalanceData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    bottom: 20
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 10,
+                                        font: { size: 11 },
+                                        boxWidth: 12,
+                                        usePointStyle: false
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + (value/1000).toFixed(0) + 'k';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error cargando ingresos vs egresos:', error));
+
+        // =================== GRÁFICO: EVOLUCIÓN DE INGRESOS ===================
+        fetch('/api/estadisticas/evolucion-ingresos')
+            .then(response => response.json())
+            .then(data => {
+                if (data.datos && data.datos.length > 0) {
+                    const datosEvolucion = {
+                        labels: data.datos.map(d => d.mes_corto),
+                        datasets: [{
+                            label: "Ingresos ($)",
+                            data: data.datos.map(d => d.ingresos),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#3498db',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    };
+                    
+                    const ctxEvolucion = document.getElementById('grafico-evolucion');
+                    new Chart(ctxEvolucion, {
+                        type: 'line',
+                        data: datosEvolucion,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    bottom: 20
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 10,
+                                        font: { size: 11 },
+                                        boxWidth: 12,
+                                        usePointStyle: true
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + (value/1000).toFixed(0) + 'k';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error cargando evolución de ingresos:', error));
     </script>
 
     

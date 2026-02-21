@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
     <body>
 
@@ -68,16 +68,35 @@
             </nav>
 
 
-            <!-- NAV 2: Gestión (para admins) -->
-            <nav class="segundo_nav">
-                <ul>
-                    {% if session.get('es_admin') == 1 %}
-                    <li><a href="/estadisticas">📊 Estadísticas</a></li>
-                    <li><a href="/gestion_productos">Gestión de productos</a></li>
-                    <li><a href="/usuarios">Gestión de usuarios</a></li>
-                    {% endif %}
-                </ul>
+            <!-- NAV 2: Gestión (para admins) o Categorías (para usuarios) -->
+            {% if session.get('es_admin') == 1 %}
+            <!-- NAVBAR ADMIN - Premium -->
+            <nav class="admin-nav">
+                <div class="admin-nav-container">
+                    <div class="admin-badge">🔐 Modo Administrador</div>
+                    <ul class="admin-nav-menu">
+                        <li class="admin-nav-item">
+                            <a href="/estadisticas" class="admin-nav-link">
+                                <span class="admin-icon">📊</span>
+                                <span class="admin-label">Estadísticas</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <a href="/gestion_productos" class="admin-nav-link">
+                                <span class="admin-icon">📦</span>
+                                <span class="admin-label">Productos</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <a href="/usuarios" class="admin-nav-link">
+                                <span class="admin-icon">👥</span>
+                                <span class="admin-label">Usuarios</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </nav>
+            {% endif %}
 
         </header>
 

@@ -42,21 +42,22 @@ class ProductoService:
         cursor.close()
         return producto
     
-    def agregar_producto(self, nombre, descripcion, categoria, precio, cantidad, ruta_imagen):
+    def agregar_producto(self, nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo=0):
         """Inserta un producto en la base de datos y devuelve un dict con el resultado.
 
-        Retorna: {'ok': True} o {'ok': False, 'error': 'mensaje'}
+        Retorna: {'ok': True, 'producto_id': id} o {'ok': False, 'error': 'mensaje'}
         """
         cursor = None
         try:
             cursor = self.conexion.cursor()
             query = """
-                INSERT INTO catalogo.producto (nombre, descripcion, categoria, precio, cantidad, foto)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO catalogo.producto (nombre, descripcion, categoria, precio, cantidad, foto, costo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(query, (nombre, descripcion, categoria, precio, cantidad, ruta_imagen))
+            cursor.execute(query, (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo))
             self.conexion.commit()
-            return {"ok": True}
+            producto_id = cursor.lastrowid
+            return {"ok": True, "producto_id": producto_id}
         except Exception as e:
             # Intentar cerrar el cursor si existe
             try:
@@ -72,22 +73,22 @@ class ProductoService:
             except:
                 pass
     
-    def editar_producto(self, id_producto, nombre, descripcion, categoria, precio, cantidad, ruta_imagen):
+    def editar_producto(self, id_producto, nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo=0):
         cursor = self.conexion.cursor()
         if ruta_imagen is not None:
             consulta = """
                 UPDATE catalogo.producto
-                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, foto=%s
+                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, foto=%s, costo=%s
                 WHERE id=%s
             """
-            valores = (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, id_producto)
+            valores = (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo, id_producto)
         else:
             consulta = """
                 UPDATE catalogo.producto
-                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s
+                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, costo=%s
                 WHERE id=%s
             """
-            valores = (nombre, descripcion, categoria, precio, cantidad, id_producto)
+            valores = (nombre, descripcion, categoria, precio, cantidad, costo, id_producto)
 
         cursor.execute(consulta, valores)
         self.conexion.commit()
