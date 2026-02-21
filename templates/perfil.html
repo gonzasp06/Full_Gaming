@@ -136,6 +136,10 @@
                                         <p>{{ usuario_nombre }}</p>
                                     </div>
                                     <div class="info-item">
+                                        <label>Apellido</label>
+                                        <p id="info-apellido">{{ usuario_apellido if usuario_apellido else '📝 No proporcionado' }}</p>
+                                    </div>
+                                    <div class="info-item">
                                         <label>Email</label>
                                         <p>{{ usuario_email }}</p>
                                     </div>
@@ -237,6 +241,12 @@
                                         <input type="text" name="nombre" class="form-control" value="{{ usuario_nombre }}" placeholder="Tu nombre" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
+                                        <label>Apellido</label>
+                                        <input type="text" name="apellido" class="form-control" value="{{ usuario_apellido if usuario_apellido else '' }}" placeholder="Tu apellido" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
                                         <label>Email</label>
                                         <input type="email" name="email" class="form-control" value="{{ usuario_email }}" placeholder="Tu email" required>
                                     </div>
@@ -249,20 +259,6 @@
                                     <div class="col-md-6 mb-3">
                                         <label>DNI</label>
                                         <input type="text" name="dni" class="form-control" placeholder="XX.XXX.XXX" value="{{ usuario_dni if usuario_dni else '' }}">
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label>Dirección</label>
-                                    <input type="text" name="direccion" class="form-control" placeholder="Calle y número" value="{{ usuario_direccion if usuario_direccion else '' }}">
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label>Provincia</label>
-                                        <input type="text" name="provincia" class="form-control" placeholder="Tu provincia" value="{{ usuario_provincia if usuario_provincia else '' }}">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label>Código Postal</label>
-                                        <input type="text" name="codigo_postal" class="form-control" placeholder="XXXX" value="{{ usuario_codigo_postal if usuario_codigo_postal else '' }}">
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -336,32 +332,22 @@
 
             const form = document.getElementById('form-cuenta');
             const nombre = form.querySelector('input[name="nombre"]').value.trim();
+            const apellido = form.querySelector('input[name="apellido"]').value.trim();
             const email = form.querySelector('input[name="email"]').value.trim();
             const telefono = form.querySelector('input[name="telefono"]').value.trim();
             const dni = form.querySelector('input[name="dni"]').value.trim();
-            const direccion = form.querySelector('input[name="direccion"]').value.trim();
-            const provincia = form.querySelector('input[name="provincia"]').value.trim();
-            const codigo_postal = form.querySelector('input[name="codigo_postal"]').value.trim();
 
-            if (!nombre || !email) {
-                mostrarNotificacion('❌ Nombre y email son obligatorios', true);
+            if (!nombre || !apellido || !email) {
+                mostrarNotificacion('❌ Nombre, apellido y email son obligatorios', true);
                 return;
             }
 
-            // Dividir nombre en nombre y apellido
-            const partes = nombre.split(' ');
-            const nombreParte = partes[0];
-            const apellidoParte = partes.slice(1).join(' ') || '';
-
             const datos = {
-                nombre: nombreParte,
-                apellido: apellidoParte,
+                nombre: nombre,
+                apellido: apellido,
                 email: email,
                 telefono: telefono,
-                dni: dni,
-                direccion: direccion,
-                provincia: provincia,
-                codigo_postal: codigo_postal
+                dni: dni
             };
 
             fetch('/api/perfil/actualizar', {
@@ -375,6 +361,11 @@
             .then(data => {
                 if (data.ok) {
                     mostrarNotificacion('✓ Perfil actualizado correctamente');
+                    // Actualizar el apellido en la información de cuenta
+                    const infoApellido = document.getElementById('info-apellido');
+                    if (infoApellido) {
+                        infoApellido.textContent = apellido || '📝 No proporcionado';
+                    }
                     // Actualizar el teléfono en la información de cuenta
                     const infoBailoTelefono = document.getElementById('info-telefono');
                     if (infoBailoTelefono) {
