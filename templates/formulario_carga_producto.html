@@ -51,6 +51,10 @@
                 <input type="text" id="precio" name="precio" class="form-control">
             </div>
             <div class="form-group">
+                <label for="costo" class="form-label">Costo / Inversión:</label>
+                <input type="text" id="costo" name="costo" class="form-control" placeholder="Costo real del producto">
+            </div>
+            <div class="form-group">
                 <label for="cantidad" class="form-label">Cantidad:</label>
                 <input type="number" id="cantidad" name="cantidad" class="form-control" min="0">
             </div>
@@ -78,6 +82,7 @@
             var descripcion = quill.root.innerHTML;
             var categoria = document.getElementById("categoria").value;
             var precio = document.getElementById("precio").value;
+            var costo = document.getElementById("costo").value;
             var cantidad = document.getElementById("cantidad").value;
             var foto = document.getElementById("foto").files[0];
 
@@ -88,6 +93,7 @@
             formData.append("descripcion", descripcion);
             formData.append("categoria", categoria);
             formData.append("precio", precio);
+            formData.append("costo", costo);
             formData.append("cantidad", cantidad);
             formData.append("foto", foto);
 

@@ -349,6 +349,21 @@
                 </div>
             </div>
 
+            <!-- NUEVOS GRÁFICOS -->
+            <div class="dos-columnas">
+                <!-- Gráfico: Ingresos vs Egresos -->
+                <div class="grafico-container">
+                    <div class="grafico-titulo">💰 Ingresos vs Egresos</div>
+                    <canvas id="grafico-ingresos-egresos"></canvas>
+                </div>
+
+                <!-- Gráfico: Evolución de Ingresos -->
+                <div class="grafico-container">
+                    <div class="grafico-titulo">📈 Evolución de Ingresos</div>
+                    <canvas id="grafico-evolucion"></canvas>
+                </div>
+            </div>
+
             <!-- TABLAS DE INFORMACIÓN DETALLADA -->
             
             <!-- Tabla: Productos Más Vendidos -->
@@ -617,6 +632,130 @@
                 }
             })
             .catch(error => console.error('Error cargando categorías:', error));
+
+        // =================== GRÁFICO: INGRESOS VS EGRESOS ===================
+        fetch('/api/estadisticas/ingresos-vs-egresos')
+            .then(response => response.json())
+            .then(data => {
+                if (data.datos && data.datos.length > 0) {
+                    const datosBalanceData = {
+                        labels: data.datos.map(d => d.mes),
+                        datasets: [
+                            {
+                                label: "Ingresos ($)",
+                                data: data.datos.map(d => d.ingresos),
+                                backgroundColor: '#2ecc71',
+                                borderColor: '#27ae60',
+                                borderWidth: 2
+                            },
+                            {
+                                label: "Egresos ($)",
+                                data: data.datos.map(d => d.egresos),
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 2
+                            }
+                        ]
+                    };
+                    
+                    const ctxBalance = document.getElementById('grafico-ingresos-egresos');
+                    new Chart(ctxBalance, {
+                        type: 'bar',
+                        data: datosBalanceData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    bottom: 20
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 10,
+                                        font: { size: 11 },
+                                        boxWidth: 12,
+                                        usePointStyle: false
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + (value/1000).toFixed(0) + 'k';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error cargando ingresos vs egresos:', error));
+
+        // =================== GRÁFICO: EVOLUCIÓN DE INGRESOS ===================
+        fetch('/api/estadisticas/evolucion-ingresos')
+            .then(response => response.json())
+            .then(data => {
+                if (data.datos && data.datos.length > 0) {
+                    const datosEvolucion = {
+                        labels: data.datos.map(d => d.mes_corto),
+                        datasets: [{
+                            label: "Ingresos ($)",
+                            data: data.datos.map(d => d.ingresos),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#3498db',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    };
+                    
+                    const ctxEvolucion = document.getElementById('grafico-evolucion');
+                    new Chart(ctxEvolucion, {
+                        type: 'line',
+                        data: datosEvolucion,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    bottom: 20
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 10,
+                                        font: { size: 11 },
+                                        boxWidth: 12,
+                                        usePointStyle: true
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + (value/1000).toFixed(0) + 'k';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error cargando evolución de ingresos:', error));
     </script>
 
     

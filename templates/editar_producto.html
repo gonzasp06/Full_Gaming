@@ -55,6 +55,11 @@
             </div>
 
             <div class="form-group">
+                <label for="costo" class="form-label">Costo / Inversión:</label>
+                <input type="text" id="costo" name="costo" class="form-control" value="{{ producto[7] if producto|length > 7 else '' }}" placeholder="Costo real del producto">
+            </div>
+
+            <div class="form-group">
                 <label for="cantidad" class="form-label">Cantidad:</label>
                 <input type="number" id="cantidad" name="cantidad" class="form-control" value="{{ producto[5] }}">
             </div>
