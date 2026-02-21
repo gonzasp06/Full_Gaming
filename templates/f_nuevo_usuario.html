@@ -20,9 +20,9 @@
     </header>
     
     <main>
-        <div class="form-container">
+        <div class="form-container auth-container">
         <h1 class="text-center">Nueva cuenta</h1>
-        <form id="formularioUsuario" action="/nuevo_usuario" method="post" enctype="multipart/form-data">
+        <form id="formularioUsuario" class="auth-form" action="/nuevo_usuario" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="nombre" class="form-label">Nombre:</label>
                 <input type="text" id="nombre" name="nombre" class="form-control" required>
@@ -53,6 +53,7 @@
                         <div id="fortaleza3" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
                     </div>
                     <small id="texto-fortaleza" style="display: block; margin-top: 5px; color: #666;">Fortaleza: Escribe una contraseña</small>
+                    <small style="display: block; margin-top: 4px; color: #666;">Ejemplo recomendado: Nube9#Sol (9 caracteres)</small>
                 </div>
             </div>
             <div class="form-group">
@@ -63,7 +64,6 @@
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
-                    <small id="validacion-contraseña" style="display: none; color: #dc3545; margin-top: 5px;">Las contraseñas no coinciden</small>
                 </div>
             </div>
             <br>
@@ -126,38 +126,39 @@
             
             // ============ EVALUADOR DE FORTALEZA DE CONTRASEÑA ============
             function evaluarFortaleza(password) {
-                let fortaleza = 0;
-                let requisitos = [];
-                
-                if (password.length >= 8) {
-                    fortaleza += 1;
-                    requisitos.push("✓ Longitud (8+ caracteres)");
+                const longitud = password.length;
+                const tieneMinuscula = /[a-z]/.test(password);
+                const tieneMayuscula = /[A-Z]/.test(password);
+                const tieneNumero = /[0-9]/.test(password);
+                const tieneEspecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+                const esComun = /hola\d*|12345|qwerty|password|admin|bienvenido|franco|morena/i.test(password);
+
+                let tipos = 0;
+                if (tieneMinuscula) tipos += 1;
+                if (tieneMayuscula) tipos += 1;
+                if (tieneNumero) tipos += 1;
+                if (tieneEspecial) tipos += 1;
+
+                if (esComun) {
+                    return "comun";
                 }
-                if (/[a-z]/.test(password)) {
-                    fortaleza += 1;
-                    requisitos.push("✓ Minúsculas");
+
+                if (longitud < 8 || tipos <= 1) {
+                    return "debil";
                 }
-                if (/[A-Z]/.test(password)) {
-                    fortaleza += 1;
-                    requisitos.push("✓ Mayúsculas");
+
+                if (longitud >= 10 && tipos >= 3) {
+                    return "fuerte";
                 }
-                if (/[0-9]/.test(password)) {
-                    fortaleza += 1;
-                    requisitos.push("✓ Números");
-                }
-                if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-                    fortaleza += 1;
-                    requisitos.push("✓ Caracteres especiales");
-                }
-                
-                return { fortaleza, requisitos };
+
+                return "media";
             }
             
             // Evento para mostrar fortaleza en tiempo real
             if (inputContraseña) {
                 inputContraseña.addEventListener("input", function() {
                     const password = this.value;
-                    const { fortaleza, requisitos } = evaluarFortaleza(password);
+                    const nivelFortaleza = evaluarFortaleza(password);
                     
                     const fortaleza1 = document.getElementById("fortaleza1");
                     const fortaleza2 = document.getElementById("fortaleza2");
@@ -176,18 +177,22 @@
                     }
                     
                     // Mostrar colores según fortaleza
-                    if (fortaleza <= 2) {
+                    if (nivelFortaleza === "comun") {
+                        fortaleza1.style.backgroundColor = "#dc3545";
+                        textoFortaleza.textContent = "🔴 No recomendada: parece fácil de adivinar (ej: Hola12345).";
+                        textoFortaleza.style.color = "#dc3545";
+                    } else if (nivelFortaleza === "debil") {
                         // DÉBIL - Rojo
                         fortaleza1.style.backgroundColor = "#dc3545";
-                        textoFortaleza.textContent = "🔴 Contraseña débil - Agregá más caracteres";
+                        textoFortaleza.textContent = "🔴 Contraseña débil - Recomendación: usá 8+ caracteres y combiná letras y números.";
                         textoFortaleza.style.color = "#dc3545";
-                    } else if (fortaleza === 3 || fortaleza === 4) {
+                    } else if (nivelFortaleza === "media") {
                         // MEDIA - Amarillo
                         fortaleza1.style.backgroundColor = "#ffc107";
                         fortaleza2.style.backgroundColor = "#ffc107";
-                        textoFortaleza.textContent = "🟡 Contraseña media - Podría ser más fuerte";
+                        textoFortaleza.textContent = "🟡 Contraseña media - Válida. Recomendación: agregá un símbolo o más longitud para reforzarla.";
                         textoFortaleza.style.color = "#ffc107";
-                    } else if (fortaleza === 5) {
+                    } else if (nivelFortaleza === "fuerte") {
                         // FUERTE - Verde
                         fortaleza1.style.backgroundColor = "#28a745";
                         fortaleza2.style.backgroundColor = "#28a745";
@@ -226,21 +231,6 @@
                 });
             }
 
-            // ============ VALIDACIÓN DE CONTRASEÑAS ============
-            if (inputRepetir) {
-                inputRepetir.addEventListener("input", function() {
-                    const contraseña = inputContraseña.value;
-                    const repetir = this.value;
-                    const validacion = document.getElementById("validacion-contraseña");
-                    
-                    if (repetir.length > 0 && contraseña !== repetir) {
-                        validacion.style.display = "block";
-                    } else {
-                        validacion.style.display = "none";
-                    }
-                });
-            }
-
             // ============ ENVÍO DEL FORMULARIO ============
             const formulario = document.getElementById("formularioUsuario");
             if (formulario) {
@@ -260,7 +250,7 @@
                     const repetir = inputRepetir.value;
                     
                     if (contraseña !== repetir) {
-                        document.getElementById("resultado").innerText = "❌ Las contraseñas no coinciden";
+                        document.getElementById("resultado").innerText = "❌ Revisá la contraseña ingresada";
                         document.getElementById("resultado").style.color = "#dc3545";
                         return;
                     }
@@ -284,12 +274,11 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.ok) {
-                            document.getElementById("resultado").innerText = data.mensaje;
+                            document.getElementById("resultado").innerText = "✅ Cuenta creada, redirigiendo...";
                             document.getElementById("resultado").style.color = "#28a745";
-                            // Redirigir al home después de 2 segundos
                             setTimeout(() => {
                                 window.location.href = "/";
-                            }, 2000);
+                            }, 700);
                         } else {
                             document.getElementById("resultado").innerText = "❌ " + (data.error || "Error al crear cuenta");
                             document.getElementById("resultado").style.color = "#dc3545";

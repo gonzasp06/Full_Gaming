@@ -132,9 +132,9 @@ def cargar_usuario():
             session['usuario_email'] = usuario['email']
             session['usuario_nombre'] = usuario['nombre']
             session['es_admin'] = usuario['is_admin']
-        return jsonify({"mensaje": "Cuenta creada"}), 200
+        return jsonify({"ok": True, "mensaje": "Cuenta creada"}), 200
     else:
-        return jsonify({"error": resultado["error"]}), 400
+        return jsonify({"ok": False, "error": resultado["error"]}), 400
 
 
 

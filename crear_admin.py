@@ -3,10 +3,10 @@ import mysql.connector
 from database import conectar_base_datos
 
 # Datos del admin
-email = "gonza@admin.com"
-contraseña = "123456789"
-nombre = "Gonzalo"
-apellido = "Sosa"
+email = "bauti@admin.com"
+contraseña = "12345"
+nombre = "Bautista"
+apellido = "Riveira"
 
 # Encriptar contraseña
 hashed = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())

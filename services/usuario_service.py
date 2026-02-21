@@ -13,6 +13,7 @@ class UsuarioService:
     # CREAR USUARIO
     
     def crear_usuario(self, nombre, apellido, email, contraseña):
+        email = email.strip().lower()
         # Validar que el email no exista ya
         usuario_existente = self.buscar_usuario(email)
         if usuario_existente:
@@ -41,6 +42,7 @@ class UsuarioService:
     
     # BUSCAR USUARIO POR EMAIL
     def buscar_usuario(self, email):
+        email = email.strip().lower()
 
         cursor = self.conexion.cursor()
         query = "SELECT * FROM usuario WHERE email = %s"
@@ -64,7 +66,7 @@ class UsuarioService:
     # LOGIN
     
     def login(self, email, contraseña):
-
+        email = email.strip().lower()
         usuario = self.buscar_usuario(email)
 
         if not usuario:
@@ -72,30 +74,36 @@ class UsuarioService:
 
         # Obtener el hash de la contraseña guardada
         hash_guardado = usuario["contraseña"]
-        
-        print(f"DEBUG - Tipo de hash_guardado: {type(hash_guardado)}")
-        print(f"DEBUG - Valor: {hash_guardado}")
-        
+
         # Asegurar que hash_guardado es bytes
         if isinstance(hash_guardado, bytes):
-            pass  # Ya es bytes
+            hash_bytes = hash_guardado
+            hash_texto = hash_guardado.decode('utf-8', errors='ignore')
         elif isinstance(hash_guardado, str):
-            hash_guardado = hash_guardado.encode('utf-8')
+            hash_texto = hash_guardado
+            hash_bytes = hash_guardado.encode('utf-8')
         else:
-            print(f"Tipo desconocido: {type(hash_guardado)}")
             return None
-        
+
         try:
-            # Verificar contraseña
-            resultado = bcrypt.checkpw(contraseña.encode('utf-8'), hash_guardado)
-            if resultado:
-                return usuario
-            else:
+            # Verificar contraseña con bcrypt si el valor tiene formato hash
+            if hash_texto.startswith('$2a$') or hash_texto.startswith('$2b$') or hash_texto.startswith('$2y$'):
+                if bcrypt.checkpw(contraseña.encode('utf-8'), hash_bytes):
+                    return usuario
                 return None
+
+            # Compatibilidad con claves legacy en texto plano + migración automática
+            if hash_texto == contraseña:
+                nuevo_hash = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
+                cursor = self.conexion.cursor()
+                query = "UPDATE usuario SET contraseña = %s WHERE idusuario = %s"
+                cursor.execute(query, (nuevo_hash, usuario['id']))
+                self.conexion.commit()
+                cursor.close()
+                return usuario
+
+            return None
         except Exception as e:
-            # Si falla bcrypt, es que el hash es inválido
-            print(f"Error en bcrypt.checkpw: {e}")
-            print(f"Hash type: {type(hash_guardado)}, Hash value: {hash_guardado}")
             return None
     
     # OBTENER TODOS LOS USUARIOS
