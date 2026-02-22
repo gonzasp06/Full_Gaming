@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 database.py
 Estudio/
+EXPLICACION_SISTEMA.md

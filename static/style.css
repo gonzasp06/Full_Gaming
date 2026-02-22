@@ -13,6 +13,14 @@ body {
   padding: 0;
 }
 
+html.perfil-page-root,
+body.perfil-page {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 header {
   flex-shrink: 0;
 }
@@ -1556,6 +1564,8 @@ h1 {
 .perfil-container {
   background: linear-gradient(135deg, #0f1419, #1a1f2e);
   min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
   padding: 20px;
   display: flex;
   flex-direction: column;

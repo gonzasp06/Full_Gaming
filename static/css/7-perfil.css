@@ -1,7 +1,21 @@
 /* ESTILOS PARA PÁGINA DE PERFIL */
+html.perfil-page-root,
+body.perfil-page {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.perfil-page {
+  background: linear-gradient(135deg, #0f1419, #1a1f2e);
+}
+
 .perfil-container {
   background: linear-gradient(135deg, #0f1419, #1a1f2e);
   min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
   padding: 20px;
   display: flex;
   flex-direction: column;
