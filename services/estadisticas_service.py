@@ -12,6 +12,48 @@ class EstadisticasService:
     def __init__(self):
         """Inicializa la conexión a la base de datos"""
         self.conexion = conectar_base_datos()
+
+    def _columna_existe(self, tabla, columna):
+        cursor = None
+        try:
+            cursor = self.conexion.cursor()
+            query = """
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = %s
+                  AND COLUMN_NAME = %s
+            """
+            cursor.execute(query, (tabla, columna))
+            resultado = cursor.fetchone()
+            cursor.close()
+            return bool(resultado and resultado[0] > 0)
+        except Exception:
+            if cursor:
+                cursor.close()
+            return False
+
+    def _tabla_existe(self, tabla):
+        cursor = None
+        try:
+            cursor = self.conexion.cursor()
+            query = """
+                SELECT COUNT(*)
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = %s
+            """
+            cursor.execute(query, (tabla,))
+            resultado = cursor.fetchone()
+            cursor.close()
+            return bool(resultado and resultado[0] > 0)
+        except Exception:
+            if cursor:
+                cursor.close()
+            return False
+
+    def _usar_costo_real_pedido_items(self):
+        return self._columna_existe('pedido_items', 'costo_total')
     
     # =================== MÉTODOS DE VENTAS ===================
     
@@ -104,6 +146,77 @@ class EstadisticasService:
             if cursor:
                 cursor.close()
             return {"ok": False, "error": str(e)}
+
+    def obtener_egresos_stock_acumulados(self):
+        """
+        Obtiene el total acumulado de egresos por compras de stock.
+        """
+        cursor = None
+        try:
+            if not self._tabla_existe('stock_compras'):
+                return {"ok": True, "egresos": 0}
+
+            cursor = self.conexion.cursor()
+            query = "SELECT COALESCE(SUM(inversion_total), 0) FROM stock_compras"
+            cursor.execute(query)
+            resultado = cursor.fetchone()
+            cursor.close()
+            return {"ok": True, "egresos": int(resultado[0]) if resultado and resultado[0] else 0}
+        except mysql.connector.Error as error:
+            if cursor:
+                cursor.close()
+            return {"ok": False, "error": str(error)}
+        except Exception as e:
+            if cursor:
+                cursor.close()
+            return {"ok": False, "error": str(e)}
+
+    def obtener_costo_vendido_acumulado(self):
+        """
+        Obtiene el costo proporcional vendido acumulado (base para ganancia real).
+        """
+        cursor = None
+        try:
+            cursor = self.conexion.cursor()
+
+            if self._usar_costo_real_pedido_items():
+                query = "SELECT COALESCE(SUM(costo_total), 0) FROM pedido_items"
+            else:
+                query = """
+                    SELECT COALESCE(SUM(COALESCE(p.costo, 0) * pi.cantidad), 0)
+                    FROM pedido_items pi
+                    JOIN producto p ON p.id = pi.producto_id
+                """
+
+            cursor.execute(query)
+            resultado = cursor.fetchone()
+            cursor.close()
+            return {"ok": True, "costo_vendido": int(resultado[0]) if resultado and resultado[0] else 0}
+        except mysql.connector.Error as error:
+            if cursor:
+                cursor.close()
+            return {"ok": False, "error": str(error)}
+        except Exception as e:
+            if cursor:
+                cursor.close()
+            return {"ok": False, "error": str(e)}
+
+    def obtener_ganancia_real_acumulada(self):
+        """
+        Ganancia real acumulada = ingresos por ventas - costo proporcional vendido.
+        """
+        ventas = self.obtener_ventas_totales()
+        costo_vendido = self.obtener_costo_vendido_acumulado()
+
+        ingresos_total = ventas.get('total', 0) if ventas.get('ok') else 0
+        costo_total = costo_vendido.get('costo_vendido', 0) if costo_vendido.get('ok') else 0
+
+        return {
+            "ok": True,
+            "ganancia_real": int(ingresos_total - costo_total),
+            "ingresos": int(ingresos_total),
+            "costo_vendido": int(costo_total)
+        }
     
     def obtener_ticket_promedio(self):
         """
@@ -333,6 +446,13 @@ class EstadisticasService:
         """
         cursor = None
         try:
+            if not self._columna_existe('usuario', 'fecha_creacion'):
+                return {
+                    "ok": True,
+                    "cantidad": 0,
+                    "periodo_dias": dias
+                }
+
             cursor = self.conexion.cursor()
             fecha_inicio = datetime.now() - timedelta(days=dias)
             
@@ -374,36 +494,28 @@ class EstadisticasService:
             cantidad_usuarios = self.obtener_cantidad_usuarios()
             ingresos_mes = self.obtener_ingresos_por_periodo(30)
             nuevos_usuarios = self.obtener_nuevos_usuarios(30)
+            egresos_stock = self.obtener_egresos_stock_acumulados()
+            costo_vendido = self.obtener_costo_vendido_acumulado()
+            ganancia_real = self.obtener_ganancia_real_acumulada()
             productos_vendidos = self.obtener_productos_mas_vendidos(5)
             productos_bajo_stock = self.obtener_productos_bajo_stock(5)
             usuarios_activos = self.obtener_usuarios_mas_activos(5)
             
-            # Verificar que todas las consultas fueron exitosas
-            if not all([
-                ventas_totales['ok'],
-                cantidad_pedidos['ok'],
-                ticket_promedio['ok'],
-                cantidad_usuarios['ok'],
-                ingresos_mes['ok'],
-                nuevos_usuarios['ok'],
-                productos_vendidos['ok'],
-                productos_bajo_stock['ok'],
-                usuarios_activos['ok']
-            ]):
-                return {"ok": False, "error": "Error al obtener algunos datos"}
-            
             return {
                 "ok": True,
                 "resumen": {
-                    "ventas_totales": ventas_totales['total'],
-                    "cantidad_pedidos": cantidad_pedidos['cantidad'],
-                    "ticket_promedio": ticket_promedio['promedio'],
-                    "cantidad_usuarios": cantidad_usuarios['cantidad'],
-                    "ingresos_mes": ingresos_mes['ingresos'],
-                    "nuevos_usuarios": nuevos_usuarios['cantidad'],
-                    "productos_mas_vendidos": productos_vendidos['productos'],
-                    "productos_bajo_stock": productos_bajo_stock['productos'],
-                    "usuarios_mas_activos": usuarios_activos['usuarios'],
+                    "ventas_totales": ventas_totales.get('total', 0) if ventas_totales.get('ok') else 0,
+                    "cantidad_pedidos": cantidad_pedidos.get('cantidad', 0) if cantidad_pedidos.get('ok') else 0,
+                    "ticket_promedio": ticket_promedio.get('promedio', 0) if ticket_promedio.get('ok') else 0,
+                    "cantidad_usuarios": cantidad_usuarios.get('cantidad', 0) if cantidad_usuarios.get('ok') else 0,
+                    "ingresos_mes": ingresos_mes.get('ingresos', 0) if ingresos_mes.get('ok') else 0,
+                    "nuevos_usuarios": nuevos_usuarios.get('cantidad', 0) if nuevos_usuarios.get('ok') else 0,
+                    "egresos_acumulados": egresos_stock.get('egresos', 0) if egresos_stock.get('ok') else 0,
+                    "costo_vendido_total": costo_vendido.get('costo_vendido', 0) if costo_vendido.get('ok') else 0,
+                    "ganancia_real": ganancia_real.get('ganancia_real', 0) if ganancia_real.get('ok') else 0,
+                    "productos_mas_vendidos": productos_vendidos.get('productos', []) if productos_vendidos.get('ok') else [],
+                    "productos_bajo_stock": productos_bajo_stock.get('productos', []) if productos_bajo_stock.get('ok') else [],
+                    "usuarios_mas_activos": usuarios_activos.get('usuarios', []) if usuarios_activos.get('ok') else [],
                     "fecha_generacion": datetime.now().strftime('%d/%m/%Y %H:%M:%S')
                 }
             }
@@ -478,21 +590,20 @@ class EstadisticasService:
             cursor.execute(query_ingresos, (cantidad_meses,))
             ingresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
             
-            # Consulta para obtener egresos
-            query_egresos = """
-                SELECT 
-                    YEAR(p.fecha) AS anio,
-                    MONTH(p.fecha) AS numero_mes,
-                    COALESCE(SUM(COALESCE(pr.costo, 0) * pi.cantidad), 0) AS egresos
-                FROM pedidos p
-                LEFT JOIN pedido_items pi ON p.id = pi.pedido_id
-                LEFT JOIN producto pr ON pi.producto_id = pr.id
-                WHERE p.fecha >= DATE_SUB(CURDATE(), INTERVAL %s MONTH)
-                GROUP BY YEAR(p.fecha), MONTH(p.fecha)
-            """
-            
-            cursor.execute(query_egresos, (cantidad_meses,))
-            egresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
+            # Egresos: compras de stock reales
+            egresos_data = {}
+            if self._tabla_existe('stock_compras'):
+                query_egresos = """
+                    SELECT
+                        YEAR(sc.creado_en) AS anio,
+                        MONTH(sc.creado_en) AS numero_mes,
+                        COALESCE(SUM(sc.inversion_total), 0) AS egresos
+                    FROM stock_compras sc
+                    WHERE sc.creado_en >= DATE_SUB(CURDATE(), INTERVAL %s MONTH)
+                    GROUP BY YEAR(sc.creado_en), MONTH(sc.creado_en)
+                """
+                cursor.execute(query_egresos, (cantidad_meses,))
+                egresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
             
             cursor.close()
             conexion.close()

@@ -1,11 +1,44 @@
 import mysql.connector
 from database import conectar_base_datos
+from services.negocio_models import Venta
 
 
 class PedidoService:
 
     def __init__(self):
         self.conexion = conectar_base_datos()
+
+    def _columna_existe(self, tabla, columna):
+        cursor = None
+        try:
+            cursor = self.conexion.cursor()
+            query = """
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = %s
+                  AND COLUMN_NAME = %s
+            """
+            cursor.execute(query, (tabla, columna))
+            resultado = cursor.fetchone()
+            cursor.close()
+            return bool(resultado and resultado[0] > 0)
+        except Exception:
+            if cursor:
+                cursor.close()
+            return False
+
+    def _obtener_costos_unitarios_productos(self, producto_ids):
+        if not producto_ids:
+            return {}
+
+        cursor = self.conexion.cursor()
+        placeholders = ",".join(["%s"] * len(producto_ids))
+        query = f"SELECT id, COALESCE(costo, 0) FROM producto WHERE id IN ({placeholders})"
+        cursor.execute(query, tuple(producto_ids))
+        filas = cursor.fetchall()
+        cursor.close()
+        return {int(row[0]): float(row[1] or 0) for row in filas}
 
     def crear_pedido(self, usuario_id, email, total, items, direccion=None, provincia=None, codigo_postal=None, dni=None, telefono=None):
         """
@@ -22,6 +55,15 @@ class PedidoService:
         cursor = None
         try:
             cursor = self.conexion.cursor()
+            columnas_costos_disponibles = (
+                self._columna_existe('pedido_items', 'costo_unitario_aplicado')
+                and self._columna_existe('pedido_items', 'costo_total')
+                and self._columna_existe('pedido_items', 'ganancia_item')
+            )
+
+            costos_por_producto = self._obtener_costos_unitarios_productos(
+                [int(item['producto_id']) for item in items]
+            )
             
             # Insertar pedido con todos los datos
             query_pedido = """
@@ -35,17 +77,55 @@ class PedidoService:
             
             # Insertar items
             for item in items:
-                query_item = """
-                    INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio, subtotal)
-                    VALUES (%s, %s, %s, %s, %s)
-                """
-                cursor.execute(query_item, (
-                    pedido_id,
-                    item['producto_id'],
-                    item['cantidad'],
-                    item['precio'],
-                    item['subtotal']
-                ))
+                producto_id = int(item['producto_id'])
+                cantidad = int(item['cantidad'])
+                precio_unitario = float(item['precio'])
+                subtotal = float(item['subtotal'])
+                costo_unitario = float(costos_por_producto.get(producto_id, 0))
+
+                venta = Venta(
+                    producto_id=producto_id,
+                    cantidad=cantidad,
+                    precio_unitario=precio_unitario,
+                    costo_unitario=costo_unitario,
+                )
+
+                if columnas_costos_disponibles:
+                    query_item = """
+                        INSERT INTO pedido_items (
+                            pedido_id,
+                            producto_id,
+                            cantidad,
+                            precio,
+                            subtotal,
+                            costo_unitario_aplicado,
+                            costo_total,
+                            ganancia_item
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    cursor.execute(query_item, (
+                        pedido_id,
+                        producto_id,
+                        cantidad,
+                        int(precio_unitario),
+                        int(subtotal),
+                        round(costo_unitario, 2),
+                        round(venta.costo_total(), 2),
+                        round(venta.ganancia_real(), 2)
+                    ))
+                else:
+                    query_item = """
+                        INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio, subtotal)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """
+                    cursor.execute(query_item, (
+                        pedido_id,
+                        producto_id,
+                        cantidad,
+                        int(precio_unitario),
+                        int(subtotal)
+                    ))
             
             self.conexion.commit()
             cursor.close()

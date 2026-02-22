@@ -5,7 +5,12 @@ from datetime import timedelta
 from database import conectar_base_datos
 from services.admin_manager import AdminManager
 from services.carrito_service import CarritoService
-from migrations import agregar_columna_costo_si_no_existe
+from migrations import (
+    agregar_columna_costo_si_no_existe,
+    agregar_columna_fecha_creacion_usuario_si_no_existe,
+    crear_tabla_stock_compras_si_no_existe,
+    agregar_columnas_costos_pedido_items_si_no_existen,
+)
 
 #Subir foto tipo archivo al servidor
 import os
@@ -15,6 +20,8 @@ import bcrypt #incripta contraseña
 from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService
 from services.pedido_service import PedidoService
+from services.stock_service import StockService
+from services.negocio_models import IngresoStock
 from routes.perfil_routes import registrar_endpoints_perfil
 from routes.estadisticas_routes import registrar_endpoints_estadisticas
 
@@ -25,6 +32,9 @@ app = Flask(__name__)
 # ==================== MIGRACIONES ====================
 # Ejecutar migraciones al iniciar la app
 agregar_columna_costo_si_no_existe()
+agregar_columna_fecha_creacion_usuario_si_no_existe()
+crear_tabla_stock_compras_si_no_existe()
+agregar_columnas_costos_pedido_items_si_no_existen()
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -312,7 +322,41 @@ def cargar_producto():
     categoria = request.form.get('categoria')
     precio = request.form.get('precio')
     cantidad = request.form.get('cantidad')
+    inversion_total_form = request.form.get('inversion_total')
     costo = request.form.get('costo', 0)
+    porcentaje_ganancia = request.form.get('porcentaje_ganancia', 0)
+
+    try:
+        cantidad_int = int(cantidad or 0)
+    except (TypeError, ValueError):
+        cantidad_int = 0
+
+    try:
+        inversion_total = float((inversion_total_form if inversion_total_form not in (None, '') else costo) or 0)
+    except (TypeError, ValueError):
+        inversion_total = 0
+
+    try:
+        porcentaje_ganancia_float = float(porcentaje_ganancia or 0)
+    except (TypeError, ValueError):
+        porcentaje_ganancia_float = 0
+
+    ingreso_stock = IngresoStock(
+        producto_id=None,
+        inversion_total=inversion_total,
+        cantidad_unidades=cantidad_int,
+        porcentaje_ganancia=porcentaje_ganancia_float,
+    )
+
+    costo_unitario = ingreso_stock.costo_unitario() if inversion_total > 0 and cantidad_int > 0 else 0
+    precio_sugerido = ingreso_stock.precio_venta_sugerido() if costo_unitario > 0 else 0
+
+    try:
+        precio_form = float(precio or 0)
+    except (TypeError, ValueError):
+        precio_form = 0
+
+    precio_final = precio_form if precio_form > 0 else precio_sugerido
 
     foto = request.files.get('foto')
 
@@ -330,18 +374,34 @@ def cargar_producto():
         nombre=nombre,
         descripcion=descripcion,
         categoria=categoria,
-        precio=precio,
+        precio=precio_final,
         cantidad=cantidad,
         ruta_imagen=ruta_imagen,
-        costo=costo
+        costo=costo_unitario
     )
 
     if resultado.get("ok"):
+        producto_id = resultado.get("producto_id")
+        if producto_id and inversion_total > 0 and cantidad_int > 0:
+            stock_service = StockService()
+            stock_service.registrar_compra_stock(
+                producto_id=producto_id,
+                inversion_total=inversion_total,
+                cantidad_unidades=cantidad_int,
+                costo_unitario=costo_unitario,
+                precio_venta_sugerido=precio_sugerido if precio_sugerido > 0 else None,
+                porcentaje_ganancia=porcentaje_ganancia_float,
+                usuario_id=session.get('usuario_id'),
+                observacion='Carga inicial de producto',
+            )
+
         return jsonify({
             "ok": True,
             "mensaje": "🎉 ¡Producto agregado exitosamente!",
             "submensaje": f"'{nombre}' ha sido añadido a tu catálogo",
-            "producto_id": resultado.get("producto_id")
+            "producto_id": producto_id,
+            "precio_calculado": round(precio_final, 2) if precio_final else 0,
+            "costo_unitario": round(costo_unitario, 2) if costo_unitario else 0
         }), 200
     else:
         # Si hubo un archivo guardado y la inserción falló, eliminar el archivo para no dejar basura

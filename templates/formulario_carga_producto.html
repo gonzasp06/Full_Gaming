@@ -16,6 +16,29 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Quill JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <style>
+        .calculo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .calculo-full {
+            grid-column: 1 / -1;
+        }
+
+        .calculo-estado {
+            font-size: 0.9rem;
+            color: #e6e6e6;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .calculo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -46,17 +69,34 @@
                     <option value="Otros">Otros</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="precio" class="form-label">Precio:</label>
-                <input type="text" id="precio" name="precio" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="costo" class="form-label">Costo / Inversión:</label>
-                <input type="text" id="costo" name="costo" class="form-control" placeholder="Costo real del producto">
-            </div>
-            <div class="form-group">
-                <label for="cantidad" class="form-label">Cantidad:</label>
-                <input type="number" id="cantidad" name="cantidad" class="form-control" min="0">
+            <div class="calculo-grid">
+                <div class="form-group">
+                    <label for="precio" class="form-label">Precio de venta:</label>
+                    <input type="text" id="precio" name="precio" class="form-control" placeholder="Se autocompleta si lo dejas vacío">
+                </div>
+                <div class="form-group">
+                    <label for="inversion_total" class="form-label">Monto total invertido (egreso):</label>
+                    <input type="text" id="inversion_total" name="inversion_total" class="form-control" placeholder="Ej: 150000">
+                </div>
+                <div class="form-group">
+                    <label for="cantidad" class="form-label">Cantidad comprada:</label>
+                    <input type="number" id="cantidad" name="cantidad" class="form-control" min="0" placeholder="Ej: 10">
+                </div>
+                <div class="form-group">
+                    <label for="porcentaje_ganancia" class="form-label">Porcentaje de ganancia deseado:</label>
+                    <input type="number" id="porcentaje_ganancia" name="porcentaje_ganancia" class="form-control" min="0" step="0.01" value="30">
+                </div>
+                <div class="form-group">
+                    <label for="costo_unitario_calculado" class="form-label">Costo unitario (calculado):</label>
+                    <input type="text" id="costo_unitario_calculado" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="precio_sugerido_calculado" class="form-label">Precio de venta sugerido (calculado):</label>
+                    <input type="text" id="precio_sugerido_calculado" class="form-control" readonly>
+                </div>
+                <div class="form-group calculo-full">
+                    <small id="estado_calculo" class="calculo-estado">Completá inversión + cantidad para calcular automáticamente.</small>
+                </div>
             </div>
             <div class="form-group">
                 <label for="foto" class="form-label">Foto:</label>
@@ -73,6 +113,66 @@
     <script>
         // Inicializar Quill
         var quill = new Quill('#descripcion-editor', { theme: 'snow' });
+        let precioEditadoManualmente = false;
+
+        function parseNumero(valor) {
+            if (valor === null || valor === undefined) return 0;
+            let normalizado = String(valor).trim().replace(/\s+/g, '');
+            normalizado = normalizado.replace(/[^0-9,.-]/g, '');
+
+            if (normalizado.includes(',') && normalizado.includes('.')) {
+                if (normalizado.lastIndexOf(',') > normalizado.lastIndexOf('.')) {
+                    normalizado = normalizado.replace(/\./g, '').replace(',', '.');
+                } else {
+                    normalizado = normalizado.replace(/,/g, '');
+                }
+            } else if (normalizado.includes(',')) {
+                normalizado = normalizado.replace(',', '.');
+            }
+
+            const numero = Number(normalizado);
+            return Number.isFinite(numero) ? numero : 0;
+        }
+
+        function recalcularCostosYPrecio() {
+            const inversionTotal = parseNumero(document.getElementById("inversion_total").value);
+            const cantidad = parseNumero(document.getElementById("cantidad").value);
+            const porcentaje = parseNumero(document.getElementById("porcentaje_ganancia").value);
+
+            const costoUnitario = (inversionTotal > 0 && cantidad > 0) ? (inversionTotal / cantidad) : 0;
+            const precioSugerido = costoUnitario > 0 ? (costoUnitario * (1 + (porcentaje / 100))) : 0;
+            const estadoEl = document.getElementById("estado_calculo");
+
+            document.getElementById("costo_unitario_calculado").value = costoUnitario > 0
+                ? "$" + costoUnitario.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "";
+
+            document.getElementById("precio_sugerido_calculado").value = precioSugerido > 0
+                ? "$" + precioSugerido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "";
+
+            if (inversionTotal <= 0) {
+                estadoEl.textContent = "Ingresá el monto invertido para calcular.";
+            } else if (cantidad <= 0) {
+                estadoEl.textContent = "Ingresá la cantidad comprada para calcular costo unitario.";
+            } else {
+                estadoEl.textContent = "Cálculo listo: podés usar el precio sugerido o editarlo manualmente.";
+            }
+
+            const inputPrecio = document.getElementById("precio");
+            if (!precioEditadoManualmente && precioSugerido > 0) {
+                inputPrecio.value = Math.round(precioSugerido);
+            }
+        }
+
+        document.getElementById("precio").addEventListener("input", function() {
+            precioEditadoManualmente = this.value.trim().length > 0;
+        });
+
+        document.getElementById("inversion_total").addEventListener("input", recalcularCostosYPrecio);
+        document.getElementById("cantidad").addEventListener("input", recalcularCostosYPrecio);
+        document.getElementById("porcentaje_ganancia").addEventListener("input", recalcularCostosYPrecio);
+        recalcularCostosYPrecio();
 
         document.getElementById("formularioProducto").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -82,9 +182,15 @@
             var descripcion = quill.root.innerHTML;
             var categoria = document.getElementById("categoria").value;
             var precio = document.getElementById("precio").value;
-            var costo = document.getElementById("costo").value;
+            var inversion_total = document.getElementById("inversion_total").value;
+            var porcentaje_ganancia = document.getElementById("porcentaje_ganancia").value;
             var cantidad = document.getElementById("cantidad").value;
             var foto = document.getElementById("foto").files[0];
+
+            if ((!precio || precio.trim() === "") && parseNumero(inversion_total) > 0 && parseNumero(cantidad) > 0) {
+                recalcularCostosYPrecio();
+                precio = document.getElementById("precio").value;
+            }
 
             // Construir objeto con los datos de arriba
             //FormData 
@@ -93,7 +199,9 @@
             formData.append("descripcion", descripcion);
             formData.append("categoria", categoria);
             formData.append("precio", precio);
-            formData.append("costo", costo);
+            formData.append("inversion_total", inversion_total);
+            formData.append("porcentaje_ganancia", porcentaje_ganancia);
+            formData.append("costo", inversion_total);
             formData.append("cantidad", cantidad);
             formData.append("foto", foto);
 
@@ -110,6 +218,8 @@
                     // Limpiar formulario
                     document.getElementById("formularioProducto").reset();
                     quill.setContents([]);
+                    precioEditadoManualmente = false;
+                    recalcularCostosYPrecio();
                 } else {
                     mostrarModalError(data.error || "Error al cargar el producto");
                 }

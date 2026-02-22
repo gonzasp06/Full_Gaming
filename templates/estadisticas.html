@@ -299,38 +299,44 @@
             <div class="resumen-tarjetas">
                 <div class="tarjeta ventas">
                     <div class="tarjeta-titulo">Ventas Totales</div>
-                    <div class="tarjeta-valor">${{ "{:,.0f}".format(resumen.ventas_totales) }}</div>
+                    <div class="tarjeta-valor" id="valor-ventas-totales">${{ "{:,.0f}".format(resumen.ventas_totales) }}</div>
                     <div class="tarjeta-subtexto">Desde el inicio del negocio</div>
                 </div>
 
                 <div class="tarjeta pedidos">
                     <div class="tarjeta-titulo">Total de Pedidos</div>
-                    <div class="tarjeta-valor">{{ resumen.cantidad_pedidos }}</div>
+                    <div class="tarjeta-valor" id="valor-pedidos">{{ resumen.cantidad_pedidos }}</div>
                     <div class="tarjeta-subtexto">Pedidos completados</div>
                 </div>
 
                 <div class="tarjeta ticket">
                     <div class="tarjeta-titulo">Ticket Promedio</div>
-                    <div class="tarjeta-valor">${{ "{:,.0f}".format(resumen.ticket_promedio) }}</div>
+                    <div class="tarjeta-valor" id="valor-ticket-promedio">${{ "{:,.0f}".format(resumen.ticket_promedio) }}</div>
                     <div class="tarjeta-subtexto">Valor promedio por pedido</div>
                 </div>
 
                 <div class="tarjeta usuarios">
                     <div class="tarjeta-titulo">Total de Usuarios</div>
-                    <div class="tarjeta-valor">{{ resumen.cantidad_usuarios }}</div>
+                    <div class="tarjeta-valor" id="valor-usuarios">{{ resumen.cantidad_usuarios }}</div>
                     <div class="tarjeta-subtexto">Usuarios registrados</div>
                 </div>
 
                 <div class="tarjeta ventas">
                     <div class="tarjeta-titulo">Ingresos Últimos 30 días</div>
-                    <div class="tarjeta-valor">${{ "{:,.0f}".format(resumen.ingresos_mes) }}</div>
+                    <div class="tarjeta-valor" id="valor-ingresos-mes">${{ "{:,.0f}".format(resumen.ingresos_mes) }}</div>
                     <div class="tarjeta-subtexto">Este mes</div>
                 </div>
 
-                <div class="tarjeta usuarios">
-                    <div class="tarjeta-titulo">Usuarios Nuevos</div>
-                    <div class="tarjeta-valor">{{ resumen.nuevos_usuarios }}</div>
-                    <div class="tarjeta-subtexto">Últimos 30 días</div>
+                <div class="tarjeta pedidos">
+                    <div class="tarjeta-titulo">Egresos Acumulados</div>
+                    <div class="tarjeta-valor" id="valor-egresos-acumulados">${{ "{:,.0f}".format(resumen.egresos_acumulados) }}</div>
+                    <div class="tarjeta-subtexto">Compras de stock</div>
+                </div>
+
+                <div class="tarjeta ventas">
+                    <div class="tarjeta-titulo">Ganancia Real</div>
+                    <div class="tarjeta-valor" id="valor-ganancia-real">${{ "{:,.0f}".format(resumen.ganancia_real) }}</div>
+                    <div class="tarjeta-subtexto">Ingresos - costo vendido</div>
                 </div>
             </div>
 
@@ -478,15 +484,40 @@
                 .then(response => response.json())
                 .then(data => {
                     // Actualizar ventas totales
-                    const ventasEl = document.querySelector('.tarjeta.ventas .tarjeta-valor');  
+                    const ventasEl = document.getElementById('valor-ventas-totales');
                     if (ventasEl) {
                         ventasEl.textContent = '$' + data.ventas_totales.toLocaleString('es-AR');
                     }
                     
                     // Actualizar cantidad de pedidos
-                    const pedidosEl = document.querySelectorAll('.tarjeta.pedidos .tarjeta-valor')[0];
+                    const pedidosEl = document.getElementById('valor-pedidos');
                     if (pedidosEl) {
                         pedidosEl.textContent = data.cantidad_pedidos;
+                    }
+
+                    const ticketEl = document.getElementById('valor-ticket-promedio');
+                    if (ticketEl) {
+                        ticketEl.textContent = '$' + Number(data.ticket_promedio || 0).toLocaleString('es-AR');
+                    }
+
+                    const usuariosEl = document.getElementById('valor-usuarios');
+                    if (usuariosEl) {
+                        usuariosEl.textContent = data.cantidad_usuarios;
+                    }
+
+                    const ingresosMesEl = document.getElementById('valor-ingresos-mes');
+                    if (ingresosMesEl) {
+                        ingresosMesEl.textContent = '$' + Number(data.ingresos_mes || 0).toLocaleString('es-AR');
+                    }
+
+                    const egresosEl = document.getElementById('valor-egresos-acumulados');
+                    if (egresosEl) {
+                        egresosEl.textContent = '$' + Number(data.egresos_acumulados || 0).toLocaleString('es-AR');
+                    }
+
+                    const gananciaEl = document.getElementById('valor-ganancia-real');
+                    if (gananciaEl) {
+                        gananciaEl.textContent = '$' + Number(data.ganancia_real || 0).toLocaleString('es-AR');
                     }
                     
                     // Actualizar fecha

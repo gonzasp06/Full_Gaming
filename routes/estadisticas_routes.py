@@ -18,6 +18,7 @@ def registrar_endpoints_estadisticas(app):
     @admin_manager.requerir_admin
     def ver_estadisticas():
         """Página principal del dashboard de estadísticas"""
+        estadisticas_service = EstadisticasService()
         resultado = estadisticas_service.obtener_resumen_dashboard()
         
         if not resultado['ok']:
@@ -31,6 +32,7 @@ def registrar_endpoints_estadisticas(app):
     @admin_manager.requerir_admin
     def api_resumen_estadisticas():
         """API para obtener el resumen de estadísticas en JSON"""
+        estadisticas_service = EstadisticasService()
         resultado = estadisticas_service.obtener_resumen_dashboard()
         
         if resultado['ok']:
