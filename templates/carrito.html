@@ -7,30 +7,114 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .carrito-input-qty {
+            background-color: #2d2d3d !important;
+            color: #fff !important;
+            border: 1px solid #6A44F2 !important;
+            border-radius: 6px !important;
+            padding: 8px !important;
+            font-weight: 600 !important;
+            text-align: center;
+        }
+
+        .carrito-input-qty:focus {
+            background-color: #3a3a4f !important;
+            color: #fff !important;
+            border-color: #8d6dff !important;
+            box-shadow: 0 0 0 0.2rem rgba(106, 68, 242, 0.25) !important;
+        }
+
+        /* Estilos para la tabla del carrito */
+        .tabla-carrito-oscura {
+            background: linear-gradient(135deg, #1a1f3a, #2d1f4f) !important;
+            border: 2px solid #6A44F2 !important;
+            border-radius: 12px !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        .tabla-carrito-oscura .table {
+            background: transparent !important;
+            margin-bottom: 0 !important;
+        }
+
+        .tabla-carrito-oscura .table thead {
+            background-color: rgba(45, 45, 61, 0.8) !important;
+            border-bottom: 2px solid #6A44F2 !important;
+        }
+
+        .tabla-carrito-oscura .table thead th {
+            color: #fff !important;
+            font-weight: 600 !important;
+            padding: 15px !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .tabla-carrito-oscura .table tbody {
+            background: transparent !important;
+        }
+
+        .tabla-carrito-oscura .table tbody tr {
+            background: transparent !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .tabla-carrito-oscura .table tbody td {
+            color: #fff !important;
+            padding: 15px !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .tabla-carrito-oscura .table tbody td a {
+            color: #6A44F2;
+        }
+
+        .tabla-carrito-oscura .table tbody td:nth-child(2) {
+            color: #bbb !important;
+        }
+
+        .tabla-carrito-oscura .table tbody td:nth-child(4) {
+            color: #6A44F2 !important;
+            font-weight: bold !important;
+        }
+    </style>
 </head>
-<body>
+<body style="background-color: #0f1419;">
     <header>
         {% include 'navbar.html' %}
     </header>
     
-    <main>
+    <main style="padding: 40px 0;">
         <div class="container my-5">
-        <h1>🛒 Mi Carrito</h1>
+        <h1 style="color: #fff; font-weight: bold;">🛒 Mi Carrito</h1>
         
         <!-- SI CARRITO VACÍO -->
         {% if items|length == 0 %}
-            <div class="alert alert-info mt-4">
-                <h4>Tu carrito está vacío</h4>
-                <p>¡Agrega productos desde nuestro catálogo!</p>
-                <a href="/" class="btn btn-primary" style="background: linear-gradient(135deg, #6A44F2, #3C308C); border: none;">Seguir comprando</a>
+            <div class="alert mt-4" style="background: linear-gradient(135deg, #1a1f3a, #2d1f4f); border: 2px solid #6A44F2; border-radius: 12px; padding: 30px;">
+                <h4 style="color: #fff; margin-bottom: 15px;">Tu carrito está vacío</h4>
+                <p style="color: #bbb; margin-bottom: 20px;">¡Agrega productos desde nuestro catálogo!</p>
+                <a href="/" class="btn btn-primary" style="background: linear-gradient(135deg, #6A44F2, #3C308C); border: none; color: white; padding: 12px 30px; font-weight: 600; border-radius: 8px;">Seguir comprando</a>
             </div>
         
         <!-- SI HAY PRODUCTOS -->
         {% else %}
             
-            <div class="table-responsive mt-4">
-                <table class="table table-hover">
-                    <thead class="table-dark">
+            <div class="table-responsive mt-4 tabla-carrito-oscura">
+                <table class="table table-hover mb-0">
+                    <thead>
                         <tr>
                             <th>Producto</th>
                             <th>Precio</th>
@@ -51,14 +135,15 @@
                                 </td>
                                 <td>${{ "%d"|format(item.precio) }}</td>
                                 <td>
-                                    <input type="number" class="form-control" style="width: 80px;" 
+                                    <input type="number" class="form-control carrito-input-qty" style="width: 80px;" 
                                            min="1" value="{{ item.cantidad }}" 
                                            onchange="actualizarCantidad({{ item.id }}, this.value)">
                                 </td>
-                                <td><strong>${{ "%d"|format(item.subtotal) }}</strong></td>
+                                <td>${{ "%d"|format(item.subtotal) }}</td>
                                 <td>
                                     <button class="btn btn-danger btn-sm" 
-                                            onclick="eliminarDelCarrito({{ item.id }})">
+                                            onclick="eliminarDelCarrito({{ item.id }})"
+                                            style="background-color: #e74c3c; border: none; border-radius: 5px;">
                                         🗑️ Eliminar
                                     </button>
                                 </td>
@@ -72,31 +157,31 @@
             <div class="row mt-5">
                 <div class="col-md-8"></div>
                 <div class="col-md-4">
-                    <div class="card p-4" style="background: linear-gradient(135deg, #f8f9fa, #fff); border: 2px solid #6A44F2;">
-                        <h5>Resumen del pedido</h5>
-                        <hr>
+                    <div class="card p-4" style="background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%); border: 2px solid #6A44F2; border-radius: 16px;">
+                        <h5 style="color: #fff; font-weight: 600;">Resumen del pedido</h5>
+                        <hr style="border-color: rgba(255, 255, 255, 0.2);">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal:</span>
-                            <strong>${{ "%d"|format(total) }}</strong>
+                            <span style="color: #bbb;">Subtotal:</span>
+                            <strong style="color: #fff;">${{ "%d"|format(total) }}</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Envío:</span>
-                            <strong>Gratis</strong>
+                            <span style="color: #bbb;">Envío:</span>
+                            <strong style="color: #2ecc71;">Gratis</strong>
                         </div>
-                        <hr>
+                        <hr style="border-color: rgba(255, 255, 255, 0.2);">
                         <div class="d-flex justify-content-between mb-4">
-                            <span style="font-size: 18px;">Total:</span>
-                            <strong style="font-size: 18px; color: #3C308C;">${{ "%d"|format(total) }}</strong>
+                            <span style="font-size: 18px; color: #fff;">Total:</span>
+                            <strong style="font-size: 20px; color: #6A44F2;">${{ "%d"|format(total) }}</strong>
                         </div>
                         
 
                         <!-- Botón Comprar (siempre disponible) -->
                         <button class="btn w-100 mb-2" onclick="procesarCompra()" 
-                                style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none; font-weight: 600;">
+                                style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none; font-weight: 600; padding: 12px; border-radius: 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">
                             ✓ Comprar ahora
                         </button>
                         
-                        <button class="btn btn-secondary w-100" onclick="vaciarCarrito()">
+                        <button class="btn btn-secondary w-100" onclick="vaciarCarrito()" style="padding: 12px; border-radius: 8px; background-color: #6c757d; border: none; color: white; font-weight: 600;">
                             Vaciar carrito
                         </button>
                     </div>

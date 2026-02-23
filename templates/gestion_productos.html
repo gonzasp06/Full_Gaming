@@ -15,6 +15,18 @@
 </head>
 
 <body>
+    <!-- MODAL DE CONFIRMACIÓN PARA ELIMINAR PRODUCTO -->
+    <div id="modal-confirm-eliminar" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-title">Eliminar Producto</h2>
+            <p class="modal-description">¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="cancelarEliminar()">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmarEliminar()">Eliminar</button>
+            </div>
+        </div>
+    </div>
     <header>
         {% include 'navbar.html' %}  <!-- incluye el navabar.html-->
     </header>
@@ -61,7 +73,7 @@
                                 Editar
                             </a>
 
-                            <a class="btn-eliminar" onclick="eliminarProducto({{ p[0] }});" style="cursor: pointer;">
+                            <a class="btn-eliminar" onclick="mostrarModalEliminar({{ p[0] }});" style="cursor: pointer;">
                                 <img src="/static/images/eliminar.png" alt="Eliminar">
                                 Eliminar
                             </a>
@@ -75,6 +87,8 @@
     </main>
     
     <script>
+        let productoAEliminar = null;
+
         function mostrarNotificacion(mensaje, esError = false) {
             const notif = document.createElement('div');
             notif.className = 'notificacion' + (esError ? ' error' : '');
@@ -86,11 +100,33 @@
             }, 3000);
         }
         
-        function eliminarProducto(productoId) {
-            if (confirm('¿Seguro quieres eliminar este producto?')) {
-                window.location.href = '/eliminar_producto/' + productoId;
+        function mostrarModalEliminar(productoId) {
+            productoAEliminar = productoId;
+            const modal = document.getElementById('modal-confirm-eliminar');
+            modal.classList.add('active');
+        }
+        
+        function cancelarEliminar() {
+            const modal = document.getElementById('modal-confirm-eliminar');
+            modal.classList.remove('active');
+            productoAEliminar = null;
+        }
+        
+        function confirmarEliminar() {
+            if (productoAEliminar) {
+                window.location.href = '/eliminar_producto/' + productoAEliminar;
             }
         }
+
+        // Cerrar modal al hacer clic fuera del contenido
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('modal-confirm-eliminar');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    cancelarEliminar();
+                }
+            });
+        });
     </script>
     
     {% include 'footer.html' %}

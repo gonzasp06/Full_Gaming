@@ -45,6 +45,7 @@
                     <option value="Teclados">Teclados</option>
                     <option value="Mouse">Mouse</option>
                     <option value="Audio">Audio</option>
+                    <option value="Joysticks">Joysticks</option>
                     <option value="Otros">Otros</option>
                 </select>
             </div>
@@ -78,6 +79,9 @@
         // Inicializar Quill y cargar contenido existente
         var quill = new Quill('#descripcion-editor', { theme: 'snow' });
         quill.clipboard.dangerouslyPasteHTML({{ producto[2]|tojson }});
+
+        // Asignar categoría actual
+        document.getElementById('categoria').value = "{{ producto[3] }}";
 
         document.getElementById('formularioProducto').addEventListener('submit', function() {
             document.getElementById('descripcion').value = quill.root.innerHTML;

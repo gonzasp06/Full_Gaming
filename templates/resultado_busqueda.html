@@ -50,9 +50,11 @@
                         </div>
                         
                         <!-- CANTIDAD DISPONIBLE (pequeño, abajo) -->
-                        <p class="product-stock-text">
-                            Stock: <strong>{{ producto[5] }}</strong> unidades
-                        </p>
+                        {% if es_admin %}
+                            <p class="product-stock-text">
+                                Stock: <strong>{{ producto[5] }}</strong> unidades
+                            </p>
+                        {% endif %}
                     </div>
 
                     <!-- BOTÓN COMPRAR -->

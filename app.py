@@ -88,7 +88,8 @@ def mostrar_catalogo(pagina=1):
     productos = service.obtener_paginados(pagina, 9)
     total_productos = len(service.obtener_todos())
     total_paginas = ceil(total_productos / 9)
-    return render_template('index.html', productos=productos, pagina=pagina, total_paginas=total_paginas)
+    es_admin = session.get('es_admin', False)
+    return render_template('index.html', productos=productos, pagina=pagina, total_paginas=total_paginas, es_admin=es_admin)
 
 @app.route('/buscar')
 def buscar_productos():
@@ -99,14 +100,16 @@ def buscar_productos():
 
     service = ProductoService()
     productos = service.buscar_productos(termino)
+    es_admin = session.get('es_admin', False)
 
-    return render_template('resultado_busqueda.html', productos=productos, termino=termino)
+    return render_template('resultado_busqueda.html', productos=productos, termino=termino, es_admin=es_admin)
 
 @app.route('/<categoria>')
 def mostrar_catalogo_categoria(categoria):
     service = ProductoService()
     productos = service.filtrar_categoria(categoria)
-    return render_template('categoria.html', productos=productos, categoria=categoria)
+    es_admin = session.get('es_admin', False)
+    return render_template('categoria.html', productos=productos, categoria=categoria, es_admin=es_admin)
 
 # Producto en detalle 
 @app.route('/producto/<int:producto_id>')
@@ -117,7 +120,8 @@ def ver_producto(producto_id):
     if not producto:
         return abort(404)
 
-    return render_template('producto_detalle.html', producto=producto)
+    es_admin = session.get('es_admin', False)
+    return render_template('producto_detalle.html', producto=producto, es_admin=es_admin)
 
 # FORMULARIO DE REGISTRO
 
