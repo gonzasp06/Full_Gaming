@@ -530,7 +530,9 @@ class EstadisticasService:
         """
         cursor = None
         try:
-            cursor = self.conexion.cursor()
+            # Crear una nueva conexión para obtener datos frescos
+            conexion = conectar_base_datos()
+            cursor = conexion.cursor()
             query = """
                 SELECT 
                     p.categoria,
@@ -545,6 +547,7 @@ class EstadisticasService:
             cursor.execute(query)
             resultados = cursor.fetchall()
             cursor.close()
+            conexion.close()
             
             categorias = []
             for row in resultados:

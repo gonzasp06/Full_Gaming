@@ -1,0 +1,314 @@
+================================================================================
+           EXPLICACIÓN DEL SISTEMA FULL GAMING - PARA PRESENTACIÓN
+================================================================================
+
+Este documento explica de forma sencilla cómo funciona el sistema Full Gaming,
+una tienda online de productos gaming desarrollada con Python (Flask) y MySQL.
+
+--------------------------------------------------------------------------------
+                    ARQUITECTURA GENERAL DEL SISTEMA
+--------------------------------------------------------------------------------
+
+El sistema está organizado en capas, como una torta:
+
+1) FRONTEND (Lo que ve el usuario)
+   - Templates HTML con diseño responsivo
+   - CSS para estilos visuales
+   - JavaScript para interactividad
+
+2) BACKEND (El cerebro del sistema)
+   - Python con Flask como framework web
+   - Rutas que responden a las acciones del usuario
+   - Servicios que procesan la lógica del negocio
+
+3) BASE DE DATOS (Donde se guarda todo)
+   - MySQL almacena productos, usuarios, pedidos, etc.
+
+--------------------------------------------------------------------------------
+                        SISTEMA DE USUARIOS
+--------------------------------------------------------------------------------
+
+¿CÓMO FUNCIONA EL REGISTRO DE UN USUARIO?
+
+1. El usuario completa el formulario con nombre, apellido, email y contraseña
+2. El sistema VERIFICA que el email no exista ya registrado
+3. La contraseña se ENCRIPTA usando "bcrypt" (un algoritmo de cifrado seguro)
+   - Esto significa que NADIE puede ver la contraseña real, ni siquiera el admin
+   - En la base de datos se guarda algo como: "$2b$12$abc123xyz..." 
+   - Es imposible revertir esto para obtener la contraseña original
+4. Se guarda el usuario en la base de datos
+5. Se inicia sesión automáticamente
+
+¿CÓMO FUNCIONA EL LOGIN?
+
+1. Usuario ingresa email y contraseña
+2. El sistema busca el email en la base de datos
+3. Si existe, compara la contraseña ingresada con el hash guardado
+   - bcrypt tiene una función especial que puede verificar si coinciden
+   - Sin necesidad de "descifrar" la contraseña guardada
+4. Si coincide, se crea una "sesión" (como una credencial temporal)
+5. La sesión dura 7 días (configurable)
+
+--------------------------------------------------------------------------------
+            GENERACIÓN DE CONTRASEÑAS ALEATORIAS (SUGERIDAS)
+--------------------------------------------------------------------------------
+
+Cuando el usuario va a registrarse, el sistema le SUGIERE una contraseña segura.
+
+¿Cómo se genera?
+
+El código JavaScript crea una contraseña de 10 caracteres que incluye:
+- Al menos 1 letra MAYÚSCULA (de A a Z, sin letras confusas como I, O)
+- Al menos 1 letra minúscula (de a a z, sin letras confusas como l, o)
+- Al menos 1 número (del 2 al 9, evitando el 0 y 1 por confusión)
+- Al menos 1 símbolo especial (!@#$%&*?)
+
+Luego:
+1. Toma 1 carácter de cada grupo (4 caracteres)
+2. Agrega 6 caracteres más aleatorios de todos los grupos
+3. MEZCLA todos los caracteres aleatoriamente (como barajar cartas)
+4. Resultado: una contraseña como "k7#Np$mX2a"
+
+El usuario puede:
+- Usar la contraseña sugerida haciendo clic en "Usar esta"
+- O escribir su propia contraseña
+
+También hay una lista de CONTRASEÑAS PROHIBIDAS (comunes):
+- "123456", "password", "admin", "qwerty", etc.
+- Si el usuario intenta usar una de estas, el sistema le advierte
+
+--------------------------------------------------------------------------------
+                    GESTIÓN DE USUARIOS (PANEL ADMIN)
+--------------------------------------------------------------------------------
+
+Solo los ADMINISTRADORES pueden acceder a esta sección.
+
+¿Qué puede hacer un admin?
+
+1. VER TODOS LOS USUARIOS
+   - Nombre, apellido, email
+   - Si es admin o no
+   - Fecha de creación de la cuenta
+   - Último acceso
+
+2. VER PEDIDOS DE UN USUARIO
+   - Haciendo clic en un usuario, se muestran sus pedidos
+   - Cada pedido tiene: ID, fecha, total, estado
+
+3. CAMBIAR ROL DE USUARIO
+   - Convertir un usuario normal en administrador
+   - O quitarle permisos de admin
+   - PROTECCIÓN: Un admin NO puede quitarse permisos a sí mismo
+
+4. ELIMINAR USUARIO
+   - Borrar completamente un usuario de la base de datos
+   - PROTECCIÓN: Un admin NO puede eliminarse a sí mismo
+
+¿Cómo sabe el sistema quién es admin?
+
+- En la tabla de usuarios hay una columna "is_admin"
+- Si is_admin = 1, el usuario es administrador
+- Si is_admin = 0, es un usuario normal
+- Al iniciar sesión, este dato se guarda en la sesión
+
+--------------------------------------------------------------------------------
+                    CARGA Y EDICIÓN DE PRODUCTOS
+--------------------------------------------------------------------------------
+
+Solo los ADMINISTRADORES pueden cargar o editar productos.
+
+¿QUÉ DATOS TIENE UN PRODUCTO?
+
+- Nombre
+- Descripción
+- Categoría (ejemplo: "monitores", "teclados", "auriculares")
+- Precio de venta
+- Cantidad en stock
+- Foto/imagen
+- Costo unitario (cuánto costó comprarlo)
+
+¿CÓMO FUNCIONA LA CARGA DE UN PRODUCTO?
+
+1. El admin completa el formulario con los datos del producto
+2. Si sube una imagen:
+   - Se guarda en la carpeta "static/uploads/"
+   - Se genera un nombre seguro para evitar conflictos
+3. Se insertan los datos en la base de datos
+4. Se registra el ingreso de stock (cuánto se invirtió)
+
+CÁLCULO AUTOMÁTICO DEL PRECIO SUGERIDO:
+
+Si el admin ingresa:
+- Inversión total (cuánto gastó en comprar el stock)
+- Cantidad de unidades
+- Porcentaje de ganancia deseado
+
+El sistema calcula automáticamente:
+- Costo unitario = Inversión total / Cantidad de unidades
+- Precio sugerido = Costo unitario × (1 + porcentaje/100)
+
+Ejemplo:
+- Inversión: $100.000
+- Unidades: 10
+- Ganancia deseada: 30%
+- Costo unitario = $10.000
+- Precio sugerido = $10.000 × 1.30 = $13.000
+
+¿CÓMO FUNCIONA LA EDICIÓN DE UN PRODUCTO?
+
+1. El admin selecciona el producto a editar
+2. Se cargan los datos actuales en el formulario
+3. El admin modifica lo que necesite
+4. Si cambia la imagen, se sube la nueva
+5. Se actualiza la base de datos con los nuevos valores
+
+--------------------------------------------------------------------------------
+                    SISTEMA DE ESTADÍSTICAS
+--------------------------------------------------------------------------------
+
+Solo los ADMINISTRADORES pueden ver las estadísticas.
+
+¿QUÉ MÉTRICAS SE CALCULAN?
+
+1. VENTAS TOTALES
+   - Suma de todos los pedidos realizados
+   - Consulta: SELECT SUM(total) FROM pedidos
+
+2. CANTIDAD DE PEDIDOS
+   - Cuántos pedidos se hicieron en total
+   - Consulta: SELECT COUNT(*) FROM pedidos
+
+3. TICKET PROMEDIO
+   - Cuánto gasta en promedio cada cliente
+   - Cálculo: Ventas totales / Cantidad de pedidos
+
+4. CANTIDAD DE USUARIOS
+   - Total de usuarios registrados
+   - Consulta: SELECT COUNT(*) FROM usuario
+
+5. INGRESOS POR PERÍODO
+   - Cuánto se vendió en los últimos 30 días (configurable)
+   - Usa filtro de fecha en la consulta
+
+6. NUEVOS USUARIOS
+   - Cuántos usuarios se registraron en los últimos 30 días
+
+7. EGRESOS (INVERSIÓN EN STOCK)
+   - Cuánto se gastó en comprar productos para vender
+   - Se registra cada vez que se carga stock
+
+8. COSTO DE LO VENDIDO
+   - Cuánto costaron los productos que ya se vendieron
+   - Diferente a ingresos (lo que pagaron los clientes)
+
+9. GANANCIA REAL
+   - Ingresos - Costo de lo vendido
+   - La ganancia verdadera del negocio
+
+10. PRODUCTOS MÁS VENDIDOS
+    - Top 5 de productos por cantidad vendida
+    - Agrupa por producto y cuenta unidades
+
+11. PRODUCTOS CON BAJO STOCK
+    - Productos que tienen pocas unidades disponibles
+    - Alerta para reabastecimiento
+
+12. USUARIOS MÁS ACTIVOS
+    - Clientes que más han comprado
+
+GRÁFICOS:
+
+El dashboard muestra gráficos usando Chart.js:
+- Gráfico de ingresos vs egresos por mes
+- Gráfico de evolución de ventas mensuales
+- Gráfico circular de ventas por categoría
+
+¿CÓMO SE RELACIONA CON LA CARGA DE PRODUCTOS?
+
+Cuando se carga un producto con inversión:
+1. Se guarda en la tabla "stock_compras" la inversión
+2. Esto se suma a los "egresos" del negocio
+3. Cuando el producto se vende:
+   - El ingreso va a "pedidos"
+   - El costo se resta de la ganancia
+4. Las estadísticas calculan la diferencia automáticamente
+
+--------------------------------------------------------------------------------
+                    SISTEMA DE CARRITO Y PEDIDOS
+--------------------------------------------------------------------------------
+
+¿CÓMO FUNCIONA EL CARRITO?
+
+1. Usuario agrega productos al carrito
+2. El carrito se guarda en la SESIÓN (memoria temporal del navegador)
+3. Se muestra: productos, cantidades, precios y total
+4. Al finalizar compra:
+   - Se crea un PEDIDO en la base de datos
+   - Se registran los ITEMS del pedido (qué productos, cuántos)
+   - Se resta el STOCK de cada producto
+   - Se vacía el carrito
+
+--------------------------------------------------------------------------------
+                    SEGURIDAD DEL SISTEMA
+--------------------------------------------------------------------------------
+
+1. CONTRASEÑAS CIFRADAS
+   - Nunca se guardan en texto plano
+   - Se usa bcrypt con salt (sal única para cada contraseña)
+
+2. CONTROL DE ACCESO
+   - Decoradores @requerir_admin para rutas protegidas
+   - La sesión guarda si el usuario es admin o no
+
+3. PROTECCIÓN DE SESIONES
+   - Clave secreta para firmar las cookies
+   - Configuración HTTPOnly (no accesible desde JavaScript malicioso)
+
+4. VALIDACIÓN DE DATOS
+   - Se verifican emails duplicados
+   - Se sanitizan nombres de archivos subidos (secure_filename)
+
+--------------------------------------------------------------------------------
+                    TECNOLOGÍAS UTILIZADAS
+--------------------------------------------------------------------------------
+
+BACKEND:
+- Python 3 - Lenguaje de programación principal
+- Flask - Framework web ligero
+- MySQL - Base de datos relacional
+- bcrypt - Cifrado de contraseñas
+
+FRONTEND:
+- HTML5 - Estructura de las páginas
+- CSS3 - Estilos y diseño
+- JavaScript - Interactividad
+- Bootstrap 5 - Framework CSS para diseño responsivo
+- Chart.js - Librería para gráficos
+
+OTROS:
+- Jinja2 - Motor de plantillas (viene con Flask)
+- Werkzeug - Utilidades como secure_filename
+
+--------------------------------------------------------------------------------
+                    FLUJO RESUMIDO DEL SISTEMA
+--------------------------------------------------------------------------------
+
+CLIENTE:
+1. Navega el catálogo
+2. Ve productos por categoría
+3. Agrega al carrito
+4. Se registra/inicia sesión
+5. Finaliza la compra
+6. El pedido queda registrado
+
+ADMINISTRADOR:
+1. Inicia sesión (con cuenta admin)
+2. Puede cargar nuevos productos
+3. Puede editar/eliminar productos existentes
+4. Puede ver y gestionar usuarios
+5. Puede ver estadísticas del negocio
+6. Puede cambiar roles de usuarios
+
+================================================================================
+FIN DEL DOCUMENTO - Preparado para presentación PowerPoint
+================================================================================
