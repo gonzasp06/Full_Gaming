@@ -349,6 +349,31 @@
         }
 
         function eliminarDelCarrito(productoId) {
+            // Modal de confirmación
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content-custom" style="animation: slideUp 0.3s ease-out;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-trash-alt" style="font-size: 48px; color: #FF6B6B; margin-bottom: 15px;"></i>
+                    </div>
+                    <h2>Eliminar producto</h2>
+                    <p style="font-size: 16px; color: #666; margin: 15px 0;">¿Estás seguro de que querés eliminar este producto del carrito?</p>
+                    <div class="modal-buttons" style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button class="btn-modal secondary" onclick="this.closest('.modal-overlay').remove()" style="flex: 1;">
+                            Cancelar
+                        </button>
+                        <button class="btn-modal primary" style="flex: 1; background: #FF6B6B;" onclick="this.closest('.modal-overlay').remove(); confirmarEliminar(${productoId})">
+                            Sí, Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.classList.add('active');
+        }
+
+        function confirmarEliminar(productoId) {
             fetch('/eliminar_carrito/' + productoId, {
                 method: 'POST'
             })

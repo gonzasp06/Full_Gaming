@@ -46,6 +46,10 @@
                             <span class="stock-dot"></span>
                             {% if producto[5] > 0 %}Disponible{% else %}Agotado{% endif %}
                         </span>
+
+                        {% if es_admin and producto[5] > 0 and producto[5] <= 5 %}
+                        <span class="badge-low-stock">⚠️ Últimas {{ producto[5] }} uds</span>
+                        {% endif %}
                     </div>
 
                     <!-- INFO DEL PRODUCTO -->

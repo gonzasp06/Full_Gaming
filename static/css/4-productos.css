@@ -175,6 +175,24 @@ h1 {
   color: #dc3545;
 }
 
+/* BADGE BAJO STOCK (solo admin) */
+.badge-low-stock {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 10;
+  background: rgba(243, 156, 18, 0.15);
+  color: #f39c12;
+  border: 1.5px solid rgba(243, 156, 18, 0.4);
+  backdrop-filter: blur(6px);
+  letter-spacing: 0.3px;
+  animation: pulse 2s infinite;
+}
+
 /* PUNTO INDICADOR (VERDE/ROJO) */
 .stock-dot {
   display: inline-block;

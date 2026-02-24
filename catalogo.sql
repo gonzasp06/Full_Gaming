@@ -68,7 +68,7 @@ CREATE TABLE `direcciones` (
   KEY `idx_direcciones_usuario` (`usuario_id`),
   CONSTRAINT `direcciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE,
   CONSTRAINT `direcciones_ibfk_2` FOREIGN KEY (`codigo_postal`) REFERENCES `codigos_postales` (`codigo_postal`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -77,7 +77,7 @@ CREATE TABLE `direcciones` (
 
 LOCK TABLES `direcciones` WRITE;
 /*!40000 ALTER TABLE `direcciones` DISABLE KEYS */;
-INSERT INTO `direcciones` VALUES (4,22,'Las fucsias','798','','5600','Mendoza','San Rafael',1,'2026-02-13 22:51:16','2026-02-13 23:15:59'),(5,22,'Avenida 9 de julio','798','','1000','CABA','Centro',0,'2026-02-13 23:07:19','2026-02-13 23:15:59');
+INSERT INTO `direcciones` VALUES (13,22,'Avenida 9 de julio','1234','','1000','CABA','Centro',1,'2026-02-15 21:02:22','2026-02-15 21:13:28'),(14,33,'Chile','650','','5600','Mendoza','San Rafael',1,'2026-02-22 17:35:23','2026-02-22 17:44:34');
 /*!40000 ALTER TABLE `direcciones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -95,12 +95,15 @@ CREATE TABLE `pedido_items` (
   `cantidad` int NOT NULL,
   `precio` int NOT NULL DEFAULT '0',
   `subtotal` int NOT NULL DEFAULT '0',
+  `costo_unitario_aplicado` decimal(12,2) DEFAULT NULL,
+  `costo_total` decimal(12,2) DEFAULT NULL,
+  `ganancia_item` decimal(12,2) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `pedido_id` (`pedido_id`),
   KEY `producto_id` (`producto_id`),
   CONSTRAINT `pedido_items_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`),
   CONSTRAINT `pedido_items_ibfk_2` FOREIGN KEY (`producto_id`) REFERENCES `producto` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -109,7 +112,7 @@ CREATE TABLE `pedido_items` (
 
 LOCK TABLES `pedido_items` WRITE;
 /*!40000 ALTER TABLE `pedido_items` DISABLE KEYS */;
-INSERT INTO `pedido_items` VALUES (1,1,54,1,10000,10000),(4,2,54,1,10000,10000),(5,3,54,1,10000,10000),(7,4,54,1,10000,10000),(9,5,54,1,10000,10000),(10,6,54,1,10000,10000),(16,10,54,2,10000,20000),(17,11,54,3,10000,30000),(21,13,54,3,10000,30000),(24,14,54,2,10000,20000),(30,20,54,1,200000,200000),(31,21,54,1,200000,200000),(32,22,54,5,200000,1000000),(33,23,54,7,200000,1400000);
+INSERT INTO `pedido_items` VALUES (1,1,54,1,10000,10000,NULL,NULL,NULL),(4,2,54,1,10000,10000,NULL,NULL,NULL),(5,3,54,1,10000,10000,NULL,NULL,NULL),(7,4,54,1,10000,10000,NULL,NULL,NULL),(9,5,54,1,10000,10000,NULL,NULL,NULL),(10,6,54,1,10000,10000,NULL,NULL,NULL),(16,10,54,2,10000,20000,NULL,NULL,NULL),(17,11,54,3,10000,30000,NULL,NULL,NULL),(21,13,54,3,10000,30000,NULL,NULL,NULL),(24,14,54,2,10000,20000,NULL,NULL,NULL),(30,20,54,1,200000,200000,NULL,NULL,NULL),(31,21,54,1,200000,200000,NULL,NULL,NULL),(32,22,54,5,200000,1000000,NULL,NULL,NULL),(33,23,54,7,200000,1400000,NULL,NULL,NULL),(34,24,58,1,19500,19500,15000.00,15000.00,4500.00),(35,25,59,2,85000,170000,66666.67,133333.34,36666.66);
 /*!40000 ALTER TABLE `pedido_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -135,7 +138,7 @@ CREATE TABLE `pedidos` (
   PRIMARY KEY (`id`),
   KEY `usuario_id` (`usuario_id`),
   CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -144,7 +147,7 @@ CREATE TABLE `pedidos` (
 
 LOCK TABLES `pedidos` WRITE;
 /*!40000 ALTER TABLE `pedidos` DISABLE KEYS */;
-INSERT INTO `pedidos` VALUES (1,NULL,'anonimo@email.com','2025-12-10 00:52:21',42222,'completado',NULL,NULL,NULL,NULL,NULL),(2,NULL,'anonimo@email.com','2025-12-10 00:57:08',20000,'completado',NULL,NULL,NULL,NULL,NULL),(3,NULL,'anonimo@email.com','2025-12-10 00:57:12',20000,'completado',NULL,NULL,NULL,NULL,NULL),(4,NULL,'anonimo@email.com','2025-12-10 00:57:39',20000,'completado',NULL,NULL,NULL,NULL,NULL),(5,NULL,'anonimo@email.com','2025-12-10 00:58:33',20000,'completado',NULL,NULL,NULL,NULL,NULL),(6,NULL,'anonimo@email.com','2025-12-10 00:58:36',20000,'completado',NULL,NULL,NULL,NULL,NULL),(7,NULL,'anonimo@email.com','2025-12-10 00:59:25',20000,'completado',NULL,NULL,NULL,NULL,NULL),(8,NULL,'anonimo@email.com','2025-12-10 01:03:33',42222,'completado',NULL,NULL,NULL,NULL,NULL),(9,NULL,'anonimo@email.com','2025-12-10 01:03:35',42222,'completado',NULL,NULL,NULL,NULL,NULL),(10,NULL,'anonimo@email.com','2025-12-10 01:04:38',52222,'completado',NULL,NULL,NULL,NULL,NULL),(11,NULL,'anonimo@email.com','2025-12-10 01:04:43',62222,'completado',NULL,NULL,NULL,NULL,NULL),(12,NULL,'anonimo@email.com','2025-12-10 01:05:22',62222,'completado',NULL,NULL,NULL,NULL,NULL),(13,NULL,'anonimo@email.com','2025-12-10 01:07:21',62222,'completado',NULL,NULL,NULL,NULL,NULL),(14,NULL,'anonimo@email.com','2025-12-10 01:09:03',20000,'completado',NULL,NULL,NULL,NULL,NULL),(15,NULL,'anonimo@email.com','2025-12-10 02:05:55',99999,'completado',NULL,NULL,NULL,NULL,NULL),(16,22,'bautiriveirabuca8@gmail.com','2025-12-15 21:32:57',99999,'completado',NULL,NULL,NULL,NULL,NULL),(17,22,'bautiriveirabuca8@gmail.com','2025-12-17 20:30:31',22222,'completado',NULL,NULL,NULL,NULL,NULL),(18,22,'bautiriveirabuca8@gmail.com','2025-12-17 23:35:10',22222,'completado',NULL,NULL,NULL,NULL,NULL),(19,NULL,'anonimo@email.com','2026-02-01 22:48:23',44444,'completado',NULL,NULL,NULL,NULL,NULL),(20,22,'bautiriveirabuca8@gmail.com','2026-02-13 20:54:08',200000,'completado',NULL,NULL,NULL,NULL,NULL),(21,22,'bautiriveirabuca8@gmail.com','2026-02-13 20:56:29',200000,'completado',NULL,NULL,NULL,NULL,NULL),(22,22,'bautiriveirabuca8@gmail.com','2026-02-13 23:38:42',1000000,'completado',NULL,NULL,NULL,NULL,NULL),(23,22,'bautiriveirabuca8@gmail.com','2026-02-13 23:39:09',1400000,'completado',NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `pedidos` VALUES (1,NULL,'anonimo@email.com','2025-12-10 00:52:21',42222,'completado',NULL,NULL,NULL,NULL,NULL),(2,NULL,'anonimo@email.com','2025-12-10 00:57:08',20000,'completado',NULL,NULL,NULL,NULL,NULL),(3,NULL,'anonimo@email.com','2025-12-10 00:57:12',20000,'completado',NULL,NULL,NULL,NULL,NULL),(4,NULL,'anonimo@email.com','2025-12-10 00:57:39',20000,'completado',NULL,NULL,NULL,NULL,NULL),(5,NULL,'anonimo@email.com','2025-12-10 00:58:33',20000,'completado',NULL,NULL,NULL,NULL,NULL),(6,NULL,'anonimo@email.com','2025-12-10 00:58:36',20000,'completado',NULL,NULL,NULL,NULL,NULL),(7,NULL,'anonimo@email.com','2025-12-10 00:59:25',20000,'completado',NULL,NULL,NULL,NULL,NULL),(8,NULL,'anonimo@email.com','2025-12-10 01:03:33',42222,'completado',NULL,NULL,NULL,NULL,NULL),(9,NULL,'anonimo@email.com','2025-12-10 01:03:35',42222,'completado',NULL,NULL,NULL,NULL,NULL),(10,NULL,'anonimo@email.com','2025-12-10 01:04:38',52222,'completado',NULL,NULL,NULL,NULL,NULL),(11,NULL,'anonimo@email.com','2025-12-10 01:04:43',62222,'completado',NULL,NULL,NULL,NULL,NULL),(12,NULL,'anonimo@email.com','2025-12-10 01:05:22',62222,'completado',NULL,NULL,NULL,NULL,NULL),(13,NULL,'anonimo@email.com','2025-12-10 01:07:21',62222,'completado',NULL,NULL,NULL,NULL,NULL),(14,NULL,'anonimo@email.com','2025-12-10 01:09:03',20000,'completado',NULL,NULL,NULL,NULL,NULL),(15,NULL,'anonimo@email.com','2025-12-10 02:05:55',99999,'completado',NULL,NULL,NULL,NULL,NULL),(16,22,'bautiriveirabuca8@gmail.com','2025-12-15 21:32:57',99999,'completado',NULL,NULL,NULL,NULL,NULL),(17,22,'bautiriveirabuca8@gmail.com','2025-12-17 20:30:31',22222,'completado',NULL,NULL,NULL,NULL,NULL),(18,22,'bautiriveirabuca8@gmail.com','2025-12-17 23:35:10',22222,'completado',NULL,NULL,NULL,NULL,NULL),(19,NULL,'anonimo@email.com','2026-02-01 22:48:23',44444,'completado',NULL,NULL,NULL,NULL,NULL),(20,22,'bautiriveirabuca8@gmail.com','2026-02-13 20:54:08',200000,'completado',NULL,NULL,NULL,NULL,NULL),(21,22,'bautiriveirabuca8@gmail.com','2026-02-13 20:56:29',200000,'completado',NULL,NULL,NULL,NULL,NULL),(22,22,'bautiriveirabuca8@gmail.com','2026-02-13 23:38:42',1000000,'completado',NULL,NULL,NULL,NULL,NULL),(23,22,'bautiriveirabuca8@gmail.com','2026-02-13 23:39:09',1400000,'completado',NULL,NULL,NULL,NULL,NULL),(24,33,'guadaguerra@gmail.com','2026-02-22 17:35:49',19500,'completado','Paunero 650','Mendoza','5600',NULL,NULL),(25,33,'guadaguerra@gmail.com','2026-02-22 23:50:45',170000,'completado','Chile 650','Mendoza','5600','45256306','2604265930');
 /*!40000 ALTER TABLE `pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -163,8 +166,9 @@ CREATE TABLE `producto` (
   `precio` int NOT NULL DEFAULT '0',
   `cantidad` int DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
+  `costo` decimal(10,2) DEFAULT '0.00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,8 +177,44 @@ CREATE TABLE `producto` (
 
 LOCK TABLES `producto` WRITE;
 /*!40000 ALTER TABLE `producto` DISABLE KEYS */;
-INSERT INTO `producto` VALUES (54,'Teclado Gamer Corsair','<p>Hola</p>','Teclados',200000,93,'static/uploads\\compragamer_Imganen_general_40192_Teclado_Mecanico_Corsair_K65_PLUS_75__Wireless_2.4Ghz_Bluetooth_1ms_Switch_MLX_Red_RGB_266Hs_bc8f25f1-grn.jpg');
+INSERT INTO `producto` VALUES (54,'Teclado Gamer Corsair','<p>Hola</p>','Teclados',200000,93,'static/uploads\\compragamer_Imganen_general_40192_Teclado_Mecanico_Corsair_K65_PLUS_75__Wireless_2.4Ghz_Bluetooth_1ms_Switch_MLX_Red_RGB_266Hs_bc8f25f1-grn.jpg',0.00),(58,'Corsair teclado','<p>Teclado</p>','Teclados',19500,9,'static/uploads\\D_Q_NP_2X_839905-MLA87126424990_072025-V.webp',15000.00),(59,'Gamesir Cyclone 2','<p><span style=\"color: rgb(61, 70, 77); background-color: rgb(255, 255, 255);\">El GameSir Cyclone 2 es un joystick versátil diseñado para ofrecer una experiencia de juego fluida y cómoda en múltiples plataformas. Su conectividad Bluetooth, con cable (wired) y wireless permite alternar entre modos según la necesidad, garantizando baja latencia y gran compatibilidad. Su diseño ergonómico y agarre antideslizante aseguran largas horas de juego sin fatiga. Incorpora gatillos y botones de alta respuesta, ideales para títulos competitivos o de acción rápida. Además, su batería de larga duración y la posibilidad de jugar mientras se carga lo convierten en una opción confiable para jugadores exigentes. </span></p>','Joysticks',85000,28,'static/uploads\\1994-producto-d-nq-np-2x-726239-mla10002555180.jpg',66666.67);
 /*!40000 ALTER TABLE `producto` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `stock_compras`
+--
+
+DROP TABLE IF EXISTS `stock_compras`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `stock_compras` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `producto_id` int NOT NULL,
+  `usuario_id` int DEFAULT NULL,
+  `inversion_total` decimal(12,2) NOT NULL,
+  `cantidad_unidades` int NOT NULL,
+  `costo_unitario` decimal(12,2) NOT NULL,
+  `precio_venta_sugerido` decimal(12,2) DEFAULT NULL,
+  `porcentaje_ganancia` decimal(8,2) DEFAULT '0.00',
+  `observacion` varchar(255) DEFAULT NULL,
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_stock_compras_producto` (`producto_id`),
+  KEY `idx_stock_compras_usuario` (`usuario_id`),
+  CONSTRAINT `fk_stock_compras_producto` FOREIGN KEY (`producto_id`) REFERENCES `producto` (`id`),
+  CONSTRAINT `fk_stock_compras_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`idusuario`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `stock_compras`
+--
+
+LOCK TABLES `stock_compras` WRITE;
+/*!40000 ALTER TABLE `stock_compras` DISABLE KEYS */;
+INSERT INTO `stock_compras` VALUES (1,58,29,150000.00,10,15000.00,19500.00,30.00,'Carga inicial de producto','2026-02-22 17:24:32'),(2,59,26,2000000.00,30,66666.67,86666.67,30.00,'Carga inicial de producto','2026-02-22 23:45:50');
+/*!40000 ALTER TABLE `stock_compras` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -196,9 +236,12 @@ CREATE TABLE `usuario` (
   `codigo_postal` varchar(10) DEFAULT NULL,
   `dni` varchar(20) DEFAULT NULL,
   `telefono` varchar(20) DEFAULT NULL,
+  `fecha_creacion` datetime DEFAULT CURRENT_TIMESTAMP,
+  `fecha_registro` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `ultimo_acceso` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`idusuario`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -207,7 +250,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (20,'Carlos','Martínez','carlos@example.com','$2b$12$/JGvnWbOwa9En8yNN1WkROLJOMp5z3lTykRlzZ81jPyGsJrEL1Xha',0,NULL,NULL,NULL,NULL,NULL),(22,'Bautista','','bautiriveirabuca8@gmail.com','$2b$12$Kk2NAqII1V3dwGIQFBQeFeqap3mG8GsViWkZwXwwuycdAFaRSa.Vy',0,NULL,NULL,NULL,NULL,'2604265930'),(23,'Bautista','Riveira Buca','bautiriveirabuca8@mail.com','$2b$12$sJND3SIazcpW5m5rMEaI8OjLmR.zgsqZ1//2iDqZANr5lRT9B20vC',0,NULL,NULL,NULL,NULL,NULL),(25,'Bautista','Riveira Buca','bautiriveira@gmail.com','$2b$12$qAOk.eruMpkGUmZnyTH6L.OpxGwCavwuOQAr3mgOS9WSyjbuD5Ot2',0,NULL,NULL,NULL,NULL,NULL),(26,'Bautista','Admin','bautista@admin.com','$2b$12$OFWy5UQerAsq/8jXEHmqNOGofg/mdChKen9yRUNx0LvJwoeXWrRsm',1,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `usuario` VALUES (20,'Carlos','Martínez','carlos@example.com','$2b$12$/JGvnWbOwa9En8yNN1WkROLJOMp5z3lTykRlzZ81jPyGsJrEL1Xha',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(22,'Bautista','','bautiriveirabuca888@gmail.com','$2b$12$Kk2NAqII1V3dwGIQFBQeFeqap3mG8GsViWkZwXwwuycdAFaRSa.Vy',0,'Avenida 9 de julio 1234','CABA','1000','45256306','2604265930','2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(23,'Bautista','Riveira Buca','bautiriveirabuca8@mail.com','$2b$12$sJND3SIazcpW5m5rMEaI8OjLmR.zgsqZ1//2iDqZANr5lRT9B20vC',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(25,'Bautista','Riveira Buca','bautiriveira@gmail.com','$2b$12$qAOk.eruMpkGUmZnyTH6L.OpxGwCavwuOQAr3mgOS9WSyjbuD5Ot2',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(26,'Bautista','Admin','bautista@admin.com','$2b$12$OFWy5UQerAsq/8jXEHmqNOGofg/mdChKen9yRUNx0LvJwoeXWrRsm',1,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(27,'Bautista','Riveira','bauti123@gmail.com','$2b$12$dJmrIRiGm5vcWgLSwjKTuev.ynjz8Hux59klnOvOeMdCPSTr3mg2e',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(28,'Bautista','Riveira','bautiriveirabuca999@gmail.com','$2b$12$/70GGVbBEi0GozH0blAoI.MxqEddGryfu51LrOd.lTM1KYaBrUqg6',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(29,'Bautista','Riveira','bauti@admin.com','$2b$12$8e173K/BzSLfYyxZAMrhgOkWSgGXxj5G88qKiEi3PVvx0knSV/gR6',1,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(30,'Bautista','Buca','bautibuca@gmail.com','$2b$12$AD3xko/6NqYykSfnzZTtO.yoa00hbm0.JWMD9Sh6GU6Eyu1Ti6DbC',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(31,'Viviana','Buca','vivibuca@gmail.com','$2b$12$.N2pEenVcCD/aOsZ6pEmoOyvJcno5JIw4cQ8Vy2do7LZj8lD3E7u2',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(32,'Pilar','Riveira','piliriveira@yahoo.com','$2b$12$QLwghwR5m/gE/LuWHmFLwetYNIHM4CQtyiwPot/ZXcEKYqDHRMkce',0,NULL,NULL,NULL,NULL,NULL,'2026-02-21 21:46:59','2026-02-23 00:54:34','2026-02-23 00:54:34'),(33,'Guadalupe','Guerra','guadaguerra@gmail.com','$2b$12$8IREwF6P8XCuknhRWP6vQebjI35db9yNaVRTyWOTZXfu2/ZCF4Mc6',0,NULL,NULL,NULL,'45256306','2604265930','2026-02-22 14:34:20','2026-02-23 00:54:34','2026-02-23 00:54:34');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -220,4 +263,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-13 20:46:52
+-- Dump completed on 2026-02-22 22:44:22

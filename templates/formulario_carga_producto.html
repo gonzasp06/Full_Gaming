@@ -1,109 +1,441 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
-    <!--Estilo CSS-->
     <link rel="stylesheet"  href="{{ url_for('static', filename='css/index.css') }}">
-    <!-- Vinculacion con Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- Quill CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <!-- Scripts de Bootstrap y jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Quill JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <style>
-        .calculo-grid {
+        /* ================================================ */
+        /*  NUEVO PRODUCTO — TEMA OSCURO MODERNO            */
+        /* ================================================ */
+        .nuevo-producto-panel {
+            max-width: 780px !important;
+            width: 95% !important;
+            margin: 30px auto !important;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%) !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-radius: 16px !important;
+            padding: 35px 40px !important;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 0 40px rgba(106, 68, 242, 0.08) !important;
+        }
+        .nuevo-producto-panel h1 {
+            color: #fff !important;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left !important;
+        }
+        .nuevo-producto-panel h1::before {
+            content: '✨';
+            font-size: 26px;
+        }
+        .page-subtitle {
+            color: #8b82d4;
+            font-size: 13px;
+            margin-bottom: 28px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(106, 68, 242, 0.2);
+        }
+
+        /* ===== SECCIONES ===== */
+        .seccion {
+            margin-bottom: 28px;
+        }
+        .seccion-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(106, 68, 242, 0.15);
+        }
+        .seccion-header .seccion-icon {
+            font-size: 20px;
+        }
+        .seccion-header .seccion-titulo {
+            font-size: 14px;
+            font-weight: 700;
+            color: #B5B3F2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .seccion-header .seccion-badge {
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .seccion-badge.genera-egreso {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.25);
+        }
+        .seccion-badge.solo-visual {
+            background: rgba(46, 204, 113, 0.12);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        /* Aviso contable */
+        .aviso-contable {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(243, 156, 18, 0.08);
+            border: 1px solid rgba(243, 156, 18, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+        }
+        .aviso-contable .aviso-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .aviso-contable .aviso-body {
+            flex: 1;
+        }
+        .aviso-contable .aviso-titulo {
+            color: #f39c12;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+        .aviso-contable .aviso-texto {
+            color: #cba53e;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* ===== INPUTS OSCUROS ===== */
+        .np-group {
+            margin-bottom: 16px;
+        }
+        .np-label {
+            display: block;
+            color: #B5B3F2;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+        }
+        .np-input,
+        .np-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            color: #d4d0f0 !important;
+            font-size: 14px !important;
+            transition: border-color 0.2s !important;
+            outline: none !important;
+            box-sizing: border-box;
+        }
+        .np-input:focus,
+        .np-select:focus {
+            border-color: #6A44F2 !important;
+            box-shadow: 0 0 0 2px rgba(106, 68, 242, 0.15) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        .np-input::placeholder { color: #666 !important; }
+        .np-input[readonly] {
+            background: rgba(106, 68, 242, 0.08) !important;
+            color: #8b82d4 !important;
+            cursor: default;
+        }
+        .np-select option {
+            background: #1a1f3a;
+            color: #d4d0f0;
+        }
+        .np-input[type="file"] {
+            padding: 8px 10px !important;
+        }
+        .np-input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border: none;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 12px;
+            transition: all 0.2s;
+        }
+        .np-input[type="file"]::file-selector-button:hover {
+            box-shadow: 0 4px 12px rgba(106, 68, 242, 0.3);
+        }
+
+        /* Grid 2 columnas */
+        .np-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
-
-        .calculo-full {
+        .np-grid-full {
             grid-column: 1 / -1;
         }
-
-        .calculo-estado {
-            font-size: 0.9rem;
-            color: #e6e6e6;
-            margin-top: 4px;
-        }
-
         @media (max-width: 768px) {
-            .calculo-grid {
-                grid-template-columns: 1fr;
-            }
+            .np-grid { grid-template-columns: 1fr; }
+            .nuevo-producto-panel { padding: 24px 20px !important; }
         }
-    </style>
 
+        /* Quill override oscuro */
+        .nuevo-producto-panel .ql-toolbar {
+            background: rgba(39, 45, 64, 0.8) !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-bottom: none !important;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        .nuevo-producto-panel .ql-container {
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-radius: 0 0 8px 8px !important;
+        }
+        .nuevo-producto-panel .ql-editor {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #d4d0f0 !important;
+            min-height: 120px;
+            border-radius: 0 0 8px 8px;
+        }
+        .nuevo-producto-panel .ql-editor:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        .nuevo-producto-panel .ql-editor.ql-blank::before {
+            color: #666 !important;
+        }
+
+        /* ===== CALCULADORA VISUAL ===== */
+        .calc-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .calc-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(106, 68, 242, 0.12);
+            border-radius: 10px;
+            padding: 14px 16px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .calc-card:hover {
+            border-color: rgba(106, 68, 242, 0.3);
+        }
+        .calc-card .calc-card-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #8b82d4;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+        }
+        .calc-card .calc-card-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+        .calc-card .calc-card-value.positivo { color: #2ecc71; }
+        .calc-card .calc-card-value.neutro { color: #f39c12; }
+
+        .calc-estado {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #8b82d4;
+            font-size: 12px;
+            padding: 6px 0 0;
+            font-weight: 600;
+        }
+
+        /* ===== BOTÓN CREAR ===== */
+        .btn-crear-producto {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(106, 68, 242, 0.3);
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+        .btn-crear-producto:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(106, 68, 242, 0.45);
+        }
+        .btn-crear-producto:active {
+            transform: translateY(0);
+        }
+
+        /* ===== MODAL OVERRIDE OSCURO ===== */
+        .modal-overlay .modal-content {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%) !important;
+            border: 1px solid rgba(106, 68, 242, 0.3) !important;
+            border-radius: 16px !important;
+            color: #d4d0f0 !important;
+        }
+        .modal-overlay .modal-title { color: #fff !important; }
+        .modal-overlay .modal-description { color: #bbb !important; }
+    </style>
 </head>
 <body>
     <header>
-        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+        {% include 'navbar.html' %}
     </header>
 
     <main>
-        <div class="container py-6 form-container">
-        <h1 class="text-center">Nuevo Producto</h1>
+        <div class="container py-6 form-container nuevo-producto-panel">
+        <h1>Nuevo Producto</h1>
+        <p class="page-subtitle">Completá los datos para agregar un nuevo producto al catálogo. Los campos de compra registran el egreso inicial.</p>
+
         <form id="formularioProducto" action="/cargar_producto" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="nombre" class="form-label">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="descripcion" class="form-label">Descripción:</label>
-                <div id="descripcion-editor" style="height:150px;"></div>
-                <input type="hidden" id="descripcion" name="descripcion">
-            </div>
-            <div class="form-group">
-                <label for="categoria" class="form-label">Categoria:</label>
-                <select id="categoria" name="categoria" class="form-control"> 
-                    <option value="Teclados">Teclados</option>
-                    <option value="Mouse">Mouse</option>
-                    <option value="Audio">Audio</option>
-                    <option value="Joysticks">Joysticks</option>
-                    <option value="Otros">Otros</option>
-                </select>
-            </div>
-            <div class="calculo-grid">
-                <div class="form-group">
-                    <label for="precio" class="form-label">Precio de venta:</label>
-                    <input type="text" id="precio" name="precio" class="form-control" placeholder="Se autocompleta si lo dejas vacío">
+
+            <!-- ═══════ SECCIÓN 1: INFORMACIÓN BÁSICA ═══════ -->
+            <div class="seccion">
+                <div class="seccion-header">
+                    <span class="seccion-icon">📋</span>
+                    <span class="seccion-titulo">Información del Producto</span>
                 </div>
-                <div class="form-group">
-                    <label for="inversion_total" class="form-label">Monto total invertido (egreso):</label>
-                    <input type="text" id="inversion_total" name="inversion_total" class="form-control" placeholder="Ej: 150000">
+
+                <div class="np-group">
+                    <label for="nombre" class="np-label">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" class="np-input" placeholder="Ej: Teclado Mecánico RGB" required>
                 </div>
-                <div class="form-group">
-                    <label for="cantidad" class="form-label">Cantidad comprada:</label>
-                    <input type="number" id="cantidad" name="cantidad" class="form-control" min="0" placeholder="Ej: 10">
+
+                <div class="np-group">
+                    <label for="descripcion" class="np-label">Descripción</label>
+                    <div id="descripcion-editor"></div>
+                    <input type="hidden" id="descripcion" name="descripcion">
                 </div>
-                <div class="form-group">
-                    <label for="porcentaje_ganancia" class="form-label">Porcentaje de ganancia deseado:</label>
-                    <input type="number" id="porcentaje_ganancia" name="porcentaje_ganancia" class="form-control" min="0" step="0.01" value="30">
-                </div>
-                <div class="form-group">
-                    <label for="costo_unitario_calculado" class="form-label">Costo unitario (calculado):</label>
-                    <input type="text" id="costo_unitario_calculado" class="form-control" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="precio_sugerido_calculado" class="form-label">Precio de venta sugerido (calculado):</label>
-                    <input type="text" id="precio_sugerido_calculado" class="form-control" readonly>
-                </div>
-                <div class="form-group calculo-full">
-                    <small id="estado_calculo" class="calculo-estado">Completá inversión + cantidad para calcular automáticamente.</small>
+
+                <div class="np-grid">
+                    <div class="np-group">
+                        <label for="categoria" class="np-label">Categoría</label>
+                        <select id="categoria" name="categoria" class="np-select">
+                            <option value="Teclados">Teclados</option>
+                            <option value="Mouse">Mouse</option>
+                            <option value="Audio">Audio</option>
+                            <option value="Joysticks">Joysticks</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="np-group">
+                        <label for="foto" class="np-label">Imagen del producto</label>
+                        <input type="file" id="foto" name="foto" class="np-input" accept="image/*">
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="foto" class="form-label">Foto:</label>
-                <input type="file" id="foto" name="foto" class="form-control">
+
+            <!-- ═══════ SECCIÓN 2: DATOS DE COMPRA ═══════ -->
+            <div class="seccion">
+                <div class="seccion-header">
+                    <span class="seccion-icon">💰</span>
+                    <span class="seccion-titulo">Datos de Compra</span>
+                    <span class="seccion-badge genera-egreso">Genera egreso</span>
+                </div>
+
+                <div class="aviso-contable">
+                    <span class="aviso-icon">📊</span>
+                    <div class="aviso-body">
+                        <div class="aviso-titulo">Impacto en estadísticas</div>
+                        <div class="aviso-texto">Estos datos registran la inversión inicial como egreso. El costo unitario se calcula automáticamente a partir del monto invertido y la cantidad. Estos valores no pueden modificarse después sin generar inconsistencias.</div>
+                    </div>
+                </div>
+
+                <div class="np-grid">
+                    <div class="np-group">
+                        <label for="inversion_total" class="np-label">Monto total invertido (egreso)</label>
+                        <input type="text" id="inversion_total" name="inversion_total" class="np-input" placeholder="Ej: 150000">
+                    </div>
+                    <div class="np-group">
+                        <label for="cantidad" class="np-label">Cantidad comprada (stock inicial)</label>
+                        <input type="number" id="cantidad" name="cantidad" class="np-input" min="0" placeholder="Ej: 10">
+                    </div>
+                </div>
+
+                <!-- Campos calculados (solo lectura) -->
+                <div class="np-grid" style="margin-top: 4px;">
+                    <div class="np-group">
+                        <label for="costo_unitario_calculado" class="np-label">Costo unitario (calculado)</label>
+                        <input type="text" id="costo_unitario_calculado" class="np-input" readonly>
+                    </div>
+                    <div class="np-group">
+                        <label for="precio_sugerido_calculado" class="np-label">Precio sugerido (calculado)</label>
+                        <input type="text" id="precio_sugerido_calculado" class="np-input" readonly>
+                    </div>
+                </div>
             </div>
-            <br>
-            <button type="submit" class="btn btn-primary" value="Cargar Producto" >Cargar Producto</button>
+
+            <!-- ═══════ SECCIÓN 3: VENTA Y PROYECCIÓN ═══════ -->
+            <div class="seccion">
+                <div class="seccion-header">
+                    <span class="seccion-icon">🏷️</span>
+                    <span class="seccion-titulo">Venta y Proyección</span>
+                    <span class="seccion-badge solo-visual">Solo visual</span>
+                </div>
+
+                <div class="np-grid">
+                    <div class="np-group">
+                        <label for="porcentaje_ganancia" class="np-label">% Ganancia deseado</label>
+                        <input type="number" id="porcentaje_ganancia" name="porcentaje_ganancia" class="np-input" min="0" step="0.01" value="30">
+                    </div>
+                    <div class="np-group">
+                        <label for="precio" class="np-label">Precio de venta final</label>
+                        <input type="text" id="precio" name="precio" class="np-input" placeholder="Se autocompleta o editá manualmente">
+                    </div>
+                </div>
+
+                <!-- Calculadora visual -->
+                <div class="calc-preview">
+                    <div class="calc-card">
+                        <div class="calc-card-label">Inversión Total</div>
+                        <div class="calc-card-value" id="calcInvTotal">$0</div>
+                    </div>
+                    <div class="calc-card">
+                        <div class="calc-card-label">Costo Unitario</div>
+                        <div class="calc-card-value" id="calcCostoUnit">$0</div>
+                    </div>
+                    <div class="calc-card">
+                        <div class="calc-card-label">Precio Sugerido</div>
+                        <div class="calc-card-value positivo" id="calcPrecioSug">$0</div>
+                    </div>
+                    <div class="calc-card">
+                        <div class="calc-card-label">Ganancia / Unidad</div>
+                        <div class="calc-card-value positivo" id="calcGanUnit">$0</div>
+                    </div>
+                    <div class="calc-estado" id="estado_calculo">Completá inversión + cantidad para calcular automáticamente.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-crear-producto">🚀 Crear Producto</button>
         </form>
     </div>
     </main>
@@ -141,6 +473,7 @@
 
             const costoUnitario = (inversionTotal > 0 && cantidad > 0) ? (inversionTotal / cantidad) : 0;
             const precioSugerido = costoUnitario > 0 ? (costoUnitario * (1 + (porcentaje / 100))) : 0;
+            const gananciaUnit = precioSugerido - costoUnitario;
             const estadoEl = document.getElementById("estado_calculo");
 
             document.getElementById("costo_unitario_calculado").value = costoUnitario > 0
@@ -151,12 +484,26 @@
                 ? "$" + precioSugerido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                 : "";
 
+            // Actualizar tarjetas calculadora
+            document.getElementById("calcInvTotal").textContent = inversionTotal > 0
+                ? "$" + inversionTotal.toLocaleString('es-AR')
+                : "$0";
+            document.getElementById("calcCostoUnit").textContent = costoUnitario > 0
+                ? "$" + costoUnitario.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "$0";
+            document.getElementById("calcPrecioSug").textContent = precioSugerido > 0
+                ? "$" + Math.round(precioSugerido).toLocaleString('es-AR')
+                : "$0";
+            document.getElementById("calcGanUnit").textContent = gananciaUnit > 0
+                ? "$" + gananciaUnit.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "$0";
+
             if (inversionTotal <= 0) {
                 estadoEl.textContent = "Ingresá el monto invertido para calcular.";
             } else if (cantidad <= 0) {
                 estadoEl.textContent = "Ingresá la cantidad comprada para calcular costo unitario.";
             } else {
-                estadoEl.textContent = "Cálculo listo: podés usar el precio sugerido o editarlo manualmente.";
+                estadoEl.textContent = "✅ Cálculo listo: podés usar el precio sugerido o editarlo manualmente.";
             }
 
             const inputPrecio = document.getElementById("precio");
@@ -192,8 +539,7 @@
                 precio = document.getElementById("precio").value;
             }
 
-            // Construir objeto con los datos de arriba
-            //FormData 
+            // Construir FormData
             var formData = new FormData();
             formData.append("nombre", nombre);
             formData.append("descripcion", descripcion);
@@ -205,17 +551,15 @@
             formData.append("cantidad", cantidad);
             formData.append("foto", foto);
 
-            // Envia solicitud POST para carga del producto
+            // Enviar solicitud POST
             fetch("/cargar_producto", {
                 method: "POST",
-                body: formData 
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    // Mostrar modal de éxito
                     mostrarModalExito(data.mensaje, data.submensaje);
-                    // Limpiar formulario
                     document.getElementById("formularioProducto").reset();
                     quill.setContents([]);
                     precioEditadoManualmente = false;
@@ -244,7 +588,6 @@
                 </div>
             `;
             document.body.appendChild(modal);
-            
             modal.querySelector('.modal-btn').addEventListener('click', function() {
                 cerrarModal(this);
             });
@@ -264,7 +607,6 @@
                 </div>
             `;
             document.body.appendChild(modal);
-            
             modal.querySelector('.modal-btn').addEventListener('click', function() {
                 cerrarModal(this);
             });
@@ -276,7 +618,6 @@
             setTimeout(() => modal.remove(), 300);
         }
     </script>
-    {% include 'footer.html' %} 
-</body>
+    {% include 'footer.html' %}
 </html>
 

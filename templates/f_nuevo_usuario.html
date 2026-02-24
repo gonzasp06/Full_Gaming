@@ -1,299 +1,769 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FullGaming</title>
+    <title>Crear cuenta — FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
-    <!--Estilo CSS-->
-    <link rel="stylesheet"  href="{{ url_for('static', filename='css/index.css') }}">
-    <!-- Vinculacion con Bootstrap -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- Scripts de Bootstrap y jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* ================================================ */
+        /*  REGISTRO — TEMA OSCURO PREMIUM                  */
+        /* ================================================ */
+        .auth-page {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.25);
+            border-radius: 20px;
+            padding: 36px 36px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 50px rgba(106, 68, 242, 0.06);
+        }
+        .auth-logo { text-align: center; margin-bottom: 8px; }
+        .auth-logo img {
+            height: 50px;
+            filter: drop-shadow(0 2px 8px rgba(106, 68, 242, 0.3));
+        }
+        .auth-title {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .auth-subtitle {
+            text-align: center;
+            color: #8b82d4;
+            font-size: 13px;
+            margin-bottom: 26px;
+        }
 
+        /* --- Inputs --- */
+        .auth-group { margin-bottom: 18px; position: relative; }
+        .auth-label {
+            display: block;
+            color: #B5B3F2;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 5px;
+        }
+        .auth-input-wrap { position: relative; }
+        .auth-input-wrap .auth-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: #6A44F2;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .auth-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-radius: 10px !important;
+            padding: 11px 14px 11px 40px !important;
+            color: #d4d0f0 !important;
+            font-size: 14px !important;
+            transition: all 0.2s !important;
+            outline: none !important;
+        }
+        .auth-input:focus {
+            border-color: #6A44F2 !important;
+            box-shadow: 0 0 0 3px rgba(106, 68, 242, 0.15) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        .auth-input::placeholder { color: #7E7B9A !important; opacity: 0.85; letter-spacing: 0.2px; }
+        .auth-input.input-error { border-color: #e74c3c !important; }
+        .auth-input.input-ok { border-color: #2ecc71 !important; }
+
+        /* Grid 2 col */
+        .auth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media(max-width:520px){ .auth-row { grid-template-columns: 1fr; } }
+
+        /* Toggle password */
+        .auth-toggle-pass {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 17px;
+            background: none;
+            border: none;
+            padding: 0;
+            z-index: 2;
+            transition: color 0.2s;
+        }
+        .auth-toggle-pass:hover { color: #6A44F2; }
+
+        /* Error / warning inline */
+        .auth-error, .auth-warn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .auth-error {
+            background: rgba(231, 76, 60, 0.08);
+            border: 1px solid rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+        }
+        .auth-warn {
+            background: rgba(243, 156, 18, 0.08);
+            border: 1px solid rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+        }
+        .auth-error.visible, .auth-warn.visible { display: flex; }
+
+        /* Caps lock */
+        .caps-warn {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+            color: #f39c12;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .caps-warn.visible { display: flex; }
+
+        /* ===== BARRA DE FUERZA ===== */
+        .strength-bar-wrap {
+            margin-top: 10px;
+        }
+        .strength-bar-track {
+            display: flex;
+            gap: 4px;
+            height: 5px;
+        }
+        .strength-bar-seg {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            transition: background 0.4s, box-shadow 0.4s;
+        }
+        .strength-text {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        /* ===== CHECKLIST ===== */
+        .pass-checklist {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 12px;
+        }
+        .pass-check-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .pass-check-item .chk-icon {
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .pass-check-item.ok { color: #2ecc71; }
+        .pass-check-item.ok .chk-icon { color: #2ecc71; }
+
+        /* ===== COMMON PASSWORD WARNING ===== */
+        .common-pass-alert {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: rgba(243, 156, 18, 0.1);
+            border: 1px solid rgba(243, 156, 18, 0.25);
+            border-radius: 10px;
+            color: #f39c12;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .common-pass-alert.visible { display: flex; }
+
+        /* ===== SUGERENCIA ===== */
+        .pass-suggestion {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: rgba(106, 68, 242, 0.06);
+            border: 1px solid rgba(106, 68, 242, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .pass-suggestion-label {
+            font-size: 11px;
+            color: #8b82d4;
+            font-weight: 600;
+        }
+        .pass-suggestion-value {
+            font-family: monospace;
+            font-size: 14px;
+            color: #d4d0f0;
+            font-weight: 700;
+            letter-spacing: 1px;
+            user-select: all;
+        }
+        .pass-suggestion-btn {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .pass-suggestion-btn:hover {
+            box-shadow: 0 4px 12px rgba(106, 68, 242, 0.3);
+        }
+
+        /* Separador */
+        .auth-sep {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(106, 68, 242, 0.25), transparent);
+            margin: 22px 0;
+            border: none;
+        }
+
+        /* Botón */
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(106, 68, 242, 0.3);
+            transition: all 0.25s ease;
+        }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(106, 68, 242, 0.45); }
+        .auth-btn:active { transform: translateY(0); }
+        .auth-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
+        .auth-btn .spinner {
+            display: none;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        .auth-btn.loading .spinner { display: inline-block; }
+        .auth-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Match indicator */
+        .match-indicator {
+            display: none;
+            margin-top: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .match-indicator.visible { display: block; }
+        .match-indicator.match { color: #2ecc71; }
+        .match-indicator.no-match { color: #e74c3c; }
+
+        /* Footer */
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #8b82d4;
+            font-size: 14px;
+        }
+        .auth-footer a {
+            color: #6C63FF;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .auth-footer a:hover { color: #8d7fff; text-decoration: underline; }
+
+        .auth-disclaimer {
+            text-align: center;
+            color: #555;
+            font-size: 11px;
+            margin-top: 16px;
+            line-height: 1.5;
+        }
+
+        /* Result message */
+        .auth-result {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            min-height: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+        {% include 'navbar.html' %}
     </header>
-    
+
     <main>
-        <div class="form-container auth-container">
-        <h1 class="text-center">Nueva cuenta</h1>
-        <form id="formularioUsuario" class="auth-form" action="/nuevo_usuario" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="nombre" class="form-label">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="apellido" class="form-label">Apellido:</label>
-                <input type="text" id="apellido" name="apellido" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="email" class="form-label">Email:</label>
-                <input type="email" id="email" name="email" class="form-control" required>
-                <small id="validacion-email" style="display: none; color: #dc3545; margin-top: 5px;"></small>
-            </div>
-            <div class="form-group">
-                <label for="contraseña" class="form-label">Contraseña:</label>
-                <div style="position: relative;">
-                    <input type="password" id="contraseña" name="contraseña" class="form-control" required style="padding-right: 40px;">
-                    <svg id="togglePassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
+        <div class="auth-page">
+            <div class="auth-card">
+                <div class="auth-logo">
+                    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="FullGaming">
                 </div>
-                <!-- Indicador de fortaleza -->
-                <div style="margin-top: 8px;">
-                    <div style="display: flex; gap: 4px; height: 6px;">
-                        <div id="fortaleza1" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
-                        <div id="fortaleza2" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
-                        <div id="fortaleza3" style="flex: 1; background-color: #e0e0e0; border-radius: 3px; transition: all 0.3s;"></div>
+                <h1 class="auth-title">Crear cuenta</h1>
+                <p class="auth-subtitle">Unite a la comunidad FullGaming</p>
+
+                <form id="formularioUsuario" action="/nuevo_usuario" method="post" enctype="multipart/form-data" autocomplete="on">
+
+                    <!-- Nombre + Apellido -->
+                    <div class="auth-row">
+                        <div class="auth-group">
+                            <label for="nombre" class="auth-label">Nombre</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-icon">👤</span>
+                                <input type="text" id="nombre" name="nombre" class="auth-input" placeholder="Tu nombre" required>
+                            </div>
+                        </div>
+                        <div class="auth-group">
+                            <label for="apellido" class="auth-label">Apellido</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-icon">👤</span>
+                                <input type="text" id="apellido" name="apellido" class="auth-input" placeholder="Tu apellido" required>
+                            </div>
+                        </div>
                     </div>
-                    <small id="texto-fortaleza" style="display: block; margin-top: 5px; color: #666;">Fortaleza: Escribe una contraseña</small>
-                    <small style="display: block; margin-top: 4px; color: #666;">Ejemplo recomendado: Nube9#Sol (9 caracteres)</small>
+
+                    <!-- Email -->
+                    <div class="auth-group">
+                        <label for="email" class="auth-label">Email</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">✉️</span>
+                            <input type="email" id="email" name="email" class="auth-input" placeholder="tu@email.com" required autocomplete="email">
+                        </div>
+                        <div class="auth-error" id="errorEmail">
+                            <span>⚠️</span> <span id="errorEmailText"></span>
+                        </div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="auth-group">
+                        <label for="contraseña" class="auth-label">Contraseña</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">🔒</span>
+                            <input type="password" id="contraseña" name="contraseña" class="auth-input" placeholder="Mínimo 8 caracteres" required autocomplete="new-password" style="padding-right: 44px !important;">
+                            <button type="button" class="auth-toggle-pass" id="togglePass" title="Mostrar contraseña">👁️</button>
+                        </div>
+                        <div class="caps-warn" id="capsWarn"><span>⬆️</span> Bloq Mayús activado</div>
+
+                        <!-- Barra de fuerza -->
+                        <div class="strength-bar-wrap">
+                            <div class="strength-bar-track">
+                                <div class="strength-bar-seg" id="seg1"></div>
+                                <div class="strength-bar-seg" id="seg2"></div>
+                                <div class="strength-bar-seg" id="seg3"></div>
+                                <div class="strength-bar-seg" id="seg4"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Escribí una contraseña</span>
+                        </div>
+
+                        <!-- Alerta contraseña común -->
+                        <div class="common-pass-alert" id="commonAlert">
+                            <span style="font-size:18px;">⚠️</span>
+                            <span>Esta contraseña es muy común y fácil de adivinar</span>
+                        </div>
+
+                        <!-- Checklist -->
+                        <div class="pass-checklist" id="passChecklist">
+                            <div class="pass-check-item" id="chkLen"><span class="chk-icon">○</span> Mín. 8 caracteres</div>
+                            <div class="pass-check-item" id="chkUpper"><span class="chk-icon">○</span> Una mayúscula</div>
+                            <div class="pass-check-item" id="chkLower"><span class="chk-icon">○</span> Una minúscula</div>
+                            <div class="pass-check-item" id="chkNum"><span class="chk-icon">○</span> Un número</div>
+                            <div class="pass-check-item" id="chkSym"><span class="chk-icon">○</span> Un símbolo</div>
+                            <div class="pass-check-item" id="chkCommon"><span class="chk-icon">○</span> No ser común</div>
+                        </div>
+
+                        <!-- Sugerencia de contraseña -->
+                        <div class="pass-suggestion">
+                            <span class="pass-suggestion-label">Sugerencia:</span>
+                            <span class="pass-suggestion-value" id="suggestedPass"></span>
+                            <button type="button" class="pass-suggestion-btn" id="btnUseSuggestion">📋 Usar esta</button>
+                        </div>
+                    </div>
+
+                    <!-- Repetir contraseña -->
+                    <div class="auth-group">
+                        <label for="repetir_contraseña" class="auth-label">Repetir contraseña</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">🔒</span>
+                            <input type="password" id="repetir_contraseña" name="repetir_contraseña" class="auth-input" placeholder="Repetí tu contraseña" required autocomplete="new-password" style="padding-right: 44px !important;">
+                            <button type="button" class="auth-toggle-pass" id="toggleRepetir" title="Mostrar contraseña">👁️</button>
+                        </div>
+                        <div class="match-indicator" id="matchIndicator"></div>
+                    </div>
+
+                    <button type="submit" class="auth-btn" id="btnRegistro">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Crear Cuenta</span>
+                    </button>
+                </form>
+
+                <p class="auth-result" id="resultado"></p>
+
+                <hr class="auth-sep">
+
+                <div class="auth-footer">
+                    ¿Ya tenés cuenta? <a href="/acceso">Iniciar sesión</a>
                 </div>
+
+                <p class="auth-disclaimer">🔒 No compartas tu contraseña con nadie.</p>
             </div>
-            <div class="form-group">
-                <label for="repetir_contraseña" class="form-label">Repetir Contraseña:</label>
-                <div style="position: relative;">
-                    <input type="password" id="repetir_contraseña" name="repetir_contraseña" class="form-control" required style="padding-right: 40px;">
-                    <svg id="toggleRepetir" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                </div>
-            </div>
-            <br>
-            <button type="submit" class="btn btn-primary" value="Crear Usuario">Crear Usuario</button>
-        </form>
-        <p id="resultado" class="text-center mt-3"></p>
-    </div>
+        </div>
     </main>
-    
+
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const inputContraseña = document.getElementById("contraseña");
-            const inputRepetir = document.getElementById("repetir_contraseña");
-            const inputEmail = document.getElementById("email");
-            const togglePassword = document.getElementById("togglePassword");
-            const toggleRepetir = document.getElementById("toggleRepetir");
-            
-            // Dominios de email permitidos
-            const dominiosPermitidos = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "protonmail.com", "icloud.com", "mail.com"];
-            
-            // ============ VALIDACIÓN DE EMAIL ============
-            if (inputEmail) {
-                inputEmail.addEventListener("input", function() {
-                    const email = this.value.trim();
-                    const validacionEmail = document.getElementById("validacion-email");
-                    
-                    if (email.length === 0) {
-                        validacionEmail.style.display = "none";
-                        return;
-                    }
-                    
-                    // Validar que tenga @
-                    if (!email.includes("@")) {
-                        validacionEmail.textContent = "El email debe contener @";
-                        validacionEmail.style.display = "block";
-                        return;
-                    }
-                    
-                    // Obtener dominio del email
-                    const partes = email.split("@");
-                    if (partes.length !== 2) {
-                        validacionEmail.textContent = "Formato de email inválido";
-                        validacionEmail.style.display = "block";
-                        return;
-                    }
-                    
-                    const dominio = partes[1].toLowerCase();
-                    
-                    // Validar que sea un dominio permitido
-                    if (!dominiosPermitidos.includes(dominio)) {
-                        validacionEmail.textContent = `Dominio no permitido. Usa: ${dominiosPermitidos.join(", ")}`;
-                        validacionEmail.style.display = "block";
-                        return;
-                    }
-                    
-                    // Email válido
-                    validacionEmail.style.display = "none";
-                });
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputNombre = document.getElementById('nombre');
+        const inputApellido = document.getElementById('apellido');
+        const inputEmail = document.getElementById('email');
+        const inputPass = document.getElementById('contraseña');
+        const inputRepetir = document.getElementById('repetir_contraseña');
+        const togglePass = document.getElementById('togglePass');
+        const toggleRepetir = document.getElementById('toggleRepetir');
+        const capsWarn = document.getElementById('capsWarn');
+        const errorEmail = document.getElementById('errorEmail');
+        const errorEmailText = document.getElementById('errorEmailText');
+        const resultado = document.getElementById('resultado');
+        const btnRegistro = document.getElementById('btnRegistro');
+
+        // Dominios permitidos
+        const dominiosPermitidos = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'protonmail.com', 'icloud.com', 'mail.com'];
+
+        // Contraseñas comunes
+        const commonPasswords = [
+            '123456', '123456789', '12345678', '1234567', '12345', '1234567890',
+            'password', 'qwerty', 'abc123', 'admin', 'admin123', 'letmein',
+            'welcome', 'monkey', 'master', 'dragon', 'login', 'princess',
+            'football', '123123', 'hola', 'hola123', 'hola1234', 'bienvenido',
+            'contraseña', 'qwerty123', 'password123', '111111', '000000',
+            'iloveyou', 'trustno1', 'sunshine', 'passw0rd'
+        ];
+
+        // ===== GENERAR CONTRASEÑA SUGERIDA =====
+        function generarPasswordSugerida() {
+            const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+            const lower = 'abcdefghjkmnpqrstuvwxyz';
+            const nums = '23456789';
+            const syms = '!@#$%&*?';
+            let pass = '';
+            pass += upper[Math.floor(Math.random() * upper.length)];
+            pass += lower[Math.floor(Math.random() * lower.length)];
+            pass += nums[Math.floor(Math.random() * nums.length)];
+            pass += syms[Math.floor(Math.random() * syms.length)];
+            const all = upper + lower + nums + syms;
+            for (let i = 0; i < 6; i++) {
+                pass += all[Math.floor(Math.random() * all.length)];
             }
-            
-            // ============ EVALUADOR DE FORTALEZA DE CONTRASEÑA ============
-            function evaluarFortaleza(password) {
-                const longitud = password.length;
-                const tieneMinuscula = /[a-z]/.test(password);
-                const tieneMayuscula = /[A-Z]/.test(password);
-                const tieneNumero = /[0-9]/.test(password);
-                const tieneEspecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-                const esComun = /hola\d*|12345|qwerty|password|admin|bienvenido|franco|morena/i.test(password);
+            // Shuffle
+            pass = pass.split('').sort(() => Math.random() - 0.5).join('');
+            return pass;
+        }
+        document.getElementById('suggestedPass').textContent = generarPasswordSugerida();
 
-                let tipos = 0;
-                if (tieneMinuscula) tipos += 1;
-                if (tieneMayuscula) tipos += 1;
-                if (tieneNumero) tipos += 1;
-                if (tieneEspecial) tipos += 1;
+        document.getElementById('btnUseSuggestion').addEventListener('click', function() {
+            const suggested = document.getElementById('suggestedPass').textContent;
+            inputPass.value = suggested;
+            inputPass.type = 'text';
+            togglePass.textContent = '🙈';
+            inputPass.dispatchEvent(new Event('input'));
+            // Copy to clipboard
+            navigator.clipboard.writeText(suggested).catch(() => {});
+        });
 
-                if (esComun) {
-                    return "comun";
-                }
-
-                if (longitud < 8 || tipos <= 1) {
-                    return "debil";
-                }
-
-                if (longitud >= 10 && tipos >= 3) {
-                    return "fuerte";
-                }
-
-                return "media";
-            }
-            
-            // Evento para mostrar fortaleza en tiempo real
-            if (inputContraseña) {
-                inputContraseña.addEventListener("input", function() {
-                    const password = this.value;
-                    const nivelFortaleza = evaluarFortaleza(password);
-                    
-                    const fortaleza1 = document.getElementById("fortaleza1");
-                    const fortaleza2 = document.getElementById("fortaleza2");
-                    const fortaleza3 = document.getElementById("fortaleza3");
-                    const textoFortaleza = document.getElementById("texto-fortaleza");
-                    
-                    // Resetear colores
-                    fortaleza1.style.backgroundColor = "#e0e0e0";
-                    fortaleza2.style.backgroundColor = "#e0e0e0";
-                    fortaleza3.style.backgroundColor = "#e0e0e0";
-                    
-                    if (password.length === 0) {
-                        textoFortaleza.textContent = "Fortaleza: Escribe una contraseña";
-                        textoFortaleza.style.color = "#666";
-                        return;
-                    }
-                    
-                    // Mostrar colores según fortaleza
-                    if (nivelFortaleza === "comun") {
-                        fortaleza1.style.backgroundColor = "#dc3545";
-                        textoFortaleza.textContent = "🔴 No recomendada: parece fácil de adivinar (ej: Hola12345).";
-                        textoFortaleza.style.color = "#dc3545";
-                    } else if (nivelFortaleza === "debil") {
-                        // DÉBIL - Rojo
-                        fortaleza1.style.backgroundColor = "#dc3545";
-                        textoFortaleza.textContent = "🔴 Contraseña débil - Recomendación: usá 8+ caracteres y combiná letras y números.";
-                        textoFortaleza.style.color = "#dc3545";
-                    } else if (nivelFortaleza === "media") {
-                        // MEDIA - Amarillo
-                        fortaleza1.style.backgroundColor = "#ffc107";
-                        fortaleza2.style.backgroundColor = "#ffc107";
-                        textoFortaleza.textContent = "🟡 Contraseña media - Válida. Recomendación: agregá un símbolo o más longitud para reforzarla.";
-                        textoFortaleza.style.color = "#ffc107";
-                    } else if (nivelFortaleza === "fuerte") {
-                        // FUERTE - Verde
-                        fortaleza1.style.backgroundColor = "#28a745";
-                        fortaleza2.style.backgroundColor = "#28a745";
-                        fortaleza3.style.backgroundColor = "#28a745";
-                        textoFortaleza.textContent = "🟢 Contraseña fuerte - Excelente";
-                        textoFortaleza.style.color = "#28a745";
-                    }
-                });
-            }
-            
-            // ============ TOGGLE CONTRASEÑA ============
-            if (togglePassword) {
-                togglePassword.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    if (inputContraseña.type === "password") {
-                        inputContraseña.type = "text";
-                        togglePassword.style.stroke = "#6A44F2";
-                    } else {
-                        inputContraseña.type = "password";
-                        togglePassword.style.stroke = "currentColor";
-                    }
-                });
-            }
-            
-            // ============ TOGGLE REPETIR ============
-            if (toggleRepetir) {
-                toggleRepetir.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    if (inputRepetir.type === "password") {
-                        inputRepetir.type = "text";
-                        toggleRepetir.style.stroke = "#6A44F2";
-                    } else {
-                        inputRepetir.type = "password";
-                        toggleRepetir.style.stroke = "currentColor";
-                    }
-                });
-            }
-
-            // ============ ENVÍO DEL FORMULARIO ============
-            const formulario = document.getElementById("formularioUsuario");
-            if (formulario) {
-                formulario.addEventListener("submit", function(event) {
-                    event.preventDefault();
-                    
-                    // Validar email
-                    const email = inputEmail.value.trim();
-                    if (!email.includes("@") || !dominiosPermitidos.includes(email.split("@")[1].toLowerCase())) {
-                        document.getElementById("resultado").innerText = "❌ Email inválido";
-                        document.getElementById("resultado").style.color = "#dc3545";
-                        return;
-                    }
-                    
-                    // Validar que las contraseñas coincidan
-                    const contraseña = inputContraseña.value;
-                    const repetir = inputRepetir.value;
-                    
-                    if (contraseña !== repetir) {
-                        document.getElementById("resultado").innerText = "❌ Revisá la contraseña ingresada";
-                        document.getElementById("resultado").style.color = "#dc3545";
-                        return;
-                    }
-                    
-                    // Obtener datos del formulario
-                    var nombre = document.getElementById("nombre").value;
-                    var apellido = document.getElementById("apellido").value;
-                    var contraseña_form = document.getElementById("contraseña").value;
-                    // Construir objeto 
-                    var formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("apellido", apellido);
-                    formData.append("email", email);
-                    formData.append("contraseña", contraseña_form);
-                    // Envia solicitud POST para carga del producto
-                    fetch("/cargar_usuario", {
-                        method: "POST",
-                        body: formData,
-                        credentials: 'include'  // Incluir cookies en la solicitud
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.ok) {
-                            document.getElementById("resultado").innerText = "✅ Cuenta creada, redirigiendo...";
-                            document.getElementById("resultado").style.color = "#28a745";
-                            setTimeout(() => {
-                                window.location.href = "/";
-                            }, 700);
-                        } else {
-                            document.getElementById("resultado").innerText = "❌ " + (data.error || "Error al crear cuenta");
-                            document.getElementById("resultado").style.color = "#dc3545";
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                        document.getElementById("resultado").innerText = "❌ Error al crear cuenta";
-                        document.getElementById("resultado").style.color = "#dc3545";
-                    });
-                });
+        // ===== TOGGLE CONTRASEÑAS =====
+        togglePass.addEventListener('click', function() {
+            if (inputPass.type === 'password') {
+                inputPass.type = 'text';
+                this.textContent = '🙈';
+            } else {
+                inputPass.type = 'password';
+                this.textContent = '👁️';
             }
         });
+        toggleRepetir.addEventListener('click', function() {
+            if (inputRepetir.type === 'password') {
+                inputRepetir.type = 'text';
+                this.textContent = '🙈';
+            } else {
+                inputRepetir.type = 'password';
+                this.textContent = '👁️';
+            }
+        });
+
+        // ===== CAPS LOCK =====
+        function checkCaps(e) {
+            capsWarn.classList.toggle('visible', e.getModifierState && e.getModifierState('CapsLock'));
+        }
+        inputPass.addEventListener('keyup', checkCaps);
+        inputPass.addEventListener('keydown', checkCaps);
+
+        // ===== EMAIL VALIDATION =====
+        inputEmail.addEventListener('input', function() {
+            errorEmail.classList.remove('visible');
+            this.classList.remove('input-error', 'input-ok');
+        });
+        inputEmail.addEventListener('blur', function() {
+            const email = this.value.trim();
+            if (!email) return;
+            if (!email.includes('@')) {
+                errorEmailText.textContent = 'El email debe contener @';
+                errorEmail.classList.add('visible');
+                this.classList.add('input-error');
+                return;
+            }
+            const partes = email.split('@');
+            if (partes.length !== 2 || !partes[1]) {
+                errorEmailText.textContent = 'Formato de email inválido';
+                errorEmail.classList.add('visible');
+                this.classList.add('input-error');
+                return;
+            }
+            const dominio = partes[1].toLowerCase();
+            if (!dominiosPermitidos.includes(dominio)) {
+                errorEmailText.textContent = 'Dominio no permitido. Usá: ' + dominiosPermitidos.join(', ');
+                errorEmail.classList.add('visible');
+                this.classList.add('input-error');
+                return;
+            }
+            this.classList.add('input-ok');
+        });
+
+        // ===== PASSWORD ANALYSIS =====
+        function hasSequence(str) {
+            const s = str.toLowerCase();
+            for (let i = 0; i < s.length - 2; i++) {
+                const c1 = s.charCodeAt(i), c2 = s.charCodeAt(i+1), c3 = s.charCodeAt(i+2);
+                if (c2 === c1+1 && c3 === c2+1) return true; // abc, 123
+                if (c2 === c1-1 && c3 === c2-1) return true; // cba, 321
+            }
+            return false;
+        }
+        function hasRepetition(str) {
+            return /(.)\1{2,}/.test(str); // 3+ repeated chars
+        }
+        function isCommon(str) {
+            return commonPasswords.includes(str.toLowerCase());
+        }
+
+        function evaluarPassword(pw) {
+            const checks = {
+                len: pw.length >= 8,
+                upper: /[A-Z]/.test(pw),
+                lower: /[a-z]/.test(pw),
+                num: /[0-9]/.test(pw),
+                sym: /[^a-zA-Z0-9]/.test(pw),
+                common: !isCommon(pw) && pw.length > 0
+            };
+
+            // Score 0-100
+            let score = 0;
+            if (checks.len) score += 20;
+            if (checks.upper) score += 15;
+            if (checks.lower) score += 10;
+            if (checks.num) score += 15;
+            if (checks.sym) score += 20;
+            if (pw.length >= 12) score += 10;
+            if (pw.length >= 16) score += 10;
+            // Penalties
+            if (hasSequence(pw)) score -= 15;
+            if (hasRepetition(pw)) score -= 15;
+            if (isCommon(pw)) score = Math.min(score, 10);
+
+            score = Math.max(0, Math.min(100, score));
+
+            let level; // 0=none, 1=debil, 2=media, 3=fuerte, 4=muy fuerte
+            if (pw.length === 0) level = 0;
+            else if (score < 30 || isCommon(pw)) level = 1;
+            else if (score < 60) level = 2;
+            else if (score < 80) level = 3;
+            else level = 4;
+
+            return { checks, score, level, isCommon: isCommon(pw) };
+        }
+
+        function updateChecklist(checks) {
+            const map = {
+                chkLen: checks.len,
+                chkUpper: checks.upper,
+                chkLower: checks.lower,
+                chkNum: checks.num,
+                chkSym: checks.sym,
+                chkCommon: checks.common
+            };
+            for (const [id, ok] of Object.entries(map)) {
+                const el = document.getElementById(id);
+                if (ok) {
+                    el.classList.add('ok');
+                    el.querySelector('.chk-icon').textContent = '✓';
+                } else {
+                    el.classList.remove('ok');
+                    el.querySelector('.chk-icon').textContent = '○';
+                }
+            }
+        }
+
+        const seg1 = document.getElementById('seg1');
+        const seg2 = document.getElementById('seg2');
+        const seg3 = document.getElementById('seg3');
+        const seg4 = document.getElementById('seg4');
+        const strengthText = document.getElementById('strengthText');
+        const commonAlert = document.getElementById('commonAlert');
+
+        const barColors = {
+            0: { segs: 0, color: '', text: 'Escribí una contraseña', textColor: '#666' },
+            1: { segs: 1, color: '#e74c3c', text: '🔴 Contraseña débil', textColor: '#e74c3c' },
+            2: { segs: 2, color: '#f39c12', text: '🟡 Buena, pero mejorable', textColor: '#f39c12' },
+            3: { segs: 3, color: '#2ecc71', text: '🟢 Contraseña fuerte', textColor: '#2ecc71' },
+            4: { segs: 4, color: '#27ae60', text: '🟢 Contraseña muy fuerte', textColor: '#27ae60' }
+        };
+
+        inputPass.addEventListener('input', function() {
+            const pw = this.value;
+            const result = evaluarPassword(pw);
+
+            // Strength bar
+            const conf = barColors[result.level];
+            const segs = [seg1, seg2, seg3, seg4];
+            segs.forEach((s, i) => {
+                if (i < conf.segs) {
+                    s.style.background = conf.color;
+                    s.style.boxShadow = '0 0 6px ' + conf.color + '66';
+                } else {
+                    s.style.background = 'rgba(255,255,255,0.08)';
+                    s.style.boxShadow = 'none';
+                }
+            });
+            strengthText.textContent = conf.text;
+            strengthText.style.color = conf.textColor;
+
+            // Checklist
+            updateChecklist(result.checks);
+
+            // Common alert
+            commonAlert.classList.toggle('visible', result.isCommon);
+
+            // Match indicator update
+            updateMatch();
+        });
+
+        // ===== MATCH INDICATOR =====
+        const matchEl = document.getElementById('matchIndicator');
+        function updateMatch() {
+            const p1 = inputPass.value, p2 = inputRepetir.value;
+            if (!p2) { matchEl.classList.remove('visible'); return; }
+            matchEl.classList.add('visible');
+            if (p1 === p2) {
+                matchEl.textContent = '✓ Las contraseñas coinciden';
+                matchEl.className = 'match-indicator visible match';
+            } else {
+                matchEl.textContent = '✗ Las contraseñas no coinciden';
+                matchEl.className = 'match-indicator visible no-match';
+            }
+        }
+        inputRepetir.addEventListener('input', updateMatch);
+
+        // ===== SUBMIT =====
+        document.getElementById('formularioUsuario').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Validate email
+            const email = inputEmail.value.trim();
+            if (!email.includes('@') || !dominiosPermitidos.includes(email.split('@')[1]?.toLowerCase())) {
+                resultado.innerText = '❌ Email inválido';
+                resultado.style.color = '#e74c3c';
+                return;
+            }
+
+            // Validate passwords match
+            if (inputPass.value !== inputRepetir.value) {
+                resultado.innerText = '❌ Las contraseñas no coinciden';
+                resultado.style.color = '#e74c3c';
+                return;
+            }
+
+            // Loading state
+            btnRegistro.classList.add('loading');
+            btnRegistro.disabled = true;
+
+            var formData = new FormData();
+            formData.append('nombre', inputNombre.value);
+            formData.append('apellido', inputApellido.value);
+            formData.append('email', email);
+            formData.append('contraseña', inputPass.value);
+
+            fetch('/cargar_usuario', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    resultado.innerText = '✅ Cuenta creada, redirigiendo...';
+                    resultado.style.color = '#2ecc71';
+                    setTimeout(() => { window.location.href = '/'; }, 700);
+                } else {
+                    resultado.innerText = '❌ ' + (data.error || 'Error al crear cuenta');
+                    resultado.style.color = '#e74c3c';
+                    btnRegistro.classList.remove('loading');
+                    btnRegistro.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultado.innerText = '❌ Error al crear cuenta';
+                resultado.style.color = '#e74c3c';
+                btnRegistro.classList.remove('loading');
+                btnRegistro.disabled = false;
+            });
+        });
+    });
     </script>
-    {% include 'footer.html' %} 
-</body>
+    {% include 'footer.html' %}
 </html>
 

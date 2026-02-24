@@ -1,75 +1,398 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FullGaming</title>
+    <title>Acceder — FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
-    <!-- Estilo CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-    <!-- Vinculación con Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- Scripts de Bootstrap y jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* ================================================ */
+        /*  LOGIN — TEMA OSCURO PREMIUM                     */
+        /* ================================================ */
+        .auth-page {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.25);
+            border-radius: 20px;
+            padding: 40px 36px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 50px rgba(106, 68, 242, 0.06);
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .auth-logo img {
+            height: 50px;
+            filter: drop-shadow(0 2px 8px rgba(106, 68, 242, 0.3));
+        }
+        .auth-title {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .auth-subtitle {
+            text-align: center;
+            color: #8b82d4;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        /* --- Inputs --- */
+        .auth-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .auth-label {
+            display: block;
+            color: #B5B3F2;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+        }
+        .auth-input-wrap {
+            position: relative;
+        }
+        .auth-input-wrap .auth-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #6A44F2;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .auth-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-radius: 10px !important;
+            padding: 12px 14px 12px 42px !important;
+            color: #d4d0f0 !important;
+            font-size: 15px !important;
+            transition: all 0.2s !important;
+            outline: none !important;
+        }
+        .auth-input:focus {
+            border-color: #6A44F2 !important;
+            box-shadow: 0 0 0 3px rgba(106, 68, 242, 0.15) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        .auth-input::placeholder { color: #7E7B9A !important; opacity: 0.85; letter-spacing: 0.2px; }
+        .auth-input.input-error {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
+        }
+
+        /* Toggle password */
+        .auth-toggle-pass {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+            z-index: 2;
+        }
+        .auth-toggle-pass:hover { color: #6A44F2; }
+
+        /* Error inline */
+        .auth-error {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(231, 76, 60, 0.08);
+            border: 1px solid rgba(231, 76, 60, 0.15);
+            border-radius: 8px;
+            color: #e74c3c;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .auth-error.visible {
+            display: flex;
+        }
+
+        /* Caps lock warning */
+        .caps-warn {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            color: #f39c12;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .caps-warn.visible { display: flex; }
+
+        /* Separador */
+        .auth-sep {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(106, 68, 242, 0.25), transparent);
+            margin: 24px 0;
+            border: none;
+        }
+
+        /* Botón principal */
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(106, 68, 242, 0.3);
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+        }
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 35px rgba(106, 68, 242, 0.45);
+        }
+        .auth-btn:active { transform: translateY(0); }
+        .auth-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .auth-btn .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        .auth-btn.loading .spinner { display: inline-block; }
+        .auth-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Link registro */
+        .auth-footer {
+            text-align: center;
+            margin-top: 22px;
+            color: #8b82d4;
+            font-size: 14px;
+        }
+        .auth-footer a {
+            color: #6C63FF;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .auth-footer a:hover {
+            color: #8d7fff;
+            text-decoration: underline;
+        }
+
+        /* Disclaimer */
+        .auth-disclaimer {
+            text-align: center;
+            color: #555;
+            font-size: 11px;
+            margin-top: 18px;
+            line-height: 1.5;
+        }
+        .auth-disclaimer span { color: #8b82d4; }
+    </style>
 </head>
 <body>
     <header>
-        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+        {% include 'navbar.html' %}
     </header>
-    
-    <main>
-        <div class="form-container auth-container">
-        <h1 class="text-center">Acceder</h1>
-        <form id="formularioAcceso" class="auth-form" action="/cuenta" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="email" class="form-label">Correo electrónico:</label>
-                <input type="email" id="email" name="email" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="contraseña" class="form-label">Contraseña:</label>
-                <input type="password" id="contraseña" name="contraseña" class="form-control" required>
-            </div>
-            <br>
-            <button type="submit" class="btn btn-primary">Acceder</button>
-        </form>
-       
-        <p class="mt-3">¿No tienes una cuenta? <a href="/nuevo_usuario" class="btn btn-primary">Registrate</a></p>
-    </div>
 
-    <div id="resultado"></div>
+    <main>
+        <div class="auth-page">
+            <div class="auth-card">
+                <div class="auth-logo">
+                    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="FullGaming">
+                </div>
+                <h1 class="auth-title">Bienvenido de vuelta</h1>
+                <p class="auth-subtitle">Iniciá sesión para acceder a tu cuenta</p>
+
+                <form id="formularioAcceso" action="/cuenta" method="post" enctype="multipart/form-data" autocomplete="on">
+                    <!-- Email -->
+                    <div class="auth-group">
+                        <label for="email" class="auth-label">Correo electrónico</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">✉️</span>
+                            <input type="email" id="email" name="email" class="auth-input" placeholder="tu@email.com" required autocomplete="email">
+                        </div>
+                        <div class="auth-error" id="errorEmail">
+                            <span>⚠️</span> <span id="errorEmailText">Formato de email inválido</span>
+                        </div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="auth-group">
+                        <label for="contraseña" class="auth-label">Contraseña</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">🔒</span>
+                            <input type="password" id="contraseña" name="contraseña" class="auth-input" placeholder="Tu contraseña" required autocomplete="current-password">
+                            <button type="button" class="auth-toggle-pass" id="togglePass" title="Mostrar contraseña">👁️</button>
+                        </div>
+                        <div class="caps-warn" id="capsWarn">
+                            <span>⬆️</span> Bloq Mayús activado
+                        </div>
+                    </div>
+
+                    <!-- Error general -->
+                    <div class="auth-error" id="errorGeneral" style="margin-bottom: 16px;">
+                        <span>❌</span> <span id="errorGeneralText">Usuario o contraseña incorrectos</span>
+                    </div>
+
+                    <button type="submit" class="auth-btn" id="btnLogin">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Iniciar Sesión</span>
+                    </button>
+                </form>
+
+                <hr class="auth-sep">
+
+                <div class="auth-footer">
+                    ¿No tenés cuenta? <a href="/nuevo_usuario">Crear cuenta</a>
+                </div>
+
+                <p class="auth-disclaimer">🔒 No compartas tu contraseña con nadie. <span>FullGaming</span> nunca te la pedirá por email.</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="resultado" style="display:none;"></div>
 
     <script>
-        document.getElementById("formularioAcceso").addEventListener("submit", function(event) {
-            event.preventDefault();
-            // Obtener datos del formulario
-            var email = document.getElementById("email").value;
-            var contraseña = document.getElementById("contraseña").value;
-            // Construir objeto 
-            var formData = new FormData();
-            formData.append("email", email);
-            formData.append("contraseña", contraseña);
-            // Envía solicitud POST al login
-            fetch("/cuenta", {
-                method: "POST",
-                body: formData 
-            })
-            .then(response => {
-                if(response.ok) {
-                    // Si login exitoso, redirige a página principal
-                    window.location.href = "/";
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formularioAcceso');
+            const emailInput = document.getElementById('email');
+            const passInput = document.getElementById('contraseña');
+            const btnLogin = document.getElementById('btnLogin');
+            const togglePass = document.getElementById('togglePass');
+            const capsWarn = document.getElementById('capsWarn');
+            const errorGeneral = document.getElementById('errorGeneral');
+            const errorEmail = document.getElementById('errorEmail');
+
+            // Toggle password
+            togglePass.addEventListener('click', function() {
+                if (passInput.type === 'password') {
+                    passInput.type = 'text';
+                    this.textContent = '🙈';
+                    this.title = 'Ocultar contraseña';
                 } else {
-                    return response.json().then(data => {
-                        throw new Error(data.error || "Error al acceder");
-                    });
+                    passInput.type = 'password';
+                    this.textContent = '👁️';
+                    this.title = 'Mostrar contraseña';
                 }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("resultado").innerText = error.message || "Error al acceder";
+            });
+
+            // Caps Lock detection
+            passInput.addEventListener('keyup', function(e) {
+                capsWarn.classList.toggle('visible', e.getModifierState && e.getModifierState('CapsLock'));
+            });
+            passInput.addEventListener('keydown', function(e) {
+                capsWarn.classList.toggle('visible', e.getModifierState && e.getModifierState('CapsLock'));
+            });
+
+            // Email validation visual
+            emailInput.addEventListener('blur', function() {
+                const val = this.value.trim();
+                if (val.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    errorEmail.classList.add('visible');
+                    this.classList.add('input-error');
+                } else {
+                    errorEmail.classList.remove('visible');
+                    this.classList.remove('input-error');
+                }
+            });
+            emailInput.addEventListener('input', function() {
+                errorEmail.classList.remove('visible');
+                this.classList.remove('input-error');
+                errorGeneral.classList.remove('visible');
+            });
+            passInput.addEventListener('input', function() {
+                errorGeneral.classList.remove('visible');
+            });
+
+            // Submit
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                errorGeneral.classList.remove('visible');
+
+                // Loading state
+                btnLogin.classList.add('loading');
+                btnLogin.disabled = true;
+
+                var formData = new FormData();
+                formData.append('email', emailInput.value);
+                formData.append('contraseña', passInput.value);
+
+                fetch('/cuenta', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Usuario o contraseña incorrectos');
+                        });
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('errorGeneralText').textContent = error.message || 'Usuario o contraseña incorrectos';
+                    errorGeneral.classList.add('visible');
+                    btnLogin.classList.remove('loading');
+                    btnLogin.disabled = false;
+
+                    // Shake animation
+                    const card = document.querySelector('.auth-card');
+                    card.style.animation = 'shake 0.4s ease';
+                    setTimeout(() => card.style.animation = '', 400);
+                });
             });
         });
     </script>
-    {% include 'footer.html' %} 
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+    </style>
+    {% include 'footer.html' %}
 </body>
 </html>

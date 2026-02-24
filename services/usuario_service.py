@@ -106,18 +106,91 @@ class UsuarioService:
         except Exception as e:
             return None
     
-    # OBTENER TODOS LOS USUARIOS
+    # OBTENER TODOS LOS USUARIOS (con fechas)
     def obtener_todos(self):
-
         try:
             cursor = self.conexion.cursor()
-            query = "SELECT idusuario, nombre, apellido, email, is_admin FROM usuario"
+            query = "SELECT idusuario, nombre, apellido, email, is_admin, fecha_creacion, ultimo_acceso FROM usuario"
             cursor.execute(query)
             usuarios = cursor.fetchall()
             cursor.close()
             return usuarios
         except Exception as e:
             return []
+
+    # OBTENER PEDIDOS DE UN USUARIO
+    def obtener_pedidos_usuario(self, usuario_id):
+        try:
+            cursor = self.conexion.cursor()
+            query = """SELECT id, fecha, total, estado 
+                       FROM pedidos 
+                       WHERE usuario_id = %s 
+                       ORDER BY fecha DESC"""
+            cursor.execute(query, (usuario_id,))
+            pedidos = cursor.fetchall()
+            cursor.close()
+            resultado = []
+            for p in pedidos:
+                resultado.append({
+                    'id': p[0],
+                    'fecha': p[1].strftime('%d/%m/%Y - %H:%M') if p[1] else 'Sin fecha',
+                    'total': int(p[2]) if p[2] else 0,
+                    'estado': p[3] or 'completado'
+                })
+            return resultado
+        except Exception as e:
+            print(f"Error obtener_pedidos_usuario: {e}")
+            return []
+
+    # ESTADÍSTICAS DE UN USUARIO (para info rápida)
+    def obtener_estadisticas_usuario(self, usuario_id):
+        try:
+            cursor = self.conexion.cursor()
+            # Datos del usuario
+            cursor.execute(
+                "SELECT fecha_creacion, ultimo_acceso FROM usuario WHERE idusuario = %s",
+                (usuario_id,)
+            )
+            usuario_data = cursor.fetchone()
+
+            # Cantidad y monto total de pedidos
+            cursor.execute(
+                "SELECT COUNT(*), COALESCE(SUM(total), 0) FROM pedidos WHERE usuario_id = %s",
+                (usuario_id,)
+            )
+            pedido_data = cursor.fetchone()
+            cursor.close()
+
+            fecha_creacion = usuario_data[0].strftime('%d/%m/%Y - %H:%M') if usuario_data and usuario_data[0] else 'No registrada'
+            ultimo_acceso = usuario_data[1].strftime('%d/%m/%Y - %H:%M') if usuario_data and usuario_data[1] else 'Nunca'
+
+            return {
+                'fecha_creacion': fecha_creacion,
+                'ultimo_acceso': ultimo_acceso,
+                'cantidad_pedidos': int(pedido_data[0]) if pedido_data else 0,
+                'monto_total': int(pedido_data[1]) if pedido_data else 0
+            }
+        except Exception as e:
+            print(f"Error obtener_estadisticas_usuario: {e}")
+            return {
+                'fecha_creacion': 'Error',
+                'ultimo_acceso': 'Error',
+                'cantidad_pedidos': 0,
+                'monto_total': 0
+            }
+
+    # ACTUALIZAR ÚLTIMO ACCESO
+    def actualizar_ultimo_acceso(self, usuario_id):
+        try:
+            cursor = self.conexion.cursor()
+            cursor.execute(
+                "UPDATE usuario SET ultimo_acceso = NOW() WHERE idusuario = %s",
+                (usuario_id,)
+            )
+            self.conexion.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"Error actualizar_ultimo_acceso: {e}")
 
     # OBTENER USUARIO POR ID
     def obtener_usuario_por_id(self, usuario_id):

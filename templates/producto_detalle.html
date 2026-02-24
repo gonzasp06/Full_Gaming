@@ -1,39 +1,315 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FullGaming</title>
+    <title>{{ producto[1] }} — FullGaming</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
-    <!--Estilo CSS-->
     <link rel="stylesheet"  href="{{ url_for('static', filename='css/index.css') }}">
-    <!-- Vinculacion con Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Scripts de Bootstrap y jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</head>
-    <script>
-    function cambiarQty(delta){
-        const input = document.getElementById('qty');
-        let v = parseInt(input.value || "1", 10);
-        v = isNaN(v) ? 1 : v;
-        v = Math.max(1, v + delta);
-        input.value = v;
+    <style>
+        /* ================================================ */
+        /*  DETALLE PRODUCTO — TEMA OSCURO PREMIUM          */
+        /* ================================================ */
 
-        const btn = document.getElementById('btnCarrito');
-        const url = new URL(btn.getAttribute('href'), window.location.origin);
-        url.searchParams.set('cantidad', v);
-        btn.setAttribute('href', url.pathname + url.search);
-    }
-    // inicializa al cargar
-    cambiarQty(0);
-    </script>
+        /* --- Container principal --- */
+        .pd-container {
+            max-width: 1140px;
+            margin: 0 auto 60px;
+            padding: 30px 24px 10px;
+        }
+        .pd-card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.2);
+            border-radius: 20px;
+            padding: 36px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 50px rgba(106, 68, 242, 0.06);
+        }
+
+        /* --- Botón volver override --- */
+        .btn-volver-detalle {
+            margin: 20px auto 0;
+            max-width: 1140px;
+            display: flex;
+            padding: 0 24px;
+        }
+
+        /* --- Imagen --- */
+        .pd-img-wrap {
+            background: linear-gradient(145deg, rgba(106, 68, 242, 0.08), rgba(30, 25, 60, 0.6));
+            border: 1px solid rgba(106, 68, 242, 0.15);
+            border-radius: 18px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.2);
+            min-height: 380px;
+        }
+        .pd-img-wrap img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            border-radius: 12px;
+            filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3));
+        }
+
+        /* --- Info column --- */
+        .pd-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            height: 100%;
+        }
+
+        /* Badge ID */
+        .pd-badge-id {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #8b82d4;
+            background: rgba(106, 68, 242, 0.1);
+            border: 1px solid rgba(106, 68, 242, 0.2);
+            letter-spacing: 0.5px;
+            width: fit-content;
+            margin-bottom: 10px;
+        }
+
+        /* Categoría badge */
+        .pd-cat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #B5B3F2;
+            background: rgba(106, 68, 242, 0.12);
+            border: 1px solid rgba(106, 68, 242, 0.18);
+            width: fit-content;
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Título */
+        .pd-titulo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 18px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.3px;
+        }
+
+        /* Separador */
+        .pd-sep {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(106, 68, 242, 0.3), transparent);
+            margin: 4px 0 18px;
+            border: none;
+        }
+
+        /* Precio block */
+        .pd-precio-block {
+            margin-bottom: 16px;
+        }
+        .pd-precio-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #8b82d4;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .pd-precio {
+            font-family: 'Horizon', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #6C63FF;
+            line-height: 1.1;
+            text-shadow: 0 0 30px rgba(108, 99, 255, 0.2);
+        }
+        .pd-precio .pd-precio-symbol {
+            font-size: 1.6rem;
+            font-weight: 700;
+            opacity: 0.75;
+            margin-right: 2px;
+        }
+
+        /* Stock badge */
+        .pd-stock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            width: fit-content;
+            margin-bottom: 4px;
+        }
+        .pd-stock-badge .pd-stock-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .pd-stock-badge.stock-ok {
+            background: rgba(46, 204, 113, 0.12);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+        .pd-stock-badge.stock-ok .pd-stock-dot { background: #2ecc71; box-shadow: 0 0 6px rgba(46, 204, 113, 0.4); }
+        .pd-stock-badge.stock-low {
+            background: rgba(243, 156, 18, 0.12);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.2);
+        }
+        .pd-stock-badge.stock-low .pd-stock-dot { background: #f39c12; box-shadow: 0 0 6px rgba(243, 156, 18, 0.4); }
+        .pd-stock-badge.stock-out {
+            background: rgba(231, 76, 60, 0.12);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+        .pd-stock-badge.stock-out .pd-stock-dot { background: #e74c3c; box-shadow: 0 0 6px rgba(231, 76, 60, 0.4); }
+
+        /* Separador 2 */
+
+        /* Beneficios */
+        .pd-beneficios {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+        .pd-beneficio {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(106, 68, 242, 0.08);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        .pd-beneficio:hover {
+            background: rgba(106, 68, 242, 0.06);
+            border-color: rgba(106, 68, 242, 0.18);
+        }
+        .pd-beneficio img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            filter: brightness(0) invert(0.75) sepia(1) saturate(3) hue-rotate(225deg);
+        }
+        .pd-beneficio-texto {
+            color: #b8b4d9;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .pd-beneficio-link {
+            margin-left: auto;
+            font-size: 12px;
+            color: #6C63FF;
+            text-decoration: none;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pd-beneficio-link:hover { text-decoration: underline; }
+
+        /* Botón CTA */
+        .pd-btn-carrito {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(106, 68, 242, 0.35);
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+            text-transform: none;
+        }
+        .pd-btn-carrito:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(106, 68, 242, 0.5);
+        }
+        .pd-btn-carrito:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+        .pd-btn-carrito:disabled {
+            background: linear-gradient(135deg, #444, #333);
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Descripción */
+        .pd-descripcion {
+            margin-top: 36px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(106, 68, 242, 0.15);
+        }
+        .pd-descripcion-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .pd-descripcion-header h2 {
+            font-family: 'Horizon', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #B5B3F2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .pd-descripcion-header::before {
+            content: '📝';
+            font-size: 20px;
+        }
+        .pd-descripcion-body {
+            max-width: 900px;
+            color: #c4c0e0;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        .pd-descripcion-body p { margin-bottom: 10px; }
+        .pd-descripcion-body strong { color: #fff; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .pd-card { padding: 24px 20px; }
+            .pd-titulo { font-size: 1.6rem; }
+            .pd-precio { font-size: 2rem; }
+            .pd-img-wrap { padding: 16px; min-height: auto; }
+        }
+    </style>
+</head>
 <body>
     <header>
-        {% include 'navbar.html' %} <!--incluye el navabar.html-->
+        {% include 'navbar.html' %}
     </header>
 
     <main>
@@ -42,11 +318,12 @@
             <span>Volver</span>
         </a>
 
-        <div class="producto-detalle-container">
-        <div class="row g-4">
-            <!-- FOTO GRANDE -->
+        <div class="pd-container">
+        <div class="pd-card">
+        <div class="row g-4 g-lg-5">
+            <!-- FOTO -->
             <div class="col-md-5">
-                <div class="producto-detalle-imagen">
+                <div class="pd-img-wrap">
                     {% set foto = producto[6] | replace('\\', '/') if producto[6] else '' %}
                     {% if foto and foto.startswith('static/') %}
                         <img src="{{ url_for('static', filename=foto.split('static/')[1]) }}" alt="{{ producto[1] }}">
@@ -59,64 +336,82 @@
                     {% endif %}
                 </div>
             </div>
-            
-            <!-- INFO PRINCIPAL -->
+
+            <!-- INFO -->
             <div class="col-md-7">
-                <div class="producto-info-wrapper">
+                <div class="pd-info">
 
-                    <div class="producto-meta">
-                    <span class="badge-meta">ID: {{ producto[0] }}</span>
+                    <!-- Meta badges -->
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+                        <span class="pd-badge-id">ID: {{ producto[0] }}</span>
+                        <span class="pd-cat-badge">{{ producto[3] }}</span>
                     </div>
-                    <h1 class="producto-detalle-titulo">{{ producto[1] }}</h1>
 
-                <p class="producto-detalle-categoria">
-                    Categoría: <span>{{ producto[3] }}</span>
-                </p>
+                    <!-- Título -->
+                    <h1 class="pd-titulo">{{ producto[1] }}</h1>
 
-                <p class="producto-detalle-precio">
-                    ${{ producto[4] }}
-                </p>
+                    <hr class="pd-sep">
 
-                <ul class="beneficios-lista">
-                <li class="beneficio-linea">
-                    <img class="beneficio-icono" src="{{ url_for('static', filename='images/envio.png') }}" alt="Envío">
-                    <span class="beneficio-texto">Envíos a todo el país.</span>
-                </li>
+                    <!-- Precio -->
+                    <div class="pd-precio-block">
+                        <div class="pd-precio-label">Precio final</div>
+                        <div class="pd-precio">
+                            <span class="pd-precio-symbol">$</span>{{ "{:,.0f}".format(producto[4]).replace(",", ".") }}
+                        </div>
+                    </div>
 
-                <li class="beneficio-linea">
-                    <img class="beneficio-icono" src="{{ url_for('static', filename='images/seguro.png') }}" alt="Compra segura">
-                    <span class="beneficio-texto">Compra segura.</span>
-                </li>
+                    <!-- Stock badge -->
+                    {% if producto[5] == 0 %}
+                        <div class="pd-stock-badge stock-out"><span class="pd-stock-dot"></span> Agotado</div>
+                    {% elif producto[5] <= 5 %}
+                        <div class="pd-stock-badge stock-low"><span class="pd-stock-dot"></span> Últimas {{ producto[5] }} unidades</div>
+                    {% else %}
+                        <div class="pd-stock-badge stock-ok"><span class="pd-stock-dot"></span> En stock</div>
+                    {% endif %}
 
-                <li class="beneficio-linea">
-                    <img class="beneficio-icono" src="{{ url_for('static', filename='images/cuotas.png') }}" alt="Cuotas">
-                    <span class="beneficio-texto">
-                    6 cuotas sin interés de $
-                    {{ "{:,.2f}".format((producto[4] | float) / 6).replace(",", "X").replace(".", ",").replace("X", ".") }}
-                    </span>
-                </li>
+                    <hr class="pd-sep">
 
-                <li class="beneficio-linea">
-                    <img class="beneficio-icono" src="{{ url_for('static', filename='images/garantia.png') }}" alt="Garantía">
-                    <span class="beneficio-texto">Garantía - 12 meses</span>
-                    <a class="beneficio-link" href="#">Ver términos y condiciones</a>
-                </li>
-                </ul>
+                    <!-- Beneficios -->
+                    <ul class="pd-beneficios">
+                        <li class="pd-beneficio">
+                            <img src="{{ url_for('static', filename='images/envio.png') }}" alt="Envío">
+                            <span class="pd-beneficio-texto">Envíos a todo el país</span>
+                        </li>
+                        <li class="pd-beneficio">
+                            <img src="{{ url_for('static', filename='images/seguro.png') }}" alt="Seguro">
+                            <span class="pd-beneficio-texto">Compra segura</span>
+                        </li>
+                        <li class="pd-beneficio">
+                            <img src="{{ url_for('static', filename='images/cuotas.png') }}" alt="Cuotas">
+                            <span class="pd-beneficio-texto">6 cuotas sin interés de ${{ "{:,.2f}".format((producto[4] | float) / 6).replace(",", "X").replace(".", ",").replace("X", ".") }}</span>
+                        </li>
+                        <li class="pd-beneficio">
+                            <img src="{{ url_for('static', filename='images/garantia.png') }}" alt="Garantía">
+                            <span class="pd-beneficio-texto">Garantía — 12 meses</span>
+                            <a class="pd-beneficio-link" href="#">Ver términos</a>
+                        </li>
+                    </ul>
 
-                <!-- Botón agregar al carrito -->
-                <button id="btn-agregar-{{ producto[0] }}" class="btn-comprar {% if producto[5] == 0 %}disabled{% endif %}"
-                data-nombre="{{ producto[1] }}"
-                onclick="agregarAlCarrito({{ producto[0] }}, 'btn-agregar-{{ producto[0] }}')"
-                {% if producto[5] == 0 %}disabled{% endif %}>
-                {% if producto[5] > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
-                </button>
+                    <!-- Botón CTA -->
+                    <button id="btn-agregar-{{ producto[0] }}" class="pd-btn-carrito {% if producto[5] == 0 %}disabled{% endif %}"
+                        data-nombre="{{ producto[1] }}"
+                        onclick="agregarAlCarrito({{ producto[0] }}, 'btn-agregar-{{ producto[0] }}')"
+                        {% if producto[5] == 0 %}disabled{% endif %}>
+                        {% if producto[5] > 0 %}🛒 Agregar al carrito{% else %}Sin stock{% endif %}
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- DESCRIPCIÓN LARGA ABAJO -->
-        <div class="producto-detalle-descripcion">
-            <h2>Descripción</h2>
-            <p>{{ producto[2]|safe }}</p>
+        <!-- DESCRIPCIÓN -->
+        <div class="pd-descripcion">
+            <div class="pd-descripcion-header">
+                <h2>Descripción</h2>
+            </div>
+            <div class="pd-descripcion-body">
+                {{ producto[2]|safe }}
+            </div>
+        </div>
         </div>
         </div>
     </main>

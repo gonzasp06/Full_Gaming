@@ -189,6 +189,7 @@ def acceso_cuentas():
             session['usuario_nombre'] = usuario['nombre']  # Nombre en sesión
             session['es_admin'] = usuario['is_admin']  # Si es admin
             session.permanent = True  # Mantener sesión
+            service.actualizar_ultimo_acceso(usuario['id'])  # Registrar último acceso
             return jsonify({"mensaje": "Login exitoso"}), 200
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
@@ -271,6 +272,22 @@ def gestion_usuarios():
     service = UsuarioService()
     usuarios = service.obtener_todos()
     return render_template('gestion_usuarios.html', usuarios=usuarios)
+
+
+@app.route('/api/usuarios/<int:user_id>/pedidos')
+@admin_manager.requerir_admin
+def api_pedidos_usuario(user_id):
+    service = UsuarioService()
+    pedidos = service.obtener_pedidos_usuario(user_id)
+    return jsonify({'ok': True, 'pedidos': pedidos})
+
+
+@app.route('/api/usuarios/<int:user_id>/info')
+@admin_manager.requerir_admin
+def api_info_usuario(user_id):
+    service = UsuarioService()
+    stats = service.obtener_estadisticas_usuario(user_id)
+    return jsonify({'ok': True, 'info': stats})
 
 
 @app.route('/actualizar_rol/<int:user_id>', methods=['POST'])

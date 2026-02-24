@@ -3,6 +3,8 @@
     width: 100%;
     background-color: #272D40;
     padding: 12px 20px;
+    position: relative;
+    z-index: 100;
 }
 
 .nav-wrapper {
