@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda y Soporte — FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .help-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        /* Header */
+        .help-header {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .help-header-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .help-header h1 {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .help-header p {
+            color: #5a4f8a;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Welcome banner */
+        .help-welcome {
+            text-align: center;
+            padding: 22px 28px;
+            margin-bottom: 36px;
+            background: linear-gradient(135deg, rgba(106, 68, 242, 0.1), rgba(60, 48, 140, 0.15));
+            border: 1px solid rgba(106, 68, 242, 0.2);
+            border-radius: 14px;
+        }
+        .help-welcome p {
+            color: #4a4270;
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Category block */
+        .help-category {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.15);
+            border-radius: 16px;
+            padding: 30px 30px;
+            margin-bottom: 22px;
+            transition: border-color 0.3s;
+        }
+        .help-category:hover {
+            border-color: rgba(106, 68, 242, 0.35);
+        }
+        .help-cat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .help-cat-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .help-cat-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .help-cat-desc {
+            color: #ddd8f0;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 18px;
+        }
+
+        /* FAQ accordion */
+        .faq-item {
+            border: 1px solid rgba(106, 68, 242, 0.12);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .faq-item:hover {
+            border-color: rgba(106, 68, 242, 0.3);
+        }
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            color: #d4d0f0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .faq-question:hover {
+            background: rgba(106, 68, 242, 0.06);
+        }
+        .faq-question .faq-arrow {
+            font-size: 12px;
+            color: #6A44F2;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+        .faq-item.open .faq-question .faq-arrow {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            display: none;
+            padding: 0 18px 16px;
+            color: #d0cce8;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+
+        /* Tip box */
+        .help-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 14px;
+            padding: 12px 16px;
+            background: rgba(46, 204, 113, 0.06);
+            border: 1px solid rgba(46, 204, 113, 0.15);
+            border-radius: 10px;
+            color: #7dd3a0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .help-tip .tip-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* Contact CTA */
+        .help-contact {
+            text-align: center;
+            margin-top: 40px;
+            padding: 32px 28px;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.2);
+            border-radius: 16px;
+        }
+        .help-contact-icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .help-contact h3 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .help-contact p {
+            color: #8b82d4;
+            font-size: 14px;
+            max-width: 480px;
+            margin: 0 auto 18px;
+            line-height: 1.6;
+        }
+        .help-contact-redes {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .help-contact-redes a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(106, 68, 242, 0.1);
+            border: 1px solid rgba(106, 68, 242, 0.2);
+            transition: all 0.2s;
+        }
+        .help-contact-redes a:hover {
+            background: rgba(106, 68, 242, 0.2);
+            border-color: rgba(106, 68, 242, 0.4);
+            transform: translateY(-2px);
+        }
+        .help-contact-redes img {
+            width: 22px;
+            filter: brightness(0.9);
+        }
+
+        @media (max-width: 600px) {
+            .help-page { padding: 24px 16px 40px; }
+            .help-category { padding: 22px 18px; }
+            .help-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% include 'navbar.html' %}
+    </header>
+
+    <main>
+        <div class="help-page">
+
+            <div class="help-header">
+                <span class="help-header-icon">🆘</span>
+                <h1>Ayuda y Soporte</h1>
+                <p>Todo lo que necesitás saber sobre tu experiencia en Full Gaming</p>
+            </div>
+
+            <div class="help-welcome">
+                <p>💬 <strong>Estamos para ayudarte.</strong> Acá vas a encontrar respuestas a las preguntas más frecuentes sobre compras, envíos, pagos, tu cuenta y más. Si no encontrás lo que buscás, nuestro equipo puede asistirte.</p>
+            </div>
+
+            <!-- ==================== COMPRAS Y PEDIDOS ==================== -->
+            <div class="help-category">
+                <div class="help-cat-header">
+                    <span class="help-cat-icon">📦</span>
+                    <h2 class="help-cat-title">Compras y Pedidos</h2>
+                </div>
+                <p class="help-cat-desc">
+                    Comprá de forma rápida y segura. Agregá productos al carrito, completá tus datos y confirmá tu pedido. Una vez procesado, vas a poder ver el estado desde tu cuenta.
+                </p>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cómo realizo una compra?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Explorá el catálogo, hacé clic en el producto que te interesa y presioná "Agregar al carrito". Cuando tengas todo listo, andá al carrito, verificá tu pedido y hacé clic en "Finalizar compra". Vas a necesitar una cuenta activa.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Puedo modificar o cancelar un pedido?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Si tu pedido todavía no fue despachado, podés contactarnos por nuestras redes para solicitar una modificación o cancelación. Una vez enviado, el cambio se gestiona como devolución.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cómo veo el estado de mi pedido?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Desde tu perfil podés consultar el historial de pedidos, donde figura el estado actual, los productos incluidos y la fecha de compra.
+                    </div>
+                </div>
+
+                <div class="help-tip">
+                    <span class="tip-icon">💡</span>
+                    <span>Revisá siempre los productos y cantidades en el carrito antes de confirmar tu compra.</span>
+                </div>
+            </div>
+
+            <!-- ==================== ENVÍOS ==================== -->
+            <div class="help-category">
+                <div class="help-cat-header">
+                    <span class="help-cat-icon">🚚</span>
+                    <h2 class="help-cat-title">Envíos</h2>
+                </div>
+                <p class="help-cat-desc">
+                    Realizamos envíos a todo el país. Los plazos dependen de tu ubicación y del servicio de correo disponible. Una vez despachado, te proporcionaremos un código de seguimiento cuando esté disponible.
+                </p>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cuánto tarda en llegar mi pedido?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Los plazos estimados son de <strong>3 a 7 días hábiles</strong> para AMBA y <strong>5 a 12 días hábiles</strong> para el interior del país. Pueden variar según la zona y el servicio de correo.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Puedo hacer seguimiento de mi envío?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Sí, cuando el pedido sea despachado recibirás un código de seguimiento (si el servicio de correo lo permite). Podés consultarlo desde la web del correo correspondiente.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Qué hago si mi paquete llega dañado?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Si recibís un paquete visiblemente dañado, sacá fotos del embalaje y del producto antes de manipularlo. Luego contactanos con tu número de pedido y las fotos para gestionar el reclamo.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CAMBIOS Y DEVOLUCIONES ==================== -->
+            <div class="help-category">
+                <div class="help-cat-header">
+                    <span class="help-cat-icon">🔁</span>
+                    <h2 class="help-cat-title">Cambios y Devoluciones</h2>
+                </div>
+                <p class="help-cat-desc">
+                    Podés solicitar un cambio o devolución dentro de los 10 días posteriores a la recepción. El producto debe estar sin uso, con su empaque original y todos los accesorios.
+                </p>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cómo inicio una devolución?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Contactanos por nuestros canales indicando tu número de pedido, el producto que querés devolver y el motivo. Nuestro equipo te va a guiar con los pasos a seguir.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cuánto tarda el reembolso?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Una vez recibido y verificado el producto, el reembolso se procesa en un plazo de <strong>5 a 10 días hábiles</strong>, dependiendo del medio de pago utilizado.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Puedo cambiar un producto por otro?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Sí, siempre que el producto original esté en condiciones. Si hay diferencia de precio, se abona o reintegra la diferencia según corresponda.
+                    </div>
+                </div>
+
+                <div class="help-tip">
+                    <span class="tip-icon">💡</span>
+                    <span>Conservá el empaque original durante los primeros días. Es necesario para procesar cualquier cambio o devolución.</span>
+                </div>
+            </div>
+
+            <!-- ==================== PAGOS ==================== -->
+            <div class="help-category">
+                <div class="help-cat-header">
+                    <span class="help-cat-icon">💳</span>
+                    <h2 class="help-cat-title">Pagos</h2>
+                </div>
+                <p class="help-cat-desc">
+                    Ofrecemos múltiples medios de pago para que elijas el que más te convenga. Todas las transacciones se procesan de forma segura.
+                </p>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Qué métodos de pago aceptan?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Aceptamos tarjetas de crédito, tarjetas de débito y transferencias bancarias. Los medios disponibles se muestran al momento de finalizar la compra.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Es seguro pagar en Full Gaming?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Sí. No almacenamos datos de tarjetas de crédito ni información bancaria sensible. Las transacciones se procesan a través de plataformas de pago seguras y encriptadas.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        Me cobraron pero no recibí confirmación, ¿qué hago?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Primero, revisá tu email (incluida la carpeta de spam). Si no tenés confirmación ni el pedido figura en tu cuenta, contactanos con el comprobante de pago y te lo resolvemos.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CUENTA Y SEGURIDAD ==================== -->
+            <div class="help-category">
+                <div class="help-cat-header">
+                    <span class="help-cat-icon">👤</span>
+                    <h2 class="help-cat-title">Cuenta y Seguridad</h2>
+                </div>
+                <p class="help-cat-desc">
+                    Tu cuenta es personal e intransferible. Desde ella podés gestionar tu perfil, ver tu historial de pedidos y mantener tus datos actualizados.
+                </p>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cómo creo una cuenta?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Hacé clic en "Crear cuenta" desde la página de acceso, completá tus datos (nombre, apellido, email y contraseña) y listo. Te recomendamos usar una contraseña fuerte.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        Olvidé mi contraseña, ¿qué hago?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Contactanos por nuestras redes sociales indicando el email asociado a tu cuenta. Nuestro equipo va a verificar tu identidad y ayudarte a restablecer el acceso.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Cómo puedo actualizar mis datos?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Ingresá a tu perfil desde el menú de usuario. Ahí podés actualizar tu nombre, dirección de envío y otros datos personales.
+                    </div>
+                </div>
+
+                <div class="help-tip">
+                    <span class="tip-icon">🔒</span>
+                    <span>Nunca compartas tu contraseña. Full Gaming jamás te la va a pedir por email, redes sociales ni ningún otro medio.</span>
+                </div>
+            </div>
+
+            <!-- ==================== SOPORTE TÉCNICO ==================== -->
+            <div class="help-category">
+                <div class="help-cat-header">
+                    <span class="help-cat-icon">📞</span>
+                    <h2 class="help-cat-title">Soporte Técnico</h2>
+                </div>
+                <p class="help-cat-desc">
+                    Si tenés un problema técnico con un producto, estamos para orientarte. Antes de contactarnos, revisá si tu consulta se responde acá.
+                </p>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        Un producto no funciona correctamente, ¿qué hago?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Verificá que el producto esté correctamente conectado/cargado y que seguiste las instrucciones del fabricante. Si el problema persiste, contactanos con tu número de pedido, una descripción del problema y fotos o videos si es posible.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿Tienen servicio técnico propio?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Podemos orientarte y, en caso de garantía, gestionar la reparación o reemplazo. Para reparaciones fuera de garantía, te podemos recomendar un servicio técnico de confianza.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        ¿La garantía cubre daños por uso?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        La garantía cubre defectos de fabricación durante 6 meses. No cubre daños por mal uso, golpes, caídas, contacto con líquidos ni modificaciones no autorizadas.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CONTACTO CTA ==================== -->
+            <div class="help-contact">
+                <span class="help-contact-icon">🤝</span>
+                <h3>¿No encontrás lo que buscás?</h3>
+                <p>Nuestro equipo está disponible para ayudarte. Escribinos por cualquiera de nuestros canales y te respondemos lo antes posible.</p>
+                <div class="help-contact-redes">
+                    <a href="https://www.instagram.com/gsp_serviciotecnico/" title="Instagram">
+                        <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
+                    </a>
+                    <a href="https://www.facebook.com/people/GSP-Servicio-Tecnico/100075951730203/?mibextid=ZbWKwL" title="Facebook">
+                        <img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook">
+                    </a>
+                    <a href="https://www.youtube.com/@GSPSERVICIOTECNICO" title="YouTube">
+                        <img src="{{ url_for('static', filename='images/youtube.png') }}" alt="YouTube">
+                    </a>
+                    <a href="https://www.tiktok.com/@gsp_serviciotecnico" title="TikTok">
+                        <img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok">
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+</body>
+</html>

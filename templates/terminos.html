@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones — FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .legal-page {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        /* Header */
+        .legal-header {
+            text-align: center;
+            margin-bottom: 44px;
+        }
+        .legal-header-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .legal-header h1 {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .legal-header p {
+            color: #5a4f8a;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Section blocks */
+        .legal-section {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.15);
+            border-radius: 16px;
+            padding: 28px 30px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        .legal-section:hover {
+            border-color: rgba(106, 68, 242, 0.35);
+        }
+        .legal-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .legal-section-title .sec-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .legal-text {
+            color: #ddd8f0;
+            font-size: 14px;
+            line-height: 1.75;
+            margin: 0;
+        }
+        .legal-text + .legal-text {
+            margin-top: 10px;
+        }
+
+        /* Lists */
+        .legal-list {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0 0 0;
+        }
+        .legal-list li {
+            position: relative;
+            padding-left: 22px;
+            color: #ddd8f0;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 6px;
+        }
+        .legal-list li::before {
+            content: '›';
+            position: absolute;
+            left: 4px;
+            color: #6A44F2;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        /* Alert / notice box */
+        .legal-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-top: 14px;
+            padding: 14px 18px;
+            background: rgba(106, 68, 242, 0.08);
+            border: 1px solid rgba(106, 68, 242, 0.2);
+            border-radius: 10px;
+            color: #d0cef5;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .legal-notice .notice-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .legal-notice.warn {
+            background: rgba(243, 156, 18, 0.06);
+            border-color: rgba(243, 156, 18, 0.18);
+            color: #e6c37e;
+        }
+
+        /* Divider */
+        .legal-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(106, 68, 242, 0.2), transparent);
+            margin: 8px 0;
+            border: none;
+        }
+
+        /* Last update */
+        .legal-updated {
+            text-align: center;
+            color: #555;
+            font-size: 12px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .legal-page { padding: 24px 16px 40px; }
+            .legal-section { padding: 20px 18px; }
+            .legal-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% include 'navbar.html' %}
+    </header>
+
+    <main>
+        <div class="legal-page">
+
+            <div class="legal-header">
+                <span class="legal-header-icon">📜</span>
+                <h1>Términos y Condiciones</h1>
+                <p>Leé con atención las condiciones de uso de nuestra plataforma</p>
+            </div>
+
+            <!-- 1. Introducción -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">1</span> Introducción
+                </div>
+                <p class="legal-text">
+                    Bienvenido/a a <strong>Full Gaming</strong>, una tienda online dedicada a la venta de productos tecnológicos, gaming, periféricos, audio y más. Al acceder y utilizar este sitio web, aceptás los presentes Términos y Condiciones que regulan la relación entre vos como usuario y nuestra plataforma.
+                </p>
+                <p class="legal-text">
+                    Te recomendamos leer esta sección completa antes de registrarte o realizar una compra. Si no estás de acuerdo con algún punto, te pedimos que no utilices el sitio.
+                </p>
+            </div>
+
+            <!-- 2. Uso del sitio -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">2</span> Uso del sitio
+                </div>
+                <p class="legal-text">
+                    El sitio web de Full Gaming está diseñado exclusivamente para la compra de productos tecnológicos. Al utilizarlo, te comprometés a:
+                </p>
+                <ul class="legal-list">
+                    <li>Usar la plataforma con fines legales y legítimos.</li>
+                    <li>No intentar acceder a áreas restringidas, cuentas ajenas o sistemas internos.</li>
+                    <li>No realizar acciones que comprometan el funcionamiento del sitio.</li>
+                    <li>Proporcionar información veraz y actualizada en todo momento.</li>
+                </ul>
+            </div>
+
+            <!-- 3. Registro de usuarios -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">3</span> Registro de usuarios
+                </div>
+                <p class="legal-text">
+                    Para realizar compras necesitás crear una cuenta con tu nombre, apellido, email y una contraseña segura. Al registrarte, declarás que:
+                </p>
+                <ul class="legal-list">
+                    <li>Los datos proporcionados son reales y te pertenecen.</li>
+                    <li>Sos mayor de 18 años o contás con autorización de un tutor legal.</li>
+                    <li>Sos el único responsable de mantener la confidencialidad de tu cuenta y contraseña.</li>
+                </ul>
+                <div class="legal-notice">
+                    <span class="notice-icon">🔒</span>
+                    <span>Tu contraseña se almacena de forma encriptada. Nunca te la vamos a pedir por email ni por ningún otro medio.</span>
+                </div>
+            </div>
+
+            <!-- 4. Compra de productos -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">4</span> Compra de productos
+                </div>
+                <p class="legal-text">
+                    Al agregar productos al carrito y confirmar tu pedido, estás realizando una oferta de compra sujeta a disponibilidad de stock. La compra se considera confirmada cuando el sistema genera un número de pedido y ves la confirmación en pantalla.
+                </p>
+                <p class="legal-text">
+                    Nos reservamos el derecho de cancelar pedidos en casos de errores en el precio, problemas de stock o actividad sospechosa en la cuenta.
+                </p>
+            </div>
+
+            <!-- 5. Precios y disponibilidad -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">5</span> Precios y disponibilidad
+                </div>
+                <p class="legal-text">
+                    Todos los precios publicados están expresados en <strong>pesos argentinos (ARS)</strong> e incluyen IVA cuando corresponda. Los precios pueden modificarse sin previo aviso, pero el precio que aplica es el vigente al momento de confirmar la compra.
+                </p>
+                <div class="legal-notice warn">
+                    <span class="notice-icon">⚠️</span>
+                    <span>La disponibilidad de productos está sujeta a stock existente. Si un producto se agota después de tu compra, nos comunicaremos con vos para ofrecer una alternativa o reembolso.</span>
+                </div>
+            </div>
+
+            <!-- 6. Pagos -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">6</span> Métodos de pago
+                </div>
+                <p class="legal-text">
+                    Aceptamos los siguientes métodos de pago:
+                </p>
+                <ul class="legal-list">
+                    <li>Tarjetas de crédito y débito.</li>
+                    <li>Transferencia bancaria.</li>
+                    <li>Otros medios habilitados en el sitio al momento de la compra.</li>
+                </ul>
+                <p class="legal-text">
+                    Toda transacción se procesa de forma segura. Full Gaming no almacena datos de tarjetas de crédito ni información bancaria sensible.
+                </p>
+            </div>
+
+            <!-- 7. Envíos -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">7</span> Envíos
+                </div>
+                <p class="legal-text">
+                    Los envíos se realizan a todo el país a través de servicios de logística confiables. Los plazos de entrega son estimativos y pueden variar según la zona y disponibilidad del servicio de correo.
+                </p>
+                <ul class="legal-list">
+                    <li>Revisá los datos de envío antes de confirmar tu pedido.</li>
+                    <li>Una vez despachado, recibirás un código de seguimiento (cuando esté disponible).</li>
+                    <li>Full Gaming no se responsabiliza por demoras ocasionadas por el servicio de correo.</li>
+                </ul>
+            </div>
+
+            <!-- 8. Cambios y devoluciones -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">8</span> Cambios y devoluciones
+                </div>
+                <p class="legal-text">
+                    Tenés derecho a solicitar un cambio o devolución dentro de los <strong>10 días hábiles</strong> posteriores a la recepción del producto, siempre que:
+                </p>
+                <ul class="legal-list">
+                    <li>El producto esté sin uso, en su empaque original y con todos sus accesorios.</li>
+                    <li>Presentes el comprobante de compra (número de pedido o email de confirmación).</li>
+                    <li>El motivo esté comprendido dentro de las causales aceptadas (defecto, error en el envío, arrepentimiento).</li>
+                </ul>
+                <div class="legal-notice">
+                    <span class="notice-icon">🔁</span>
+                    <span>El derecho de arrepentimiento aplica según la Ley de Defensa del Consumidor (Ley 24.240). Podés revocar la compra dentro de los 10 días corridos desde la recepción.</span>
+                </div>
+            </div>
+
+            <!-- 9. Garantías -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">9</span> Garantías
+                </div>
+                <p class="legal-text">
+                    Todos los productos comercializados cuentan con garantía legal de <strong>6 meses</strong> por defectos de fabricación, según la normativa vigente. La garantía no cubre:
+                </p>
+                <ul class="legal-list">
+                    <li>Daños por mal uso, golpes, caídas o manipulación indebida.</li>
+                    <li>Modificaciones o reparaciones realizadas por terceros no autorizados.</li>
+                    <li>Desgaste natural del producto.</li>
+                </ul>
+                <p class="legal-text">
+                    Para gestionar una garantía, contactanos con tu número de pedido y una descripción del problema.
+                </p>
+            </div>
+
+            <!-- 10. Responsabilidad del usuario -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">10</span> Responsabilidad del usuario
+                </div>
+                <p class="legal-text">
+                    Como usuario de Full Gaming, sos responsable de:
+                </p>
+                <ul class="legal-list">
+                    <li>Mantener tus credenciales de acceso seguras y no compartirlas.</li>
+                    <li>Verificar que los datos de envío sean correctos antes de confirmar.</li>
+                    <li>Revisar los detalles del pedido (productos, cantidades, precios) antes de finalizar la compra.</li>
+                    <li>Informar cualquier actividad sospechosa en tu cuenta.</li>
+                </ul>
+            </div>
+
+            <!-- 11. Propiedad intelectual -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">11</span> Propiedad intelectual
+                </div>
+                <p class="legal-text">
+                    Todo el contenido del sitio (diseño, textos, imágenes, logotipos, código fuente) es propiedad de Full Gaming o de sus respectivos titulares. Queda prohibida su reproducción, distribución o modificación sin autorización previa por escrito.
+                </p>
+            </div>
+
+            <!-- 12. Modificaciones -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">12</span> Modificaciones de los términos
+                </div>
+                <p class="legal-text">
+                    Full Gaming se reserva el derecho de modificar estos Términos y Condiciones en cualquier momento. Las modificaciones entran en vigencia desde su publicación en el sitio. Te recomendamos revisar esta página periódicamente.
+                </p>
+                <div class="legal-notice">
+                    <span class="notice-icon">📌</span>
+                    <span>El uso continuado del sitio después de una modificación implica la aceptación de los nuevos términos.</span>
+                </div>
+            </div>
+
+            <!-- 13. Contacto -->
+            <div class="legal-section">
+                <div class="legal-section-title">
+                    <span class="sec-num">13</span> Contacto
+                </div>
+                <p class="legal-text">
+                    Si tenés dudas o consultas sobre estos Términos y Condiciones, podés comunicarte con nosotros a través de nuestras redes sociales o canales de contacto disponibles en el sitio.
+                </p>
+                <p class="legal-text">
+                    Nuestro equipo de soporte está disponible para ayudarte con cualquier inquietud relacionada con tu experiencia en Full Gaming.
+                </p>
+            </div>
+
+            <p class="legal-updated">Última actualización: Febrero 2026</p>
+
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+</body>
+</html>

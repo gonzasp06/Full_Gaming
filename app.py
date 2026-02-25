@@ -104,6 +104,14 @@ def buscar_productos():
 
     return render_template('resultado_busqueda.html', productos=productos, termino=termino, es_admin=es_admin)
 
+@app.route('/terminos')
+def terminos_condiciones():
+    return render_template('terminos.html')
+
+@app.route('/ayuda')
+def ayuda_soporte():
+    return render_template('ayuda.html')
+
 @app.route('/<categoria>')
 def mostrar_catalogo_categoria(categoria):
     service = ProductoService()

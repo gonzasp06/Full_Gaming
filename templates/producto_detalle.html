@@ -230,6 +230,161 @@
         }
         .pd-beneficio-link:hover { text-decoration: underline; }
 
+        /* ===== MODAL GARANTÍA ===== */
+        .gar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: garFadeIn 0.25s ease;
+        }
+        .gar-overlay.visible { display: flex; }
+        @keyframes garFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .gar-modal {
+            width: 100%;
+            max-width: 640px;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.25);
+            border-radius: 20px;
+            padding: 32px 30px 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: garSlideUp 0.3s ease;
+        }
+        @keyframes garSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .gar-modal::-webkit-scrollbar { width: 6px; }
+        .gar-modal::-webkit-scrollbar-track { background: transparent; }
+        .gar-modal::-webkit-scrollbar-thumb { background: rgba(106, 68, 242, 0.3); border-radius: 3px; }
+
+        .gar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+        .gar-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .gar-header-left .gar-icon {
+            font-size: 28px;
+        }
+        .gar-header h2 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0;
+        }
+        .gar-close {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .gar-close:hover { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border-color: rgba(231, 76, 60, 0.3); }
+
+        .gar-section {
+            margin-bottom: 20px;
+        }
+        .gar-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .gar-section-title .gar-sec-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .gar-text {
+            color: #d4d0f0;
+            font-size: 13px;
+            line-height: 1.75;
+            margin: 0 0 8px;
+        }
+        .gar-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0;
+        }
+        .gar-list li {
+            position: relative;
+            padding-left: 20px;
+            color: #d4d0f0;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-bottom: 4px;
+        }
+        .gar-list li::before {
+            content: '›';
+            position: absolute;
+            left: 4px;
+            color: #6A44F2;
+            font-weight: 800;
+            font-size: 15px;
+        }
+        .gar-list.check li::before { content: '✓'; color: #2ecc71; font-size: 12px; left: 2px; }
+        .gar-list.cross li::before { content: '✗'; color: #e74c3c; font-size: 12px; left: 2px; }
+
+        .gar-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        .gar-notice.info {
+            background: rgba(106, 68, 242, 0.08);
+            border: 1px solid rgba(106, 68, 242, 0.18);
+            color: #c5c0f0;
+        }
+        .gar-notice.warn {
+            background: rgba(243, 156, 18, 0.06);
+            border: 1px solid rgba(243, 156, 18, 0.15);
+            color: #e6c37e;
+        }
+        .gar-notice .gar-n-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+        .gar-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(106, 68, 242, 0.2), transparent);
+            margin: 16px 0;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            .gar-modal { padding: 24px 18px 20px; }
+        }
+
         /* Botón CTA */
         .pd-btn-carrito {
             display: inline-flex;
@@ -388,7 +543,7 @@
                         <li class="pd-beneficio">
                             <img src="{{ url_for('static', filename='images/garantia.png') }}" alt="Garantía">
                             <span class="pd-beneficio-texto">Garantía — 12 meses</span>
-                            <a class="pd-beneficio-link" href="#">Ver términos</a>
+                            <a class="pd-beneficio-link" href="javascript:void(0)" onclick="document.getElementById('modalGarantia').classList.add('visible')">Ver términos</a>
                         </li>
                     </ul>
 
@@ -415,6 +570,126 @@
         </div>
         </div>
     </main>
+
+    <!-- MODAL GARANTÍA Y TÉRMINOS -->
+    <div class="gar-overlay" id="modalGarantia" onclick="if(event.target===this)this.classList.remove('visible')">
+        <div class="gar-modal">
+            <div class="gar-header">
+                <div class="gar-header-left">
+                    <span class="gar-icon">🛡️</span>
+                    <h2>Garantía y Términos del Producto</h2>
+                </div>
+                <button class="gar-close" onclick="document.getElementById('modalGarantia').classList.remove('visible')">✕</button>
+            </div>
+
+            <!-- Garantía -->
+            <div class="gar-section">
+                <div class="gar-section-title">
+                    <span class="gar-sec-icon">🔒</span> Garantía oficial
+                </div>
+                <p class="gar-text">
+                    Todos los productos vendidos por <strong style="color:#fff;">Full Gaming</strong> cuentan con <strong style="color:#fff;">12 meses de garantía</strong> a partir de la fecha de compra. La garantía cubre exclusivamente defectos de fabricación que impidan el funcionamiento normal del producto.
+                </p>
+                <p class="gar-text">La garantía incluye:</p>
+                <ul class="gar-list check">
+                    <li>Fallas de hardware de origen (botones, conectores, componentes internos)</li>
+                    <li>Problemas de funcionamiento que no se deban al uso del usuario</li>
+                    <li>Desperfectos visibles que hayan llegado de fábrica</li>
+                    <li>Accesorios incluidos en la caja original</li>
+                </ul>
+            </div>
+
+            <hr class="gar-divider">
+
+            <!-- Condiciones de uso -->
+            <div class="gar-section">
+                <div class="gar-section-title">
+                    <span class="gar-sec-icon">📋</span> Condiciones de uso
+                </div>
+                <p class="gar-text">
+                    Para que la garantía sea válida, el producto debe haber sido utilizado de manera normal y razonable, siguiendo las instrucciones del fabricante. Esto incluye:
+                </p>
+                <ul class="gar-list">
+                    <li>Usar el producto en las condiciones indicadas por el fabricante</li>
+                    <li>No exponer el producto a condiciones extremas de temperatura o humedad</li>
+                    <li>Utilizar los cables y adaptadores provistos o compatibles certificados</li>
+                    <li>Mantener el producto limpio y en un entorno adecuado</li>
+                </ul>
+                <div class="gar-notice info">
+                    <span class="gar-n-icon">💡</span>
+                    <span>Conservá el comprobante de compra (número de pedido o email de confirmación). Es indispensable para gestionar cualquier reclamo de garantía.</span>
+                </div>
+            </div>
+
+            <hr class="gar-divider">
+
+            <!-- Devoluciones y cambios -->
+            <div class="gar-section">
+                <div class="gar-section-title">
+                    <span class="gar-sec-icon">🔁</span> Devoluciones y cambios
+                </div>
+                <p class="gar-text">
+                    Podés solicitar un cambio o devolución dentro de los <strong style="color:#fff;">10 días hábiles</strong> posteriores a la recepción del producto. Para que proceda, el producto debe:
+                </p>
+                <ul class="gar-list check">
+                    <li>Estar sin uso y en su empaque original completo</li>
+                    <li>Incluir todos los accesorios, manuales y etiquetas</li>
+                    <li>No presentar signos de manipulación, rayones o daño físico</li>
+                </ul>
+                <p class="gar-text" style="margin-top:8px;">
+                    Una vez verificado el estado del producto, el reembolso se procesa en un plazo de 5 a 10 días hábiles según el medio de pago utilizado. Si preferís un cambio por otro producto, se ajusta la diferencia de precio si corresponde.
+                </p>
+            </div>
+
+            <hr class="gar-divider">
+
+            <!-- Exclusiones -->
+            <div class="gar-section">
+                <div class="gar-section-title">
+                    <span class="gar-sec-icon">⚠️</span> Exclusiones de garantía
+                </div>
+                <p class="gar-text">
+                    La garantía <strong style="color:#e74c3c;">NO cubre</strong> daños producidos por las siguientes causas:
+                </p>
+                <ul class="gar-list cross">
+                    <li>Golpes, caídas o impactos físicos</li>
+                    <li>Contacto con líquidos, humedad excesiva o ambientes corrosivos</li>
+                    <li>Mal uso, uso negligente o uso en condiciones no recomendadas</li>
+                    <li>Conexión a voltajes incorrectos o sobrecargas eléctricas</li>
+                    <li>Modificaciones, reparaciones o desarme por parte de terceros no autorizados</li>
+                    <li>Desgaste natural por uso prolongado (cables, gomas, almohadillas)</li>
+                    <li>Daños estéticos que no afecten la funcionalidad (rayones superficiales)</li>
+                    <li>Software, configuraciones o compatibilidad con otros dispositivos</li>
+                </ul>
+                <div class="gar-notice warn">
+                    <span class="gar-n-icon">⚠️</span>
+                    <span>Si el producto presenta signos de manipulación o reparación no autorizada, la garantía queda automáticamente anulada.</span>
+                </div>
+            </div>
+
+            <hr class="gar-divider">
+
+            <!-- Soporte y contacto -->
+            <div class="gar-section" style="margin-bottom:0;">
+                <div class="gar-section-title">
+                    <span class="gar-sec-icon">📞</span> Soporte y contacto
+                </div>
+                <p class="gar-text">
+                    Si necesitás gestionar una garantía, cambio o devolución, contactanos por nuestras redes sociales o canales de atención con la siguiente información:
+                </p>
+                <ul class="gar-list">
+                    <li><strong style="color:#fff;">Número de pedido</strong> (lo encontrás en tu perfil o email de confirmación)</li>
+                    <li><strong style="color:#fff;">Descripción del problema</strong> con la mayor cantidad de detalle posible</li>
+                    <li><strong style="color:#fff;">Fotos o videos</strong> del defecto (si aplica)</li>
+                </ul>
+                <div class="gar-notice info" style="margin-top:14px;">
+                    <span class="gar-n-icon">🤝</span>
+                    <span>Nuestro equipo va a responder tu consulta lo antes posible. Queremos que tu experiencia con Full Gaming sea siempre positiva.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     function agregarAlCarrito(productoId, btnId) {
         const btn = document.getElementById(btnId);
