@@ -348,9 +348,37 @@
                         </select>
                     </div>
                     <div class="np-group">
-                        <label for="foto" class="np-label">Imagen del producto</label>
-                        <input type="file" id="foto" name="foto" class="np-input" accept="image/*">
+                        <label for="marca" class="np-label">Marca <span style="color:#888; font-size:10px; text-transform:none;">(opcional - se detecta del nombre)</span></label>
+                        <input type="text" id="marca" name="marca" class="np-input" list="marcasSugeridas" placeholder="Ej: Logitech, Razer, GameSir" autocomplete="off">
+                        <datalist id="marcasSugeridas">
+                            {% if marcas %}
+                                {% for marca in marcas %}
+                                <option value="{{ marca.nombre }}">
+                                {% endfor %}
+                            {% else %}
+                                <!-- Marcas por defecto si no hay en BD -->
+                                <option value="Razer">
+                                <option value="ASUS">
+                                <option value="Logitech">
+                                <option value="Redragon">
+                                <option value="GameSir">
+                                <option value="Corsair">
+                                <option value="HyperX">
+                                <option value="SteelSeries">
+                                <option value="Cooler Master">
+                                <option value="MSI">
+                            {% endif %}
+                        </datalist>
+                        <div id="marcaSugerida" style="display:none; margin-top:6px; padding:8px 12px; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.25); border-radius:8px; font-size:12px; color:#2ecc71;">
+                            <span>💡 Marca detectada: <strong id="marcaDetectadaTexto"></strong></span>
+                            <button type="button" onclick="usarMarcaSugerida()" style="margin-left:10px; background:#2ecc71; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Usar</button>
+                        </div>
                     </div>
+                </div>
+
+                <div class="np-group">
+                    <label for="foto" class="np-label">Imagen del producto</label>
+                    <input type="file" id="foto" name="foto" class="np-input" accept="image/*">
                 </div>
             </div>
 
@@ -446,6 +474,63 @@
         // Inicializar Quill
         var quill = new Quill('#descripcion-editor', { theme: 'snow' });
         let precioEditadoManualmente = false;
+
+        // ===== DETECCIÓN AUTOMÁTICA DE MARCA =====
+        const MARCAS_GAMING = [
+            'Razer', 'Logitech', 'Redragon', 'HyperX', 'Corsair', 'SteelSeries',
+            'GameSir', 'Trust', 'Genius', '8BitDo', 'Thrustmaster',
+            'JBL', 'Sony', 'Sennheiser', 'Audio-Technica', 'Astro', 'Turtle Beach',
+            'ASUS', 'Samsung', 'LG', 'AOC', 'BenQ', 'ViewSonic', 'MSI', 'Gigabyte',
+            'Dell', 'Acer', 'HP', 'Philips',
+            'Xbox', 'Nintendo', 'PowerA', 'PDP', 'SCUF', 'Nacon',
+            'AMD', 'Intel', 'NVIDIA', 'EVGA', 'Zotac', 'PNY',
+            'Kingston', 'Seagate', 'WD', 'Crucial', 'XPG', 'Adata', 'SanDisk',
+            'Thermaltake', 'NZXT', 'Cooler Master', 'be quiet!', 'DeepCool',
+            'DXRacer', 'Secretlab', 'AKRacing', 'Cougar'
+        ];
+
+        let marcaDetectadaActual = null;
+
+        function detectarMarcaDesdeNombre(nombre) {
+            const nombreLower = nombre.toLowerCase();
+            for (const marca of MARCAS_GAMING) {
+                if (nombreLower.includes(marca.toLowerCase())) {
+                    return marca;
+                }
+            }
+            return null;
+        }
+
+        function verificarMarcaEnNombre() {
+            const nombre = document.getElementById('nombre').value;
+            const marcaInput = document.getElementById('marca');
+            const sugerenciaDiv = document.getElementById('marcaSugerida');
+            const marcaTexto = document.getElementById('marcaDetectadaTexto');
+            
+            const marcaDetectada = detectarMarcaDesdeNombre(nombre);
+            
+            if (marcaDetectada && marcaInput.value.trim() === '') {
+                marcaDetectadaActual = marcaDetectada;
+                marcaTexto.textContent = marcaDetectada;
+                sugerenciaDiv.style.display = 'block';
+            } else {
+                sugerenciaDiv.style.display = 'none';
+            }
+        }
+
+        function usarMarcaSugerida() {
+            if (marcaDetectadaActual) {
+                document.getElementById('marca').value = marcaDetectadaActual;
+                document.getElementById('marcaSugerida').style.display = 'none';
+            }
+        }
+
+        document.getElementById('nombre').addEventListener('input', verificarMarcaEnNombre);
+        document.getElementById('marca').addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                document.getElementById('marcaSugerida').style.display = 'none';
+            }
+        });
 
         function parseNumero(valor) {
             if (valor === null || valor === undefined) return 0;

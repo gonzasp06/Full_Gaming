@@ -41,8 +41,22 @@ class ProductoService:
         producto = cursor.fetchone()
         cursor.close()
         return producto
+
+    def obtener_por_id_con_marca(self, id_producto):
+        """Obtiene un producto incluyendo el nombre de su marca (si tiene)."""
+        cursor = self.conexion.cursor(dictionary=True)
+        query = """
+            SELECT p.*, m.nombre as nombre_marca
+            FROM catalogo.producto p
+            LEFT JOIN catalogo.marca m ON p.id_marca = m.id_marca
+            WHERE p.id = %s
+        """
+        cursor.execute(query, (id_producto,))
+        producto = cursor.fetchone()
+        cursor.close()
+        return producto
     
-    def agregar_producto(self, nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo=0):
+    def agregar_producto(self, nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo=0, id_marca=None):
         """Inserta un producto en la base de datos y devuelve un dict con el resultado.
 
         Retorna: {'ok': True, 'producto_id': id} o {'ok': False, 'error': 'mensaje'}
@@ -51,10 +65,10 @@ class ProductoService:
         try:
             cursor = self.conexion.cursor()
             query = """
-                INSERT INTO catalogo.producto (nombre, descripcion, categoria, precio, cantidad, foto, costo)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO catalogo.producto (nombre, descripcion, categoria, precio, cantidad, foto, costo, id_marca)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(query, (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo))
+            cursor.execute(query, (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo, id_marca))
             self.conexion.commit()
             producto_id = cursor.lastrowid
             return {"ok": True, "producto_id": producto_id}
@@ -73,22 +87,22 @@ class ProductoService:
             except:
                 pass
     
-    def editar_producto(self, id_producto, nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo=0):
+    def editar_producto(self, id_producto, nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo=0, id_marca=None):
         cursor = self.conexion.cursor()
         if ruta_imagen is not None:
             consulta = """
                 UPDATE catalogo.producto
-                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, foto=%s, costo=%s
+                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, foto=%s, costo=%s, id_marca=%s
                 WHERE id=%s
             """
-            valores = (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo, id_producto)
+            valores = (nombre, descripcion, categoria, precio, cantidad, ruta_imagen, costo, id_marca, id_producto)
         else:
             consulta = """
                 UPDATE catalogo.producto
-                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, costo=%s
+                SET nombre=%s, descripcion=%s, categoria=%s, precio=%s, cantidad=%s, costo=%s, id_marca=%s
                 WHERE id=%s
             """
-            valores = (nombre, descripcion, categoria, precio, cantidad, costo, id_producto)
+            valores = (nombre, descripcion, categoria, precio, cantidad, costo, id_marca, id_producto)
 
         cursor.execute(consulta, valores)
         self.conexion.commit()
@@ -114,13 +128,15 @@ class ProductoService:
         cursor = self.conexion.cursor()
         like = f"%{termino}%"
         consulta = """
-            SELECT *
-            FROM catalogo.producto
-            WHERE nombre LIKE %s
-                OR descripcion LIKE %s
-                OR categoria LIKE %s
+            SELECT p.*, m.nombre as nombre_marca
+            FROM catalogo.producto p
+            LEFT JOIN catalogo.marca m ON p.id_marca = m.id_marca
+            WHERE p.nombre LIKE %s
+                OR p.descripcion LIKE %s
+                OR p.categoria LIKE %s
+                OR m.nombre LIKE %s
         """
-        cursor.execute(consulta, (like, like, like))
+        cursor.execute(consulta, (like, like, like, like))
         productos = cursor.fetchall()
         cursor.close()
         return productos

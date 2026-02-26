@@ -10,6 +10,8 @@ from migrations import (
     agregar_columna_fecha_creacion_usuario_si_no_existe,
     crear_tabla_stock_compras_si_no_existe,
     agregar_columnas_costos_pedido_items_si_no_existen,
+    crear_tabla_marca_si_no_existe,
+    agregar_columna_id_marca_producto_si_no_existe,
 )
 
 #Subir foto tipo archivo al servidor
@@ -21,6 +23,7 @@ from services.producto_service import ProductoService
 from services.usuario_service import UsuarioService
 from services.pedido_service import PedidoService
 from services.stock_service import StockService
+from services.marca_service import MarcaService
 from services.negocio_models import IngresoStock
 from routes.perfil_routes import registrar_endpoints_perfil
 from routes.estadisticas_routes import registrar_endpoints_estadisticas
@@ -35,6 +38,8 @@ agregar_columna_costo_si_no_existe()
 agregar_columna_fecha_creacion_usuario_si_no_existe()
 crear_tabla_stock_compras_si_no_existe()
 agregar_columnas_costos_pedido_items_si_no_existen()
+crear_tabla_marca_si_no_existe()
+agregar_columna_id_marca_producto_si_no_existe()
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -221,7 +226,9 @@ def render_acceso():
 @app.route('/formulario')
 @admin_manager.requerir_admin
 def carga_producto():
-    return render_template('formulario_carga_producto.html')
+    marca_service = MarcaService()
+    marcas = marca_service.obtener_todas()
+    return render_template('formulario_carga_producto.html', marcas=marcas)
 
 @app.route('/gestion_productos')
 @admin_manager.requerir_admin
@@ -245,8 +252,10 @@ def eliminar_producto(id_producto):
 @admin_manager.requerir_admin
 def editar_producto(id_producto):
     service = ProductoService()
-    producto = service.obtener_por_id(id_producto)
-    return render_template('editar_producto.html', producto=producto)
+    marca_service = MarcaService()
+    producto = service.obtener_por_id_con_marca(id_producto)
+    marcas = marca_service.obtener_todas()
+    return render_template('editar_producto.html', producto=producto, marcas=marcas)
 
 @app.route('/actualizar_producto/<int:id_producto>', methods=['POST'])
 @admin_manager.requerir_admin
@@ -259,6 +268,13 @@ def actualizar_producto(id_producto):
     precio = request.form['precio']
     cantidad = request.form['cantidad']
     costo = request.form.get('costo', 0)
+    marca_nombre = request.form.get('marca', '').strip()
+
+    # Obtener o crear marca si se especificó
+    id_marca = None
+    if marca_nombre:
+        marca_service = MarcaService()
+        id_marca = marca_service.obtener_o_crear(marca_nombre)
 
     foto = request.files.get('foto')
     ruta = None
@@ -268,7 +284,7 @@ def actualizar_producto(id_producto):
         ruta = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         foto.save(ruta)
 
-    service.editar_producto(id_producto, nombre, descripcion, categoria, precio, cantidad, ruta, costo)
+    service.editar_producto(id_producto, nombre, descripcion, categoria, precio, cantidad, ruta, costo, id_marca)
 
     return redirect('/gestion_productos')
 
@@ -354,6 +370,13 @@ def cargar_producto():
     inversion_total_form = request.form.get('inversion_total')
     costo = request.form.get('costo', 0)
     porcentaje_ganancia = request.form.get('porcentaje_ganancia', 0)
+    marca_nombre = request.form.get('marca', '').strip()
+
+    # Obtener o crear marca si se especificó
+    id_marca = None
+    if marca_nombre:
+        marca_service = MarcaService()
+        id_marca = marca_service.obtener_o_crear(marca_nombre)
 
     try:
         cantidad_int = int(cantidad or 0)
@@ -406,7 +429,8 @@ def cargar_producto():
         precio=precio_final,
         cantidad=cantidad,
         ruta_imagen=ruta_imagen,
-        costo=costo_unitario
+        costo=costo_unitario,
+        id_marca=id_marca
     )
 
     if resultado.get("ok"):
@@ -526,6 +550,23 @@ def obtener_cantidad_carrito():
     cantidad_total = sum(carrito.values()) if carrito else 0
     
     return jsonify({"ok": True, "cantidad": cantidad_total}), 200
+
+
+# ==================== API MARCAS ====================
+@app.route('/api/marcas', methods=['GET'])
+def obtener_marcas():
+    """Obtener todas las marcas disponibles"""
+    marca_service = MarcaService()
+    marcas = marca_service.obtener_todas()
+    return jsonify({"ok": True, "marcas": marcas}), 200
+
+
+@app.route('/api/marcas/en-uso', methods=['GET'])
+def obtener_marcas_en_uso():
+    """Obtener solo las marcas que tienen productos asociados"""
+    marca_service = MarcaService()
+    marcas = marca_service.obtener_marcas_en_uso()
+    return jsonify({"ok": True, "marcas": marcas}), 200
 
 
 @app.route('/logout')

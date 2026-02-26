@@ -180,6 +180,101 @@ def agregar_columna_fecha_creacion_usuario_si_no_existe():
         print("  ALTER TABLE usuario ADD COLUMN fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP;")
         return False
 
+
+def crear_tabla_marca_si_no_existe():
+    """Crea la tabla marca para categorizar productos por fabricante"""
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        if _tabla_existe(cursor, 'marca'):
+            print("✓ La tabla 'marca' ya existe")
+            cursor.close()
+            conexion.close()
+            return True
+
+        print("Creando tabla 'marca'...")
+        create_query = """
+            CREATE TABLE marca (
+                id_marca INT NOT NULL AUTO_INCREMENT,
+                nombre VARCHAR(100) NOT NULL,
+                PRIMARY KEY (id_marca),
+                UNIQUE KEY unique_nombre_marca (nombre)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+        """
+        cursor.execute(create_query)
+        conexion.commit()
+        print("✓ Tabla 'marca' creada exitosamente")
+
+        cursor.close()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(f"⚠ Error al crear tabla 'marca': {str(e)}")
+        return False
+
+
+def agregar_columna_id_marca_producto_si_no_existe():
+    """Agrega la columna id_marca (nullable) a producto y crea la FK"""
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        # Primero verificar que exista la tabla marca
+        if not _tabla_existe(cursor, 'marca'):
+            print("⚠ La tabla 'marca' no existe. Ejecutá primero crear_tabla_marca_si_no_existe()")
+            cursor.close()
+            conexion.close()
+            return False
+
+        # Verificar si la columna ya existe
+        if _columna_existe(cursor, 'producto', 'id_marca'):
+            print("✓ La columna 'id_marca' ya existe en 'producto'")
+            cursor.close()
+            conexion.close()
+            return True
+
+        print("Agregando columna 'id_marca' a tabla 'producto'...")
+        
+        # Agregar columna nullable
+        alter_query = """
+            ALTER TABLE producto 
+            ADD COLUMN id_marca INT DEFAULT NULL
+        """
+        cursor.execute(alter_query)
+        conexion.commit()
+        print("✓ Columna 'id_marca' agregada")
+
+        # Agregar índice
+        print("Agregando índice en 'id_marca'...")
+        index_query = """
+            ALTER TABLE producto 
+            ADD INDEX idx_producto_marca (id_marca)
+        """
+        cursor.execute(index_query)
+        conexion.commit()
+        print("✓ Índice creado")
+
+        # Agregar FK
+        print("Agregando clave foránea producto → marca...")
+        fk_query = """
+            ALTER TABLE producto 
+            ADD CONSTRAINT fk_producto_marca 
+            FOREIGN KEY (id_marca) REFERENCES marca(id_marca)
+            ON DELETE SET NULL
+        """
+        cursor.execute(fk_query)
+        conexion.commit()
+        print("✓ Clave foránea creada exitosamente")
+
+        cursor.close()
+        conexion.close()
+        return True
+
+    except Exception as e:
+        print(f"⚠ Error al agregar columna 'id_marca': {str(e)}")
+        return False
+
 if __name__ == "__main__":
     agregar_columna_costo_si_no_existe()
     agregar_columna_fecha_creacion_usuario_si_no_existe()

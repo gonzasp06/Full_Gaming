@@ -425,31 +425,32 @@
             margin-right: 6px;
             white-space: nowrap;
         }
-        .filtro-chip {
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(106, 68, 242, 0.25);
-            background: rgba(255, 255, 255, 0.04);
-            color: #bbb;
-            font-size: 13px;
-            font-weight: 600;
+        .filtros-bar button.filtro-chip {
+            padding: 5px 14px !important;
+            border-radius: 20px !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+            color: #bbb !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
             user-select: none;
+            box-shadow: none !important;
         }
-        .filtro-chip:hover {
-            background: rgba(106, 68, 242, 0.12);
-            border-color: rgba(106, 68, 242, 0.4);
-            color: #d4d0f0;
+        .filtros-bar button.filtro-chip:hover {
+            background: rgba(106, 68, 242, 0.12) !important;
+            border-color: rgba(106, 68, 242, 0.4) !important;
+            color: #d4d0f0 !important;
         }
-        .filtro-chip.active {
-            background: linear-gradient(135deg, #6A44F2, #3C308C);
-            border-color: #6A44F2;
-            color: #fff;
-            box-shadow: 0 4px 14px rgba(106, 68, 242, 0.3);
+        .filtros-bar button.filtro-chip.active {
+            background: linear-gradient(135deg, #6A44F2, #3C308C) !important;
+            border-color: #6A44F2 !important;
+            color: #fff !important;
+            box-shadow: 0 4px 14px rgba(106, 68, 242, 0.3) !important;
         }
-        .filtro-chip .chip-count {
+        .filtros-bar button.filtro-chip .chip-count {
             display: inline-block;
             margin-left: 6px;
             background: rgba(255, 255, 255, 0.15);
@@ -460,7 +461,7 @@
             min-width: 18px;
             text-align: center;
         }
-        .filtro-chip.active .chip-count {
+        .filtros-bar button.filtro-chip.active .chip-count {
             background: rgba(255, 255, 255, 0.25);
         }
         .filtros-sin-resultados {

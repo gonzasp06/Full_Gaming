@@ -5,4 +5,8 @@ __pycache__/
 *.pyc
 database.py
 Estudio/
+
+# Archivos de explicación (documentación personal)
 EXPLICACION_SISTEMA.md
+EXPLICACION_PRESENTACION.txt
+DOCUMENTACION_PROFESORES.md

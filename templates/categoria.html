@@ -29,10 +29,80 @@
             </a>
             <h1>{{ categoria }}</h1>
         </div>
+
+        <!-- BARRA DE FILTROS -->
+        <div class="filtros-container">
+            <!-- Toggle para mobile -->
+            <button class="filtros-toggle" onclick="toggleFiltros()">
+                <i class="fas fa-filter"></i>
+                <span>Filtros</span>
+                <i class="fas fa-chevron-down toggle-arrow"></i>
+            </button>
+
+            <div class="filtros-barra" id="filtrosBarra">
+                <!-- Filtro por Marca/Colección -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Marca</label>
+                    <select class="filtro-select" id="filtroMarca" onchange="aplicarFiltros()">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+
+                <!-- Filtro por Precio -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Precio</label>
+                    <select class="filtro-select" id="filtroPrecio" onchange="aplicarFiltros()">
+                        <option value="">Cualquier precio</option>
+                        <option value="0-50000">Hasta $50.000</option>
+                        <option value="50000-100000">$50.000 - $100.000</option>
+                        <option value="100000-200000">$100.000 - $200.000</option>
+                        <option value="200000-500000">$200.000 - $500.000</option>
+                        <option value="500000-">Más de $500.000</option>
+                    </select>
+                </div>
+
+                <!-- Filtro por Disponibilidad -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Disponibilidad</label>
+                    <select class="filtro-select" id="filtroStock" onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="disponible">En stock</option>
+                        <option value="agotado">Agotado</option>
+                    </select>
+                </div>
+
+                <!-- Ordenar por -->
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Ordenar por</label>
+                    <select class="filtro-select" id="filtroOrden" onchange="aplicarFiltros()">
+                        <option value="">Por defecto</option>
+                        <option value="precio-asc">Precio: menor a mayor</option>
+                        <option value="precio-desc">Precio: mayor a menor</option>
+                        <option value="nombre-asc">Nombre: A-Z</option>
+                        <option value="nombre-desc">Nombre: Z-A</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Chips de filtros activos -->
+            <div class="filtros-activos" id="filtrosActivos">
+                <!-- Los chips se generan dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Contador de resultados -->
+        <div class="resultados-contador" id="resultadosContador">
+            <span id="cantidadResultados">{{ productos|length }}</span> productos encontrados
+        </div>
+
         <div class="container categoria-container">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4" id="productosGrid">
           {% for producto in productos %}
-            <div class="col">
+            <div class="col producto-item" 
+                 data-nombre="{{ producto[1] }}"
+                 data-precio="{{ producto[4] }}"
+                 data-stock="{{ producto[5] }}"
+                 data-disponible="{% if producto[5] > 0 %}disponible{% else %}agotado{% endif %}">
                 <div class="product-card" ondblclick="window.location.href='{{ url_for('ver_producto', producto_id=producto[0]) }}'">
                     
                     <!-- IMAGEN CON BADGES -->
@@ -54,6 +124,7 @@
 
                     <!-- INFO DEL PRODUCTO -->
                     <div class="product-info">
+                        <span class="badge-marca-producto" data-marca-badge></span>
                         <h5 class="product-name"><a href="{{ url_for('ver_producto', producto_id=producto[0]) }}">{{ producto[1] }}</a></h5>
                         
                         <!-- PRECIO -->
@@ -125,6 +196,255 @@
                 mostrarNotificacion('❌ Error al agregar al carrito', true);
             });
         }
+
+        // ========== SISTEMA DE FILTROS ==========
+
+        // Lista completa de marcas gaming conocidas
+        const MARCAS_GAMING = [
+            // Periféricos Gaming
+            'Razer', 'Logitech', 'Redragon', 'HyperX', 'Corsair', 'SteelSeries',
+            'GameSir', 'Trust', 'Genius', '8BitDo', 'Thrustmaster',
+            // Audio
+            'JBL', 'Sony', 'Sennheiser', 'Audio-Technica', 'Beyerdynamic', 'Astro',
+            'Turtle Beach', 'Rode', 'Blue', 'Fifine',
+            // Monitores y TV
+            'ASUS', 'Samsung', 'LG', 'AOC', 'BenQ', 'ViewSonic', 'MSI', 'Gigabyte',
+            'Dell', 'Acer', 'HP', 'Philips',
+            // Consolas y Controllers
+            'Xbox', 'Sony PlayStation', 'Nintendo', 'PowerA', 'PDP', 'SCUF', 'Nacon',
+            // Componentes PC
+            'AMD', 'Intel', 'NVIDIA', 'EVGA', 'Zotac', 'PNY', 'Sapphire', 'ASRock',
+            // Almacenamiento
+            'Kingston', 'Seagate', 'WD', 'Western Digital', 'Crucial', 'XPG', 'Adata',
+            'SanDisk', 'Samsung', 'Patriot',
+            // Gabinetes y Coolers
+            'Thermaltake', 'NZXT', 'Cooler Master', 'be quiet!', 'Fractal Design',
+            'Lian Li', 'Phanteks', 'DeepCool',
+            // Sillas Gaming
+            'DXRacer', 'Secretlab', 'AKRacing', 'Cougar', 'Vertagear'
+        ];
+
+        // Detectar marca desde el nombre del producto
+        function detectarMarca(nombreProducto) {
+            const nombreLower = nombreProducto.toLowerCase();
+            for (const marca of MARCAS_GAMING) {
+                if (nombreLower.includes(marca.toLowerCase())) {
+                    return marca;
+                }
+            }
+            return null;
+        }
+
+        // Toggle filtros en mobile
+        function toggleFiltros() {
+            const barra = document.getElementById('filtrosBarra');
+            const toggle = document.querySelector('.filtros-toggle');
+            barra.classList.toggle('active');
+            toggle.classList.toggle('active');
+        }
+
+        // Extraer marcas de los nombres de productos
+        function extraerMarcas() {
+            const productos = document.querySelectorAll('.producto-item');
+            const marcasEncontradas = new Map(); // marca -> cantidad
+            let sinMarca = 0;
+            
+            productos.forEach(p => {
+                const nombre = p.dataset.nombre;
+                const marca = detectarMarca(nombre);
+                const badgeEl = p.querySelector('[data-marca-badge]');
+                
+                if (marca) {
+                    p.dataset.marca = marca.toLowerCase();
+                    marcasEncontradas.set(marca, (marcasEncontradas.get(marca) || 0) + 1);
+                    // Agregar badge visual
+                    if (badgeEl) {
+                        badgeEl.textContent = marca;
+                        badgeEl.classList.remove('sin-marca');
+                    }
+                } else {
+                    p.dataset.marca = '';
+                    sinMarca++;
+                    // No mostrar badge si no tiene marca
+                    if (badgeEl) {
+                        badgeEl.textContent = '';
+                    }
+                }
+            });
+
+            // Poblar select de marcas ordenado por cantidad
+            const selectMarca = document.getElementById('filtroMarca');
+            const marcasOrdenadas = [...marcasEncontradas.entries()].sort((a, b) => b[1] - a[1]);
+            
+            marcasOrdenadas.forEach(([marca, cantidad]) => {
+                const option = document.createElement('option');
+                option.value = marca.toLowerCase();
+                option.textContent = `${marca} (${cantidad})`;
+                selectMarca.appendChild(option);
+            });
+
+            // Agregar opción "Sin marca" si hay productos sin marca
+            if (sinMarca > 0) {
+                const option = document.createElement('option');
+                option.value = 'sin-marca';
+                option.textContent = `Sin marca (${sinMarca})`;
+                selectMarca.appendChild(option);
+            }
+        }
+
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const marca = document.getElementById('filtroMarca').value.toLowerCase();
+            const precioRango = document.getElementById('filtroPrecio').value;
+            const stock = document.getElementById('filtroStock').value;
+            const orden = document.getElementById('filtroOrden').value;
+
+            const productos = document.querySelectorAll('.producto-item');
+            const grid = document.getElementById('productosGrid');
+            let productosArray = Array.from(productos);
+            let visibles = 0;
+
+            // Filtrar
+            productosArray.forEach(producto => {
+                let mostrar = true;
+
+                // Filtro marca
+                if (marca) {
+                    if (marca === 'sin-marca') {
+                        if (producto.dataset.marca && producto.dataset.marca !== '') {
+                            mostrar = false;
+                        }
+                    } else if (producto.dataset.marca !== marca) {
+                        mostrar = false;
+                    }
+                }
+
+                // Filtro precio
+                if (precioRango) {
+                    const precio = parseFloat(producto.dataset.precio);
+                    const [min, max] = precioRango.split('-').map(n => n ? parseFloat(n) : null);
+                    
+                    if (min !== null && precio < min) mostrar = false;
+                    if (max !== null && precio > max) mostrar = false;
+                }
+
+                // Filtro stock
+                if (stock && producto.dataset.disponible !== stock) {
+                    mostrar = false;
+                }
+
+                producto.classList.toggle('oculto', !mostrar);
+                if (mostrar) visibles++;
+            });
+
+            // Ordenar (solo los visibles)
+            if (orden) {
+                const productosVisibles = productosArray.filter(p => !p.classList.contains('oculto'));
+                
+                productosVisibles.sort((a, b) => {
+                    switch(orden) {
+                        case 'precio-asc':
+                            return parseFloat(a.dataset.precio) - parseFloat(b.dataset.precio);
+                        case 'precio-desc':
+                            return parseFloat(b.dataset.precio) - parseFloat(a.dataset.precio);
+                        case 'nombre-asc':
+                            return a.dataset.nombre.localeCompare(b.dataset.nombre);
+                        case 'nombre-desc':
+                            return b.dataset.nombre.localeCompare(a.dataset.nombre);
+                        default:
+                            return 0;
+                    }
+                });
+
+                // Reordenar en el DOM
+                productosVisibles.forEach(p => grid.appendChild(p));
+            }
+
+            // Actualizar contador
+            document.getElementById('cantidadResultados').textContent = visibles;
+
+            // Actualizar chips
+            actualizarChips();
+
+            // Mostrar mensaje si no hay resultados
+            mostrarSinResultados(visibles === 0);
+        }
+
+        // Actualizar chips de filtros activos
+        function actualizarChips() {
+            const container = document.getElementById('filtrosActivos');
+            container.innerHTML = '';
+
+            const filtros = [
+                { id: 'filtroMarca', label: 'Marca', getValue: el => el.options[el.selectedIndex]?.text },
+                { id: 'filtroPrecio', label: 'Precio', getValue: el => el.options[el.selectedIndex]?.text },
+                { id: 'filtroStock', label: 'Stock', getValue: el => el.options[el.selectedIndex]?.text },
+                { id: 'filtroOrden', label: 'Orden', getValue: el => el.options[el.selectedIndex]?.text }
+            ];
+
+            let hayFiltros = false;
+
+            filtros.forEach(f => {
+                const el = document.getElementById(f.id);
+                if (el.value) {
+                    hayFiltros = true;
+                    const chip = document.createElement('span');
+                    chip.className = 'filtro-chip';
+                    chip.innerHTML = `
+                        ${f.label}: ${f.getValue(el)}
+                        <button class="filtro-chip-eliminar" onclick="limpiarFiltro('${f.id}')">✕</button>
+                    `;
+                    container.appendChild(chip);
+                }
+            });
+
+            // Botón limpiar todos
+            if (hayFiltros) {
+                const btnLimpiar = document.createElement('button');
+                btnLimpiar.className = 'btn-limpiar-filtros';
+                btnLimpiar.innerHTML = '<i class="fas fa-times"></i> Limpiar filtros';
+                btnLimpiar.onclick = limpiarTodosFiltros;
+                container.appendChild(btnLimpiar);
+            }
+        }
+
+        // Limpiar un filtro específico
+        function limpiarFiltro(id) {
+            document.getElementById(id).value = '';
+            aplicarFiltros();
+        }
+
+        // Limpiar todos los filtros
+        function limpiarTodosFiltros() {
+            document.getElementById('filtroMarca').value = '';
+            document.getElementById('filtroPrecio').value = '';
+            document.getElementById('filtroStock').value = '';
+            document.getElementById('filtroOrden').value = '';
+            aplicarFiltros();
+        }
+
+        // Mostrar mensaje sin resultados
+        function mostrarSinResultados(mostrar) {
+            let mensaje = document.querySelector('.sin-resultados');
+            
+            if (mostrar && !mensaje) {
+                mensaje = document.createElement('div');
+                mensaje.className = 'sin-resultados col-12';
+                mensaje.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    <h3>No se encontraron productos</h3>
+                    <p>Probá ajustando los filtros para ver más resultados</p>
+                `;
+                document.getElementById('productosGrid').appendChild(mensaje);
+            } else if (!mostrar && mensaje) {
+                mensaje.remove();
+            }
+        }
+
+        // Inicializar al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            extraerMarcas();
+        });
     </script>
     {% include 'footer.html' %}  
 </body>
