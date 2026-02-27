@@ -14,6 +14,9 @@ from migrations import (
     agregar_columna_id_marca_producto_si_no_existe,
     agregar_columnas_recuperacion_usuario_si_no_existen,
     agregar_columna_token_eliminacion_si_no_existe,
+    crear_tabla_egresos_reales_si_no_existe,
+    crear_tabla_devoluciones_si_no_existe,
+    crear_tabla_carrito_usuario_si_no_existe,
 )
 
 #Subir foto tipo archivo al servidor
@@ -30,6 +33,7 @@ from services.email_service import EmailService
 from services.negocio_models import IngresoStock
 from routes.perfil_routes import registrar_endpoints_perfil
 from routes.estadisticas_routes import registrar_endpoints_estadisticas
+from routes.devolucion_routes import registrar_endpoints_devoluciones
 
 # print("ProductoService:", ProductoService)
 
@@ -45,6 +49,9 @@ crear_tabla_marca_si_no_existe()
 agregar_columna_id_marca_producto_si_no_existe()
 agregar_columnas_recuperacion_usuario_si_no_existen()
 agregar_columna_token_eliminacion_si_no_existe()
+crear_tabla_egresos_reales_si_no_existe()
+crear_tabla_devoluciones_si_no_existe()
+crear_tabla_carrito_usuario_si_no_existe()
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -74,6 +81,9 @@ registrar_endpoints_perfil(app)
 
 # Registrar endpoints de estadísticas
 registrar_endpoints_estadisticas(app)
+
+# Registrar endpoints de devoluciones
+registrar_endpoints_devoluciones(app)
 
 # conexión a base de datos
 conexion = conectar_base_datos()
@@ -173,6 +183,8 @@ def cargar_usuario():
             session['usuario_email'] = usuario['email']
             session['usuario_nombre'] = usuario['nombre']
             session['es_admin'] = usuario['is_admin']
+            # Cargar carrito persistente del usuario nuevo
+            carrito_service.cargar_carrito_desde_bd(usuario['id'])
             
             # Enviar email de bienvenida con opción de eliminar cuenta
             try:
@@ -219,13 +231,6 @@ def acceso_cuentas():
         email = request.form.get('email', '').strip().lower()
         contraseña = request.form.get('contraseña', '').strip()
         
-        # DEBUG: Ver qué llega desde el cliente
-        print(f"🔍 LOGIN DEBUG:")
-        print(f"   Email recibido: '{email}'")
-        print(f"   Contraseña len: {len(contraseña)} chars")
-        print(f"   Contraseña bytes: {contraseña.encode('utf-8')}")
-        print(f"   User-Agent: {request.headers.get('User-Agent', 'N/A')[:50]}")
-        
         usuario = service.login(email, contraseña)
         if usuario:
             session['usuario_id'] = usuario['id']  # ID del usuario
@@ -234,6 +239,8 @@ def acceso_cuentas():
             session['es_admin'] = usuario['is_admin']  # Si es admin
             session.permanent = True  # Mantener sesión
             service.actualizar_ultimo_acceso(usuario['id'])  # Registrar último acceso
+            # Cargar carrito persistente del usuario
+            carrito_service.cargar_carrito_desde_bd(usuario['id'])
             return jsonify({"mensaje": "Login exitoso"}), 200
         else:
             return jsonify({"error": "Credenciales incorrectas"}), 401
@@ -267,6 +274,12 @@ def gestion_productos():
     service = ProductoService()
     productos = service.obtener_todos()
     return render_template('gestion_productos.html', productos=productos)
+
+@app.route('/admin/devoluciones')
+@admin_manager.requerir_admin
+def admin_devoluciones():
+    """Página de administración de devoluciones"""
+    return render_template('admin_devoluciones.html')
 
 @app.route('/eliminar_producto/<int:id_producto>')
 @admin_manager.requerir_admin
@@ -603,8 +616,52 @@ def obtener_marcas_en_uso():
 @app.route('/logout')
 def logout():
     """Cerrar sesión"""
+    # Guardar carrito en BD antes de limpiar la sesión
+    uid = session.get('usuario_id')
+    if uid:
+        carrito_service.guardar_carrito_en_bd(uid)
     session.clear()
     return redirect(url_for('mostrar_catalogo'))
+
+
+# ==================== ELIMINAR CUENTA PROPIA ====================
+
+@app.route('/api/eliminar-cuenta', methods=['POST'])
+def eliminar_cuenta_propia():
+    """
+    Elimina la cuenta del usuario autenticado.
+    Requiere contraseña actual para confirmar identidad.
+    """
+    # Verificar que está logueado
+    if 'usuario_id' not in session:
+        return jsonify({"ok": False, "error": "No estás autenticado"}), 401
+    
+    datos = request.get_json()
+    if not datos:
+        return jsonify({"ok": False, "error": "Datos no proporcionados"}), 400
+    
+    contraseña = datos.get('contraseña', '').strip()
+    if not contraseña:
+        return jsonify({"ok": False, "error": "Debés ingresar tu contraseña"}), 400
+    
+    usuario_id = session['usuario_id']
+    
+    # No permitir que el admin elimine su cuenta desde acá
+    if session.get('es_admin') == 1:
+        return jsonify({"ok": False, "error": "Las cuentas de administrador no se pueden eliminar desde el perfil"}), 403
+    
+    service = UsuarioService()
+    resultado = service.eliminar_cuenta_propia(usuario_id, contraseña)
+    
+    if resultado.get("ok"):
+        # Limpiar sesión completamente
+        session.clear()
+        return jsonify({
+            "ok": True,
+            "mensaje": "Tu cuenta fue eliminada correctamente"
+        }), 200
+    else:
+        return jsonify(resultado), 400
 
 
 # ==================== RECUPERACIÓN DE CONTRASEÑA ====================

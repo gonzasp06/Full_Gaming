@@ -440,3 +440,167 @@ El equipo de {self.nombre_sistema}
         except Exception as e:
             print(f"⚠ Error al enviar email de bienvenida: {str(e)}")
             return {"ok": False, "error": "Error al enviar el email"}
+
+    # ======================== DEVOLUCIONES ========================
+
+    def enviar_devolucion_aprobada(self, email_destino, nombre_usuario, pedido_id, monto=0):
+        """Envía email notificando que la devolución fue aprobada."""
+        try:
+            if not self.email_user or not self.email_password:
+                print(f"[DEV] Devolución aprobada - Pedido #{pedido_id} - {email_destino}")
+                return {"ok": True, "dev_mode": True}
+
+            mensaje = MIMEMultipart('alternative')
+            mensaje['Subject'] = f"✅ Devolución Aprobada - Pedido #{pedido_id} | {self.nombre_sistema}"
+            mensaje['From'] = self.email_user
+            mensaje['To'] = email_destino
+
+            monto_fmt = f"${int(monto):,}".replace(",", ".")
+
+            texto_plano = f"""
+¡Hola {nombre_usuario}!
+
+Tu solicitud de devolución para el Pedido #{pedido_id} fue APROBADA.
+
+Monto a reembolsar: {monto_fmt}
+
+El reembolso se procesará en los próximos días hábiles.
+
+Saludos,
+El equipo de {self.nombre_sistema}
+            """
+
+            html = f"""
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; background-color: #1a1a2e; color: #ffffff; padding: 20px; margin: 0;">
+    <div style="max-width: 550px; margin: 0 auto; background: linear-gradient(135deg, #252540 0%, #1a1a2e 100%); border-radius: 20px; padding: 40px; border: 1px solid #3C308C;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #6A44F2; margin: 0; font-size: 32px;">🎮 {self.nombre_sistema}</h1>
+            <p style="color: #888; margin-top: 5px;">Tu tienda gamer de confianza</p>
+        </div>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 64px; margin-bottom: 10px;">✅</div>
+            <h2 style="color: #2ecc71; margin: 0;">Devolución Aprobada</h2>
+            <p style="color: #bbb; font-size: 15px; margin-top: 10px;">
+                Pedido #{pedido_id}
+            </p>
+        </div>
+        <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 25px; text-align: center;">
+            <p style="color: #bbb; font-size: 14px; margin: 0 0 10px 0;">Monto a reembolsar:</p>
+            <p style="color: #2ecc71; font-size: 28px; font-weight: bold; margin: 0;">{monto_fmt}</p>
+        </div>
+        <div style="background: rgba(106, 68, 242, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+            <p style="color: #bbb; font-size: 14px; margin: 0;">
+                Hola <strong style="color: #fff;">{nombre_usuario}</strong>, tu solicitud de devolución fue aprobada por nuestro equipo.
+                El reembolso se procesará en los próximos días hábiles.
+            </p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #3C308C; margin: 25px 0;">
+        <p style="color: #555; font-size: 11px; text-align: center;">
+            © 2026 {self.nombre_sistema} - Todos los derechos reservados
+        </p>
+    </div>
+</body>
+</html>
+            """
+
+            mensaje.attach(MIMEText(texto_plano, 'plain', 'utf-8'))
+            mensaje.attach(MIMEText(html, 'html', 'utf-8'))
+
+            server = self._crear_conexion()
+            if not server:
+                return {"ok": False, "error": "No se pudo conectar al servidor de email"}
+
+            server.sendmail(self.email_user, email_destino, mensaje.as_string())
+            server.quit()
+
+            print(f"✓ Email de devolución aprobada enviado a {email_destino}")
+            return {"ok": True}
+
+        except Exception as e:
+            print(f"⚠ Error al enviar email de devolución aprobada: {str(e)}")
+            return {"ok": False, "error": "Error al enviar el email"}
+
+    def enviar_devolucion_rechazada(self, email_destino, nombre_usuario, pedido_id, motivo_rechazo=None):
+        """Envía email notificando que la devolución fue rechazada."""
+        try:
+            if not self.email_user or not self.email_password:
+                print(f"[DEV] Devolución rechazada - Pedido #{pedido_id} - {email_destino}")
+                return {"ok": True, "dev_mode": True}
+
+            mensaje = MIMEMultipart('alternative')
+            mensaje['Subject'] = f"❌ Devolución No Aprobada - Pedido #{pedido_id} | {self.nombre_sistema}"
+            mensaje['From'] = self.email_user
+            mensaje['To'] = email_destino
+
+            motivo_texto = motivo_rechazo if motivo_rechazo else "No se proporcionó un motivo específico."
+
+            texto_plano = f"""
+Hola {nombre_usuario},
+
+Tu solicitud de devolución para el Pedido #{pedido_id} no fue aprobada.
+
+Motivo: {motivo_texto}
+
+Si tenés dudas, podés contactarnos respondiendo a este email.
+
+Saludos,
+El equipo de {self.nombre_sistema}
+            """
+
+            html = f"""
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; background-color: #1a1a2e; color: #ffffff; padding: 20px; margin: 0;">
+    <div style="max-width: 550px; margin: 0 auto; background: linear-gradient(135deg, #252540 0%, #1a1a2e 100%); border-radius: 20px; padding: 40px; border: 1px solid #3C308C;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #6A44F2; margin: 0; font-size: 32px;">🎮 {self.nombre_sistema}</h1>
+            <p style="color: #888; margin-top: 5px;">Tu tienda gamer de confianza</p>
+        </div>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 64px; margin-bottom: 10px;">📋</div>
+            <h2 style="color: #e67e22; margin: 0;">Devolución No Aprobada</h2>
+            <p style="color: #bbb; font-size: 15px; margin-top: 10px;">
+                Pedido #{pedido_id}
+            </p>
+        </div>
+        <div style="background: rgba(230, 126, 34, 0.1); border: 1px solid rgba(230, 126, 34, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+            <p style="color: #e67e22; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">Motivo:</p>
+            <p style="color: #bbb; font-size: 14px; margin: 0;">{motivo_texto}</p>
+        </div>
+        <div style="background: rgba(106, 68, 242, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+            <p style="color: #bbb; font-size: 14px; margin: 0;">
+                Hola <strong style="color: #fff;">{nombre_usuario}</strong>, lamentamos informarte que tu solicitud
+                de devolución no fue aprobada en esta oportunidad. Si tenés consultas adicionales,
+                no dudes en contactarnos.
+            </p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #3C308C; margin: 25px 0;">
+        <p style="color: #555; font-size: 11px; text-align: center;">
+            © 2026 {self.nombre_sistema} - Todos los derechos reservados
+        </p>
+    </div>
+</body>
+</html>
+            """
+
+            mensaje.attach(MIMEText(texto_plano, 'plain', 'utf-8'))
+            mensaje.attach(MIMEText(html, 'html', 'utf-8'))
+
+            server = self._crear_conexion()
+            if not server:
+                return {"ok": False, "error": "No se pudo conectar al servidor de email"}
+
+            server.sendmail(self.email_user, email_destino, mensaje.as_string())
+            server.quit()
+
+            print(f"✓ Email de devolución rechazada enviado a {email_destino}")
+            return {"ok": True}
+
+        except Exception as e:
+            print(f"⚠ Error al enviar email de devolución rechazada: {str(e)}")
+            return {"ok": False, "error": "Error al enviar el email"}
+

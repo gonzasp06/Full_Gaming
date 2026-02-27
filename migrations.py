@@ -349,6 +349,160 @@ def agregar_columna_token_eliminacion_si_no_existe():
         return False
 
 
+def crear_tabla_egresos_reales_si_no_existe():
+    """
+    Crea la tabla egresos_reales para registrar pérdidas no recuperables del negocio:
+    fallas de producto, devoluciones, roturas, errores, etc.
+    Separada de stock_compras (que es inversión, no pérdida).
+    """
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        if _tabla_existe(cursor, 'egresos_reales'):
+            print("✓ La tabla 'egresos_reales' ya existe")
+            cursor.close()
+            conexion.close()
+            return True
+
+        print("Creando tabla 'egresos_reales'...")
+        create_query = """
+            CREATE TABLE egresos_reales (
+                id INT NOT NULL AUTO_INCREMENT,
+                producto_id INT DEFAULT NULL,
+                pedido_id INT DEFAULT NULL,
+                tipo ENUM('falla', 'devolucion', 'rotura', 'error', 'otro') NOT NULL DEFAULT 'otro',
+                monto DECIMAL(12,2) NOT NULL,
+                cantidad INT NOT NULL DEFAULT 1,
+                descripcion VARCHAR(500) DEFAULT NULL,
+                fecha TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                usuario_id INT DEFAULT NULL,
+                PRIMARY KEY (id),
+                KEY idx_egresos_reales_producto (producto_id),
+                KEY idx_egresos_reales_pedido (pedido_id),
+                KEY idx_egresos_reales_tipo (tipo),
+                KEY idx_egresos_reales_fecha (fecha),
+                CONSTRAINT fk_egresos_reales_producto
+                    FOREIGN KEY (producto_id) REFERENCES producto (id)
+                    ON DELETE SET NULL,
+                CONSTRAINT fk_egresos_reales_usuario
+                    FOREIGN KEY (usuario_id) REFERENCES usuario (idusuario)
+                    ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+        """
+        cursor.execute(create_query)
+        conexion.commit()
+        print("✓ Tabla 'egresos_reales' creada exitosamente")
+
+        cursor.close()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(f"⚠ Error al crear tabla 'egresos_reales': {str(e)}")
+        return False
+
+
+def crear_tabla_devoluciones_si_no_existe():
+    """
+    Crea la tabla devoluciones para gestionar solicitudes de devolución/reembolso.
+    Relacionada con pedidos, usuarios y administradores.
+    """
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        if _tabla_existe(cursor, 'devoluciones'):
+            print("✓ La tabla 'devoluciones' ya existe")
+            cursor.close()
+            conexion.close()
+            return True
+
+        print("Creando tabla 'devoluciones'...")
+        create_query = """
+            CREATE TABLE devoluciones (
+                id INT NOT NULL AUTO_INCREMENT,
+                pedido_id INT NOT NULL,
+                usuario_id INT NOT NULL,
+                motivo ENUM('producto_defectuoso','no_coincide','arrepentimiento','otro') NOT NULL DEFAULT 'otro',
+                comentarios TEXT DEFAULT NULL,
+                estado ENUM('pendiente','aprobada','rechazada') NOT NULL DEFAULT 'pendiente',
+                monto_devolucion DECIMAL(12,2) NOT NULL DEFAULT 0,
+                fecha_solicitud TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                fecha_resolucion TIMESTAMP NULL DEFAULT NULL,
+                admin_id INT DEFAULT NULL,
+                motivo_rechazo VARCHAR(500) DEFAULT NULL,
+                PRIMARY KEY (id),
+                KEY idx_devoluciones_pedido (pedido_id),
+                KEY idx_devoluciones_usuario (usuario_id),
+                KEY idx_devoluciones_estado (estado),
+                KEY idx_devoluciones_fecha (fecha_solicitud),
+                CONSTRAINT fk_devoluciones_pedido
+                    FOREIGN KEY (pedido_id) REFERENCES pedidos (id)
+                    ON DELETE CASCADE,
+                CONSTRAINT fk_devoluciones_usuario
+                    FOREIGN KEY (usuario_id) REFERENCES usuario (idusuario)
+                    ON DELETE CASCADE,
+                CONSTRAINT fk_devoluciones_admin
+                    FOREIGN KEY (admin_id) REFERENCES usuario (idusuario)
+                    ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+        """
+        cursor.execute(create_query)
+        conexion.commit()
+        print("✓ Tabla 'devoluciones' creada exitosamente")
+
+        cursor.close()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(f"⚠ Error al crear tabla 'devoluciones': {str(e)}")
+        return False
+
+
+def crear_tabla_carrito_usuario_si_no_existe():
+    """Crea la tabla 'carrito_usuario' para carritos persistentes por usuario"""
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        if _tabla_existe(cursor, 'carrito_usuario'):
+            print("✓ La tabla 'carrito_usuario' ya existe")
+            cursor.close()
+            conexion.close()
+            return True
+
+        print("Creando tabla 'carrito_usuario'...")
+        create_query = """
+            CREATE TABLE carrito_usuario (
+                id INT NOT NULL AUTO_INCREMENT,
+                usuario_id INT NOT NULL,
+                producto_id INT NOT NULL,
+                cantidad INT NOT NULL DEFAULT 1,
+                fecha_agregado TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                fecha_actualizado TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                UNIQUE KEY uk_carrito_usuario_producto (usuario_id, producto_id),
+                KEY idx_carrito_usuario (usuario_id),
+                CONSTRAINT fk_carrito_usuario
+                    FOREIGN KEY (usuario_id) REFERENCES usuario (idusuario)
+                    ON DELETE CASCADE,
+                CONSTRAINT fk_carrito_producto
+                    FOREIGN KEY (producto_id) REFERENCES producto (id)
+                    ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+        """
+        cursor.execute(create_query)
+        conexion.commit()
+        print("✓ Tabla 'carrito_usuario' creada exitosamente")
+
+        cursor.close()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(f"⚠ Error al crear tabla 'carrito_usuario': {str(e)}")
+        return False
+
+
 if __name__ == "__main__":
     agregar_columna_costo_si_no_existe()
     agregar_columna_fecha_creacion_usuario_si_no_existe()
@@ -356,3 +510,6 @@ if __name__ == "__main__":
     agregar_columnas_costos_pedido_items_si_no_existen()
     agregar_columnas_recuperacion_usuario_si_no_existen()
     agregar_columna_token_eliminacion_si_no_existe()
+    crear_tabla_egresos_reales_si_no_existe()
+    crear_tabla_devoluciones_si_no_existe()
+    crear_tabla_carrito_usuario_si_no_existe()

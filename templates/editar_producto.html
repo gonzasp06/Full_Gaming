@@ -115,7 +115,25 @@
 
     <script>
         // Inicializar Quill y cargar contenido existente
-        var quill = new Quill('#descripcion-editor', { theme: 'snow' });
+        var quill = new Quill('#descripcion-editor', {
+            theme: 'snow',
+            modules: {
+                clipboard: { matchers: [] },
+                toolbar: true
+            }
+        });
+
+        // Forzar pegado como texto plano (sin fuentes ni estilos externos)
+        quill.clipboard.addMatcher(Node.ELEMENT_NODE, function(node, delta) {
+            delta.ops = delta.ops.map(op => {
+                if (op.insert && typeof op.insert === 'string') {
+                    return { insert: op.insert };
+                }
+                return op;
+            });
+            return delta;
+        });
+
         quill.clipboard.dangerouslyPasteHTML({{ p_desc|tojson }});
 
         // Asignar categoría actual

@@ -498,3 +498,115 @@ body.perfil-page {
   font-size: 32px;
   margin: 0;
 }
+
+/* ============================= */
+/* ZONA PELIGROSA (Eliminar cuenta) */
+/* ============================= */
+
+.zona-peligrosa {
+  margin-top: 40px;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(231, 76, 60, 0.03);
+}
+
+.zona-peligrosa-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(231, 76, 60, 0.2);
+  background: rgba(231, 76, 60, 0.06);
+}
+
+.zona-peligrosa-header h5 {
+  color: #e74c3c;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.zona-peligrosa-header p {
+  color: #888;
+  font-size: 12px;
+  margin: 0;
+}
+
+.zona-peligrosa-content {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.zona-peligrosa-info strong {
+  color: #ddd;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.zona-peligrosa-info p {
+  color: #888;
+  font-size: 12px;
+  margin: 0;
+  max-width: 350px;
+}
+
+.btn-eliminar-cuenta {
+  background: transparent;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.btn-eliminar-cuenta:hover {
+  background: #e74c3c;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .zona-peligrosa-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .btn-eliminar-cuenta {
+    width: 100%;
+    text-align: center;
+  }
+
+  .zona-peligrosa-info p {
+    max-width: 100%;
+  }
+}
+
+/* ============ BOTÓN DEVOLUCIÓN EN TABLA PEDIDOS ============ */
+.btn-devolucion-mini {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-devolucion-mini:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(230, 126, 34, 0.3);
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+

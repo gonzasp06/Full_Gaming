@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devoluciones - FullGaming Admin</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { font-family: 'Horizon', sans-serif; }
+
+        .dev-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .dev-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #1a1f3a, #2d1f4f);
+            padding: 20px 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(106, 68, 242, 0.3);
+        }
+
+        .dev-header h1 {
+            margin: 0;
+            color: #fff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dev-header .dev-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .dev-stat {
+            text-align: center;
+            padding: 8px 18px;
+            background: rgba(106, 68, 242, 0.15);
+            border-radius: 8px;
+            border: 1px solid rgba(106, 68, 242, 0.3);
+        }
+
+        .dev-stat-num {
+            font-size: 22px;
+            font-weight: 700;
+            color: #FFD700;
+            display: block;
+        }
+
+        .dev-stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        /* Tabs */
+        .dev-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: rgba(26, 31, 58, 0.5);
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid rgba(106, 68, 242, 0.2);
+        }
+
+        .dev-tab {
+            flex: 1;
+            padding: 10px 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #999;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+        }
+
+        .dev-tab:hover { color: #fff; background: rgba(106, 68, 242, 0.1); }
+        .dev-tab.active {
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            color: #fff;
+        }
+
+        .dev-tab .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+
+        /* Cards de devolución */
+        .dev-panel { display: none; }
+        .dev-panel.active { display: block; }
+
+        .dev-card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #252540 100%);
+            border: 1px solid rgba(106, 68, 242, 0.25);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .dev-card:hover {
+            border-color: #6A44F2;
+            box-shadow: 0 4px 20px rgba(106, 68, 242, 0.15);
+        }
+
+        .dev-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .dev-card-info h3 {
+            color: #fff;
+            font-size: 16px;
+            margin: 0 0 4px 0;
+        }
+
+        .dev-card-info p {
+            color: #999;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .dev-card-monto {
+            text-align: right;
+        }
+
+        .dev-card-monto .monto {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .dev-card-monto .fecha {
+            font-size: 11px;
+            color: #777;
+        }
+
+        .dev-card-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .dev-detail {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+
+        .dev-detail-label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dev-detail-value {
+            font-size: 13px;
+            color: #ddd;
+            margin-top: 2px;
+        }
+
+        .dev-comentarios {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            grid-column: 1 / -1;
+        }
+
+        .dev-comentarios p {
+            color: #bbb;
+            font-size: 13px;
+            margin: 0;
+            font-style: italic;
+        }
+
+        .dev-card-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .btn-aprobar {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-aprobar:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+
+        .btn-rechazar {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-rechazar:hover { background: rgba(231, 76, 60, 0.1); transform: translateY(-2px); }
+
+        /* Badges de estado */
+        .estado-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .estado-pendiente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+        .estado-aprobada { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+        .estado-rechazada { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+
+        /* Volver */
+        .dev-volver {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6A44F2;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(106, 68, 242, 0.1);
+            border: 1px solid rgba(106, 68, 242, 0.3);
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .dev-volver:hover { background: rgba(106, 68, 242, 0.2); border-color: #6A44F2; color: #FFD700; }
+
+        .dev-empty {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .dev-empty .icon { font-size: 48px; margin-bottom: 10px; }
+
+        /* Modal rechazo */
+        .modal-rechazo-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-rechazo-content {
+            background: linear-gradient(135deg, #252540 0%, #1a1a2e 100%);
+            border: 1px solid #3C308C;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-rechazo-content h3 {
+            color: #e74c3c;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+        .modal-rechazo-content textarea {
+            width: 100%;
+            background: #1a1f2e;
+            color: white;
+            border: 1px solid #3C308C;
+            border-radius: 8px;
+            padding: 10px;
+            resize: vertical;
+            min-height: 80px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .modal-rechazo-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .dev-header { flex-direction: column; gap: 15px; }
+            .dev-header .dev-stats { width: 100%; }
+            .dev-card-body { grid-template-columns: 1fr; }
+            .dev-card-header { flex-direction: column; gap: 10px; }
+            .dev-card-actions { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="dev-container">
+        <a href="/estadisticas" class="dev-volver">← Volver al Dashboard</a>
+
+        <div class="dev-header">
+            <h1>🔄 Gestión de Devoluciones</h1>
+            <div class="dev-stats">
+                <div class="dev-stat">
+                    <span class="dev-stat-num" id="stat-pendientes">0</span>
+                    <span class="dev-stat-label">Pendientes</span>
+                </div>
+                <div class="dev-stat">
+                    <span class="dev-stat-num" id="stat-total">0</span>
+                    <span class="dev-stat-label">Total</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="dev-tabs">
+            <button class="dev-tab active" onclick="cambiarTab('pendientes')">
+                ⏳ Pendientes <span class="tab-badge" id="tab-badge-pendientes" style="display:none;">0</span>
+            </button>
+            <button class="dev-tab" onclick="cambiarTab('historial')">
+                📋 Historial
+            </button>
+        </div>
+
+        <!-- Panel Pendientes -->
+        <div id="panel-pendientes" class="dev-panel active">
+            <div id="lista-pendientes">
+                <div class="dev-empty">
+                    <div class="icon">⏳</div>
+                    <p>Cargando devoluciones pendientes...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Historial -->
+        <div id="panel-historial" class="dev-panel">
+            <div id="lista-historial">
+                <div class="dev-empty">
+                    <div class="icon">📋</div>
+                    <p>Cargando historial...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aprobación -->
+    <div id="modal-aprobacion" class="modal-rechazo-overlay" style="display: none;">
+        <div class="modal-rechazo-content" style="text-align: center;">
+            <div style="font-size: 56px; margin-bottom: 12px;">✅</div>
+            <h3 style="color: #2ecc71; margin: 0 0 8px 0; font-size: 20px;">Aprobar Devolución</h3>
+            <p style="color: #bbb; font-size: 13px; margin-bottom: 5px;">Devolución #<span id="aprobacion-dev-id"></span> — Pedido #<span id="aprobacion-ped-id"></span></p>
+            <p style="color: #FFD700; font-size: 22px; font-weight: 700; margin: 12px 0;" id="aprobacion-monto"></p>
+            <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.25); border-radius: 10px; padding: 14px; margin: 15px 0; text-align: left;">
+                <p style="color: #bbb; font-size: 12px; margin: 0 0 8px 0; font-weight: 600;">Al aprobar se ejecutará:</p>
+                <p style="color: #8b82d4; font-size: 12px; margin: 4px 0;">💰 Registro automático como egreso real</p>
+                <p style="color: #8b82d4; font-size: 12px; margin: 4px 0;">📧 Notificación por email al cliente</p>
+                <p style="color: #8b82d4; font-size: 12px; margin: 4px 0;">📦 Pedido pasará a estado "Devuelto"</p>
+            </div>
+            <div class="modal-rechazo-btns" style="justify-content: center; margin-top: 18px;">
+                <button class="btn-rechazar" onclick="cerrarModalAprobacion()">Cancelar</button>
+                <button class="btn-aprobar" id="btn-confirmar-aprobacion" onclick="confirmarAprobacion()" style="padding: 10px 28px; font-size: 14px;">✅ Confirmar Aprobación</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Rechazo -->
+    <div id="modal-rechazo" class="modal-rechazo-overlay" style="display: none;">
+        <div class="modal-rechazo-content">
+            <h3>❌ Rechazar Devolución</h3>
+            <p style="color: #bbb; font-size: 13px;">Devolución #<span id="rechazo-dev-id"></span> — Pedido #<span id="rechazo-ped-id"></span></p>
+            <label style="color: #999; font-size: 12px; margin-bottom: 5px; display: block;">Motivo del rechazo (opcional):</label>
+            <textarea id="rechazo-motivo" placeholder="Explicá brevemente por qué se rechaza..."></textarea>
+            <div class="modal-rechazo-btns">
+                <button class="btn-rechazar" onclick="cerrarModalRechazo()">Cancelar</button>
+                <button class="btn-rechazar" style="background: #e74c3c; color: white;" id="btn-confirmar-rechazo" onclick="confirmarRechazo()">Confirmar Rechazo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let devRechazoId = null;
+
+        // ============ TABS ============
+        function cambiarTab(tab) {
+            document.querySelectorAll('.dev-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.dev-panel').forEach(p => p.classList.remove('active'));
+
+            event.target.closest('.dev-tab').classList.add('active');
+            document.getElementById('panel-' + tab).classList.add('active');
+
+            if (tab === 'pendientes') cargarPendientes();
+            if (tab === 'historial') cargarHistorial();
+        }
+
+        // ============ CARGAR DATOS ============
+        async function cargarPendientes() {
+            try {
+                const resp = await fetch('/api/devoluciones/pendientes');
+                const data = await resp.json();
+
+                if (data.ok) {
+                    const lista = document.getElementById('lista-pendientes');
+                    const devs = data.devoluciones;
+
+                    document.getElementById('stat-pendientes').textContent = devs.length;
+                    const badge = document.getElementById('tab-badge-pendientes');
+                    badge.textContent = devs.length;
+                    badge.style.display = devs.length > 0 ? 'inline-flex' : 'none';
+
+                    if (devs.length === 0) {
+                        lista.innerHTML = '<div class="dev-empty"><div class="icon">✅</div><p>No hay devoluciones pendientes</p></div>';
+                        return;
+                    }
+
+                    lista.innerHTML = devs.map(d => renderCardPendiente(d)).join('');
+                }
+            } catch (err) {
+                document.getElementById('lista-pendientes').innerHTML = '<div class="dev-empty"><div class="icon">⚠️</div><p>Error al cargar</p></div>';
+            }
+        }
+
+        async function cargarHistorial() {
+            try {
+                const resp = await fetch('/api/devoluciones/todas');
+                const data = await resp.json();
+
+                if (data.ok) {
+                    const lista = document.getElementById('lista-historial');
+                    const devs = data.devoluciones;
+
+                    document.getElementById('stat-total').textContent = devs.length;
+
+                    if (devs.length === 0) {
+                        lista.innerHTML = '<div class="dev-empty"><div class="icon">📋</div><p>No hay devoluciones registradas</p></div>';
+                        return;
+                    }
+
+                    lista.innerHTML = devs.map(d => renderCardHistorial(d)).join('');
+                }
+            } catch (err) {
+                document.getElementById('lista-historial').innerHTML = '<div class="dev-empty"><div class="icon">⚠️</div><p>Error al cargar</p></div>';
+            }
+        }
+
+        // ============ RENDER CARDS ============
+        function renderCardPendiente(d) {
+            return `
+                <div class="dev-card" id="dev-card-${d.id}">
+                    <div class="dev-card-header">
+                        <div class="dev-card-info">
+                            <h3>Devolución #${d.id} — Pedido #${d.pedido_id}</h3>
+                            <p>👤 ${d.usuario_nombre} (${d.usuario_email})</p>
+                        </div>
+                        <div class="dev-card-monto">
+                            <div class="monto">$${d.monto_devolucion.toLocaleString('es-AR')}</div>
+                            <div class="fecha">${d.fecha_solicitud}</div>
+                        </div>
+                    </div>
+                    <div class="dev-card-body">
+                        <div class="dev-detail">
+                            <div class="dev-detail-label">Motivo</div>
+                            <div class="dev-detail-value">${d.motivo_label}</div>
+                        </div>
+                        <div class="dev-detail">
+                            <div class="dev-detail-label">Total del Pedido</div>
+                            <div class="dev-detail-value">$${d.pedido_total.toLocaleString('es-AR')}</div>
+                        </div>
+                        ${d.comentarios ? `
+                        <div class="dev-comentarios">
+                            <div class="dev-detail-label">Comentarios del cliente</div>
+                            <p>"${d.comentarios}"</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="dev-card-actions">
+                        <button class="btn-rechazar" onclick="abrirModalRechazo(${d.id}, ${d.pedido_id})">
+                            ❌ Rechazar
+                        </button>
+                        <button class="btn-aprobar" onclick="aprobarDevolucion(${d.id}, ${d.pedido_id}, ${d.monto_devolucion})">
+                            ✅ Aprobar Devolución
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCardHistorial(d) {
+            let estadoHtml = '';
+            if (d.estado === 'pendiente') estadoHtml = '<span class="estado-badge estado-pendiente">⏳ Pendiente</span>';
+            else if (d.estado === 'aprobada') estadoHtml = '<span class="estado-badge estado-aprobada">✅ Aprobada</span>';
+            else if (d.estado === 'rechazada') estadoHtml = '<span class="estado-badge estado-rechazada">❌ Rechazada</span>';
+
+            return `
+                <div class="dev-card">
+                    <div class="dev-card-header">
+                        <div class="dev-card-info">
+                            <h3>Devolución #${d.id} — Pedido #${d.pedido_id} ${estadoHtml}</h3>
+                            <p>👤 ${d.usuario_nombre} (${d.usuario_email})</p>
+                        </div>
+                        <div class="dev-card-monto">
+                            <div class="monto">$${d.monto_devolucion.toLocaleString('es-AR')}</div>
+                            <div class="fecha">${d.fecha_solicitud}</div>
+                        </div>
+                    </div>
+                    <div class="dev-card-body">
+                        <div class="dev-detail">
+                            <div class="dev-detail-label">Motivo</div>
+                            <div class="dev-detail-value">${d.motivo_label}</div>
+                        </div>
+                        <div class="dev-detail">
+                            <div class="dev-detail-label">Resolución</div>
+                            <div class="dev-detail-value">${d.fecha_resolucion || 'Sin resolver'}</div>
+                        </div>
+                        ${d.comentarios ? `
+                        <div class="dev-comentarios">
+                            <div class="dev-detail-label">Comentarios</div>
+                            <p>"${d.comentarios}"</p>
+                        </div>
+                        ` : ''}
+                        ${d.motivo_rechazo ? `
+                        <div class="dev-comentarios" style="border-left: 3px solid #e74c3c;">
+                            <div class="dev-detail-label" style="color: #e74c3c;">Motivo de rechazo</div>
+                            <p style="color: #e74c3c;">"${d.motivo_rechazo}"</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============ ACCIONES ============
+        let devAprobacionId = null;
+
+        function aprobarDevolucion(devId, pedId, monto) {
+            devAprobacionId = devId;
+            document.getElementById('aprobacion-dev-id').textContent = devId;
+            document.getElementById('aprobacion-ped-id').textContent = pedId;
+            document.getElementById('aprobacion-monto').textContent = '$' + Number(monto).toLocaleString('es-AR');
+            document.getElementById('modal-aprobacion').style.display = 'flex';
+        }
+
+        function cerrarModalAprobacion() {
+            document.getElementById('modal-aprobacion').style.display = 'none';
+            devAprobacionId = null;
+        }
+
+        document.getElementById('modal-aprobacion').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModalAprobacion();
+        });
+
+        async function confirmarAprobacion() {
+            if (!devAprobacionId) return;
+
+            const btn = document.getElementById('btn-confirmar-aprobacion');
+            btn.disabled = true;
+            btn.textContent = '⏳ Procesando...';
+
+            try {
+                const resp = await fetch(`/api/devoluciones/aprobar/${devAprobacionId}`, { method: 'POST' });
+                const data = await resp.json();
+
+                if (data.ok) {
+                    cerrarModalAprobacion();
+                    mostrarNotif('✅ Devolución aprobada correctamente');
+                    removerCardConAnimacion(devAprobacionId);
+                    if (typeof actualizarBadgeDevoluciones === 'function') actualizarBadgeDevoluciones();
+                } else {
+                    mostrarNotif('❌ ' + (data.error || 'Error'), true);
+                }
+            } catch (err) {
+                mostrarNotif('❌ Error de conexión', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Confirmar Aprobación';
+            }
+        }
+
+        function abrirModalRechazo(devId, pedId) {
+            devRechazoId = devId;
+            document.getElementById('rechazo-dev-id').textContent = devId;
+            document.getElementById('rechazo-ped-id').textContent = pedId;
+            document.getElementById('rechazo-motivo').value = '';
+            document.getElementById('modal-rechazo').style.display = 'flex';
+        }
+
+        function cerrarModalRechazo() {
+            document.getElementById('modal-rechazo').style.display = 'none';
+            devRechazoId = null;
+        }
+
+        async function confirmarRechazo() {
+            if (!devRechazoId) return;
+
+            const motivo = document.getElementById('rechazo-motivo').value.trim();
+            const btn = document.getElementById('btn-confirmar-rechazo');
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+
+            try {
+                const resp = await fetch(`/api/devoluciones/rechazar/${devRechazoId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ motivo_rechazo: motivo })
+                });
+                const data = await resp.json();
+
+                if (data.ok) {
+                    cerrarModalRechazo();
+                    mostrarNotif('Devolución rechazada');
+                    removerCardConAnimacion(devRechazoId);
+                    if (typeof actualizarBadgeDevoluciones === 'function') actualizarBadgeDevoluciones();
+                } else {
+                    mostrarNotif('❌ ' + (data.error || 'Error'), true);
+                }
+            } catch (err) {
+                mostrarNotif('❌ Error de conexión', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Confirmar Rechazo';
+            }
+        }
+
+        // Cerrar modal al click fuera
+        document.getElementById('modal-rechazo').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModalRechazo();
+        });
+
+        // ============ ANIMACIÓN DE REMOCIÓN ============
+        function removerCardConAnimacion(devId) {
+            const card = document.getElementById('dev-card-' + devId);
+            if (card) {
+                card.style.transition = 'all 0.4s ease-out';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(60px) scale(0.95)';
+                card.style.maxHeight = card.scrollHeight + 'px';
+                setTimeout(() => {
+                    card.style.maxHeight = '0';
+                    card.style.padding = '0';
+                    card.style.margin = '0';
+                    card.style.border = 'none';
+                    card.style.overflow = 'hidden';
+                }, 350);
+                setTimeout(() => {
+                    card.remove();
+                    // Actualizar contadores
+                    const remaining = document.querySelectorAll('#lista-pendientes .dev-card').length;
+                    document.getElementById('stat-pendientes').textContent = remaining;
+                    const badge = document.getElementById('tab-badge-pendientes');
+                    badge.textContent = remaining;
+                    badge.style.display = remaining > 0 ? 'inline-flex' : 'none';
+                    if (remaining === 0) {
+                        document.getElementById('lista-pendientes').innerHTML = '<div class="dev-empty"><div class="icon">✅</div><p>No hay devoluciones pendientes</p></div>';
+                    }
+                    // Incrementar stat total
+                    const totalEl = document.getElementById('stat-total');
+                    totalEl.textContent = parseInt(totalEl.textContent || 0) + 0; // mantener
+                }, 750);
+            } else {
+                cargarPendientes();
+            }
+        }
+
+        // ============ NOTIFICACIÓN ============
+        function mostrarNotif(msg, esError = false) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 99999;
+                padding: 12px 20px; border-radius: 10px;
+                color: white; font-size: 14px; font-weight: 600;
+                animation: slideIn 0.3s ease-out;
+                background: ${esError ? 'linear-gradient(135deg, #e74c3c, #c0392b)' : 'linear-gradient(135deg, #2ecc71, #27ae60)'};
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            `;
+            notif.textContent = msg;
+            document.body.appendChild(notif);
+            setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 3000);
+        }
+
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarPendientes();
+            // Cargar stat total
+            fetch('/api/devoluciones/todas').then(r => r.json()).then(d => {
+                if (d.ok) document.getElementById('stat-total').textContent = d.devoluciones.length;
+            }).catch(() => {});
+        });
+    </script>
+</body>
+</html>

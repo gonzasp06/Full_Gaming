@@ -806,6 +806,15 @@
   .full-width-mobile {
     width: 100% !important;
   }
+
+  /* Formulario de egresos en 1 columna */
+  #form-egreso {
+    grid-template-columns: 1fr !important;
+  }
+
+  #form-egreso div[style*="grid-column"] {
+    grid-column: 1 !important;
+  }
 }
 
 /* ============================================= */

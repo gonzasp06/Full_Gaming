@@ -245,6 +245,90 @@ class UsuarioService:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
+    def eliminar_cuenta_propia(self, user_id, contraseña):
+        """
+        Elimina la cuenta del usuario autenticado tras validar su contraseña.
+        Elimina datos relacionados (pedidos, direcciones) antes de eliminar el usuario.
+        
+        Args:
+            user_id: ID del usuario autenticado
+            contraseña: Contraseña actual para validación de identidad
+            
+        Returns:
+            dict con ok=True si se eliminó, o ok=False con error
+        """
+        try:
+            # 1. Obtener datos del usuario
+            cursor = self.conexion.cursor()
+            cursor.execute("SELECT contraseña, email, nombre FROM usuario WHERE idusuario = %s", (user_id,))
+            usuario = cursor.fetchone()
+            
+            if not usuario:
+                cursor.close()
+                return {"ok": False, "error": "Usuario no encontrado"}
+            
+            hash_guardado = usuario[0]
+            email = usuario[1]
+            nombre = usuario[2]
+            
+            # 2. Validar contraseña con bcrypt
+            if isinstance(hash_guardado, bytes):
+                hash_bytes = hash_guardado
+                hash_texto = hash_guardado.decode('utf-8', errors='ignore')
+            elif isinstance(hash_guardado, str):
+                hash_texto = hash_guardado
+                hash_bytes = hash_guardado.encode('utf-8')
+            else:
+                cursor.close()
+                return {"ok": False, "error": "Error interno de autenticación"}
+            
+            contraseña_valida = False
+            if hash_texto.startswith('$2a$') or hash_texto.startswith('$2b$') or hash_texto.startswith('$2y$'):
+                contraseña_valida = bcrypt.checkpw(contraseña.encode('utf-8'), hash_bytes)
+            else:
+                # Legacy: texto plano
+                contraseña_valida = (hash_texto == contraseña)
+            
+            if not contraseña_valida:
+                cursor.close()
+                return {"ok": False, "error": "Contraseña incorrecta"}
+            
+            # 3. Eliminar datos relacionados (integridad referencial)
+            try:
+                cursor.execute("DELETE FROM pedido_items WHERE pedido_id IN (SELECT id FROM pedidos WHERE usuario_id = %s)", (user_id,))
+            except:
+                pass
+            try:
+                cursor.execute("DELETE FROM pedidos WHERE usuario_id = %s", (user_id,))
+            except:
+                pass
+            try:
+                cursor.execute("DELETE FROM direcciones WHERE usuario_id = %s", (user_id,))
+            except:
+                pass
+            try:
+                cursor.execute("DELETE FROM stock_compras WHERE usuario_id = %s", (user_id,))
+            except:
+                pass
+            
+            # 4. Eliminar el usuario
+            cursor.execute("DELETE FROM usuario WHERE idusuario = %s", (user_id,))
+            self.conexion.commit()
+            cursor.close()
+            
+            print(f"🗑️ Cuenta eliminada: {email} (ID: {user_id}) por solicitud del usuario")
+            
+            return {
+                "ok": True,
+                "nombre": nombre,
+                "email": email,
+                "mensaje": f"Cuenta de {email} eliminada correctamente"
+            }
+            
+        except Exception as e:
+            print(f"⚠ Error al eliminar cuenta propia: {str(e)}")
+            return {"ok": False, "error": "Error al eliminar la cuenta. Intentá de nuevo."}
+
     # OBTENER PERFIL COMPLETO DEL USUARIO
     def obtener_perfil(self, usuario_id):
         try:

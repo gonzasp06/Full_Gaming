@@ -1,6 +1,7 @@
 import mysql.connector
 from database import conectar_base_datos
 from datetime import datetime, timedelta
+from services.egreso_service import EgresoService
 
 
 class EstadisticasService:
@@ -497,10 +498,14 @@ class EstadisticasService:
             egresos_stock = self.obtener_egresos_stock_acumulados()
             costo_vendido = self.obtener_costo_vendido_acumulado()
             ganancia_real = self.obtener_ganancia_real_acumulada()
+            egreso_svc = EgresoService()
+            egresos_reales_result = egreso_svc.obtener_egresos_acumulados()
             productos_vendidos = self.obtener_productos_mas_vendidos(5)
             productos_bajo_stock = self.obtener_productos_bajo_stock(5)
             usuarios_activos = self.obtener_usuarios_mas_activos(5)
             
+            egresos_reales_total = egresos_reales_result.get('egresos_reales', 0) if egresos_reales_result.get('ok') else 0
+
             return {
                 "ok": True,
                 "resumen": {
@@ -510,7 +515,8 @@ class EstadisticasService:
                     "cantidad_usuarios": cantidad_usuarios.get('cantidad', 0) if cantidad_usuarios.get('ok') else 0,
                     "ingresos_mes": ingresos_mes.get('ingresos', 0) if ingresos_mes.get('ok') else 0,
                     "nuevos_usuarios": nuevos_usuarios.get('cantidad', 0) if nuevos_usuarios.get('ok') else 0,
-                    "egresos_acumulados": egresos_stock.get('egresos', 0) if egresos_stock.get('ok') else 0,
+                    "inversion_acumulada": egresos_stock.get('egresos', 0) if egresos_stock.get('ok') else 0,
+                    "egresos_reales_acumulados": egresos_reales_total,
                     "costo_vendido_total": costo_vendido.get('costo_vendido', 0) if costo_vendido.get('ok') else 0,
                     "ganancia_real": ganancia_real.get('ganancia_real', 0) if ganancia_real.get('ok') else 0,
                     "productos_mas_vendidos": productos_vendidos.get('productos', []) if productos_vendidos.get('ok') else [],
@@ -572,7 +578,10 @@ class EstadisticasService:
 
     def obtener_ingresos_vs_egresos_por_mes(self, cantidad_meses=12):
         """
-        Calcula ingresos vs egresos (costos) agrupados por mes
+        Calcula ingresos vs inversión vs egresos reales agrupados por mes.
+        - Ingresos: ventas realizadas
+        - Inversión: compras de stock (stock_compras)
+        - Egresos: pérdidas reales (egresos_reales)
         """
         try:
             # Crear una nueva conexión para este método
@@ -593,20 +602,35 @@ class EstadisticasService:
             cursor.execute(query_ingresos, (cantidad_meses,))
             ingresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
             
-            # Egresos: compras de stock reales
-            egresos_data = {}
+            # Inversión: compras de stock reales
+            inversion_data = {}
             if self._tabla_existe('stock_compras'):
-                query_egresos = """
+                query_inversion = """
                     SELECT
                         YEAR(sc.creado_en) AS anio,
                         MONTH(sc.creado_en) AS numero_mes,
-                        COALESCE(SUM(sc.inversion_total), 0) AS egresos
+                        COALESCE(SUM(sc.inversion_total), 0) AS inversion
                     FROM stock_compras sc
                     WHERE sc.creado_en >= DATE_SUB(CURDATE(), INTERVAL %s MONTH)
                     GROUP BY YEAR(sc.creado_en), MONTH(sc.creado_en)
                 """
+                cursor.execute(query_inversion, (cantidad_meses,))
+                inversion_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
+
+            # Egresos reales: pérdidas (fallas, devoluciones, roturas, etc.)
+            egresos_reales_data = {}
+            if self._tabla_existe('egresos_reales'):
+                query_egresos = """
+                    SELECT
+                        YEAR(e.fecha) AS anio,
+                        MONTH(e.fecha) AS numero_mes,
+                        COALESCE(SUM(e.monto), 0) AS egresos
+                    FROM egresos_reales e
+                    WHERE e.fecha >= DATE_SUB(CURDATE(), INTERVAL %s MONTH)
+                    GROUP BY YEAR(e.fecha), MONTH(e.fecha)
+                """
                 cursor.execute(query_egresos, (cantidad_meses,))
-                egresos_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
+                egresos_reales_data = {(row[0], row[1]): row[2] for row in cursor.fetchall()}
             
             cursor.close()
             conexion.close()
@@ -616,18 +640,20 @@ class EstadisticasService:
             
             # Combinar datos
             datos = []
-            todas_las_claves = set(list(ingresos_data.keys()) + list(egresos_data.keys()))
+            todas_las_claves = set(list(ingresos_data.keys()) + list(inversion_data.keys()) + list(egresos_reales_data.keys()))
             
             for anio, numero_mes in sorted(todas_las_claves):
                 if 1 <= numero_mes <= 12:
                     ingresos = float(ingresos_data.get((anio, numero_mes), 0))
-                    egresos = float(egresos_data.get((anio, numero_mes), 0))
+                    inversion = float(inversion_data.get((anio, numero_mes), 0))
+                    egresos = float(egresos_reales_data.get((anio, numero_mes), 0))
                     datos.append({
                         "mes": meses_nombre[numero_mes - 1],
                         "numero_mes": numero_mes,
                         "ingresos": int(ingresos),
+                        "inversion": int(inversion),
                         "egresos": int(egresos),
-                        "balance": int(ingresos - egresos)
+                        "balance": int(ingresos - inversion - egresos)
                     })
             
             return {"ok": True, "datos": datos}

@@ -328,9 +328,15 @@
                 </div>
 
                 <div class="tarjeta pedidos">
-                    <div class="tarjeta-titulo">Egresos Acumulados</div>
-                    <div class="tarjeta-valor" id="valor-egresos-acumulados">${{ "{:,.0f}".format(resumen.egresos_acumulados) }}</div>
+                    <div class="tarjeta-titulo">Inversión Acumulada</div>
+                    <div class="tarjeta-valor" id="valor-inversion-acumulada">${{ "{:,.0f}".format(resumen.inversion_acumulada) }}</div>
                     <div class="tarjeta-subtexto">Compras de stock</div>
+                </div>
+
+                <div class="tarjeta usuarios">
+                    <div class="tarjeta-titulo">Egresos Reales</div>
+                    <div class="tarjeta-valor" id="valor-egresos-reales">${{ "{:,.0f}".format(resumen.egresos_reales_acumulados) }}</div>
+                    <div class="tarjeta-subtexto">Pérdidas (fallas, devoluciones)</div>
                 </div>
 
                 <div class="tarjeta ventas">
@@ -359,7 +365,7 @@
             <div class="dos-columnas">
                 <!-- Gráfico: Ingresos vs Egresos -->
                 <div class="grafico-container">
-                    <div class="grafico-titulo">💰 Ingresos vs Egresos</div>
+                    <div class="grafico-titulo">💰 Ingresos vs Inversión vs Egresos</div>
                     <canvas id="grafico-ingresos-egresos"></canvas>
                 </div>
 
@@ -371,6 +377,120 @@
             </div>
 
             <!-- TABLAS DE INFORMACIÓN DETALLADA -->
+
+            <!-- Sección: Registrar Egreso Real -->
+            <div class="tabla-section" style="border-left: 4px solid #e74c3c;">
+                <div class="tabla-titulo" style="border-bottom-color: #e74c3c;">🔴 Registrar Egreso Real (Pérdida)</div>
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
+                    Registrá pérdidas no recuperables: fallas de producto, devoluciones, roturas, errores de envío, etc.
+                </p>
+                <form id="form-egreso" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Tipo de egreso *</label>
+                        <select id="egreso-tipo" required style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px;">
+                            <option value="falla">🔧 Falla de producto</option>
+                            <option value="devolucion">↩️ Devolución</option>
+                            <option value="rotura">💔 Rotura</option>
+                            <option value="error">❌ Error (envío, cobro, etc.)</option>
+                            <option value="otro">📋 Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Monto de la pérdida ($) *</label>
+                        <input type="number" id="egreso-monto" min="1" required placeholder="Ej: 15000" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Cantidad de unidades</label>
+                        <input type="number" id="egreso-cantidad" min="1" value="1" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Producto (opcional)</label>
+                        <select id="egreso-producto-id" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                            <option value="">-- Seleccionar producto --</option>
+                        </select>
+                        <small id="egreso-stock-info" style="color: #888; font-size: 11px; margin-top: 4px; display: none;">Stock actual: <strong id="egreso-stock-actual">0</strong> unidades</small>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Descripción</label>
+                        <input type="text" id="egreso-descripcion" placeholder="Ej: Producto llegó dañado del proveedor" maxlength="500" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <button type="submit" id="btn-registrar-egreso" style="padding: 10px 24px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                            📝 Registrar Egreso
+                        </button>
+                        <span id="egreso-resultado" style="margin-left: 12px; font-size: 13px;"></span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal: Editar Egreso -->
+            <div id="modal-editar-egreso" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center;">
+                <div style="background: white; border-radius: 12px; padding: 28px 32px; max-width: 520px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;">
+                    <button onclick="cerrarModalEditarEgreso()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; color: #999;">✕</button>
+                    <h3 style="margin: 0 0 18px 0; font-size: 18px; color: #333;">✏️ Editar Egreso</h3>
+                    <input type="hidden" id="editar-egreso-id">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Tipo de egreso</label>
+                            <select id="editar-egreso-tipo" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px;">
+                                <option value="falla">🔧 Falla de producto</option>
+                                <option value="devolucion">↩️ Devolución</option>
+                                <option value="rotura">💔 Rotura</option>
+                                <option value="error">❌ Error (envío, cobro, etc.)</option>
+                                <option value="otro">📋 Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Monto ($)</label>
+                            <input type="number" id="editar-egreso-monto" min="1" required style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Cantidad</label>
+                            <input type="number" id="editar-egreso-cantidad" min="1" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Producto</label>
+                            <select id="editar-egreso-producto-id" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                                <option value="">-- Sin producto --</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="font-size: 12px; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Descripción</label>
+                            <input type="text" id="editar-egreso-descripcion" maxlength="500" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                        </div>
+                        <div style="grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+                            <button onclick="guardarEdicionEgreso()" id="btn-guardar-edicion-egreso" style="padding: 10px 24px; background: #2980b9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">💾 Guardar Cambios</button>
+                            <button onclick="cerrarModalEditarEgreso()" style="padding: 10px 24px; background: #95a5a6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">Cancelar</button>
+                            <span id="editar-egreso-resultado" style="font-size: 13px;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla: Últimos Egresos Reales -->
+            <div class="tabla-section">
+                <div class="tabla-titulo" style="border-bottom-color: #e74c3c;">📉 Últimos Egresos Reales</div>
+                <table class="tabla-responsiva" id="tabla-egresos-reales">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Monto</th>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-egresos">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #999;">
+                                Cargando egresos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             
             <!-- Tabla: Productos Más Vendidos -->
             <div class="tabla-section">
@@ -510,9 +630,14 @@
                         ingresosMesEl.textContent = '$' + Number(data.ingresos_mes || 0).toLocaleString('es-AR');
                     }
 
-                    const egresosEl = document.getElementById('valor-egresos-acumulados');
+                    const egresosEl = document.getElementById('valor-inversion-acumulada');
                     if (egresosEl) {
-                        egresosEl.textContent = '$' + Number(data.egresos_acumulados || 0).toLocaleString('es-AR');
+                        egresosEl.textContent = '$' + Number(data.inversion_acumulada || 0).toLocaleString('es-AR');
+                    }
+
+                    const egresosRealesEl = document.getElementById('valor-egresos-reales');
+                    if (egresosRealesEl) {
+                        egresosRealesEl.textContent = '$' + Number(data.egresos_reales_acumulados || 0).toLocaleString('es-AR');
                     }
 
                     const gananciaEl = document.getElementById('valor-ganancia-real');
@@ -664,7 +789,7 @@
             })
             .catch(error => console.error('Error cargando categorías:', error));
 
-        // =================== GRÁFICO: INGRESOS VS EGRESOS ===================
+        // =================== GRÁFICO: INGRESOS VS INVERSIÓN VS EGRESOS ===================
         fetch('/api/estadisticas/ingresos-vs-egresos')
             .then(response => response.json())
             .then(data => {
@@ -677,6 +802,13 @@
                                 data: data.datos.map(d => d.ingresos),
                                 backgroundColor: '#2ecc71',
                                 borderColor: '#27ae60',
+                                borderWidth: 2
+                            },
+                            {
+                                label: "Inversión ($)",
+                                data: data.datos.map(d => d.inversion),
+                                backgroundColor: '#3498db',
+                                borderColor: '#2980b9',
                                 borderWidth: 2
                             },
                             {
@@ -787,6 +919,284 @@
                 }
             })
             .catch(error => console.error('Error cargando evolución de ingresos:', error));
+
+        // =================== EGRESOS REALES: FORMULARIO Y TABLA ===================
+
+        const tipoLabels = {
+            'falla': '🔧 Falla',
+            'devolucion': '↩️ Devolución',
+            'rotura': '💔 Rotura',
+            'error': '❌ Error',
+            'otro': '📋 Otro'
+        };
+
+        function cargarEgresos() {
+            fetch('/api/egresos/listado')
+                .then(r => r.json())
+                .then(data => {
+                    const tbody = document.getElementById('tbody-egresos');
+                    if (!tbody) return;
+                    
+                    if (data.ok && data.egresos && data.egresos.length > 0) {
+                        tbody.innerHTML = data.egresos.map(e => `
+                            <tr>
+                                <td>${tipoLabels[e.tipo] || e.tipo}</td>
+                                <td>${e.producto || '-'}</td>
+                                <td>${e.cantidad}</td>
+                                <td style="color: #e74c3c; font-weight: bold;">$${Number(e.monto).toLocaleString('es-AR')}</td>
+                                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${e.descripcion || '-'}</td>
+                                <td>${e.fecha}</td>
+                                <td style="white-space: nowrap;">
+                                    <button onclick='abrirEditarEgreso(${JSON.stringify(e).replace(/'/g, "&#39;")})' style="padding: 4px 10px; background: #2980b9; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 4px;">✏️</button>
+                                    <button onclick="eliminarEgreso(${e.id})" style="padding: 4px 10px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">🗑️</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No hay egresos registrados</td></tr>';
+                    }
+                })
+                .catch(err => console.error('Error cargando egresos:', err));
+        }
+
+        function eliminarEgreso(id) {
+            if (!confirm('¿Estás seguro de eliminar este egreso?')) return;
+            
+            fetch(`/api/egresos/eliminar/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        cargarEgresos();
+                    } else {
+                        alert('Error: ' + (data.error || 'No se pudo eliminar'));
+                    }
+                })
+                .catch(err => alert('Error de conexión'));
+        }
+
+        // =================== EDITAR EGRESO ===================
+        function abrirEditarEgreso(egreso) {
+            document.getElementById('editar-egreso-id').value = egreso.id;
+            document.getElementById('editar-egreso-tipo').value = egreso.tipo;
+            document.getElementById('editar-egreso-monto').value = egreso.monto;
+            document.getElementById('editar-egreso-cantidad').value = egreso.cantidad;
+            document.getElementById('editar-egreso-descripcion').value = egreso.descripcion || '';
+            document.getElementById('editar-egreso-resultado').textContent = '';
+
+            // Cargar productos en el selector del modal
+            const select = document.getElementById('editar-egreso-producto-id');
+            select.innerHTML = '<option value="">-- Sin producto --</option>';
+            productosCache.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.nombre} (Stock: ${p.stock})`;
+                select.appendChild(opt);
+            });
+            if (egreso.producto_id) {
+                select.value = egreso.producto_id;
+            }
+
+            const modal = document.getElementById('modal-editar-egreso');
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModalEditarEgreso() {
+            document.getElementById('modal-editar-egreso').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal-editar-egreso').addEventListener('click', function(ev) {
+            if (ev.target === this) cerrarModalEditarEgreso();
+        });
+
+        function guardarEdicionEgreso() {
+            const id = document.getElementById('editar-egreso-id').value;
+            const tipo = document.getElementById('editar-egreso-tipo').value;
+            const monto = document.getElementById('editar-egreso-monto').value;
+            const cantidad = document.getElementById('editar-egreso-cantidad').value;
+            const productoId = document.getElementById('editar-egreso-producto-id').value;
+            const descripcion = document.getElementById('editar-egreso-descripcion').value;
+            const resultado = document.getElementById('editar-egreso-resultado');
+            const btn = document.getElementById('btn-guardar-edicion-egreso');
+
+            if (!monto || parseFloat(monto) <= 0) {
+                resultado.textContent = '⚠️ Ingresá un monto válido';
+                resultado.style.color = '#e74c3c';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Guardando...';
+
+            fetch(`/api/egresos/editar/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: tipo,
+                    monto: parseFloat(monto),
+                    cantidad: parseInt(cantidad) || 1,
+                    producto_id: productoId ? parseInt(productoId) : null,
+                    descripcion: descripcion
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    cerrarModalEditarEgreso();
+                    cargarEgresos();
+                    setTimeout(actualizarEstadisticas, 500);
+                } else {
+                    resultado.textContent = '❌ ' + (data.error || 'Error al guardar');
+                    resultado.style.color = '#e74c3c';
+                }
+                btn.disabled = false;
+                btn.textContent = '💾 Guardar Cambios';
+            })
+            .catch(err => {
+                resultado.textContent = '❌ Error de conexión';
+                resultado.style.color = '#e74c3c';
+                btn.disabled = false;
+                btn.textContent = '💾 Guardar Cambios';
+            });
+        }
+
+        // Formulario de registro de egreso
+        const formEgreso = document.getElementById('form-egreso');
+        if (formEgreso) {
+            formEgreso.addEventListener('submit', function(ev) {
+                ev.preventDefault();
+                
+                const tipo = document.getElementById('egreso-tipo').value;
+                const monto = document.getElementById('egreso-monto').value;
+                const cantidad = document.getElementById('egreso-cantidad').value || 1;
+                const productoId = document.getElementById('egreso-producto-id').value || null;
+                const descripcion = document.getElementById('egreso-descripcion').value || '';
+                const resultado = document.getElementById('egreso-resultado');
+                const btn = document.getElementById('btn-registrar-egreso');
+
+                if (!monto || parseFloat(monto) <= 0) {
+                    resultado.textContent = '⚠️ Ingresá un monto válido';
+                    resultado.style.color = '#e74c3c';
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = '⏳ Registrando...';
+
+                fetch('/api/egresos/registrar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tipo: tipo,
+                        monto: parseFloat(monto),
+                        cantidad: parseInt(cantidad),
+                        producto_id: productoId ? parseInt(productoId) : null,
+                        descripcion: descripcion
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        resultado.textContent = '✅ Egreso registrado y stock actualizado';
+                        resultado.style.color = '#27ae60';
+                        // Limpiar formulario
+                        document.getElementById('egreso-monto').value = '';
+                        document.getElementById('egreso-cantidad').value = '1';
+                        document.getElementById('egreso-producto-id').value = '';
+                        document.getElementById('egreso-descripcion').value = '';
+                        document.getElementById('egreso-stock-info').style.display = 'none';
+                        // Recargar tabla y selector de productos (stock actualizado)
+                        cargarEgresos();
+                        cargarProductosSelector();
+                        // Actualizar tarjetas
+                        setTimeout(actualizarEstadisticas, 500);
+                    } else {
+                        resultado.textContent = '❌ ' + (data.error || 'Error al registrar');
+                        resultado.style.color = '#e74c3c';
+                    }
+                    btn.disabled = false;
+                    btn.textContent = '📝 Registrar Egreso';
+                })
+                .catch(err => {
+                    resultado.textContent = '❌ Error de conexión';
+                    resultado.style.color = '#e74c3c';
+                    btn.disabled = false;
+                    btn.textContent = '📝 Registrar Egreso';
+                });
+            });
+        }
+
+        // Cargar egresos al iniciar
+        cargarEgresos();
+
+        // =================== CARGAR PRODUCTOS EN SELECTOR ===================
+        let productosCache = [];
+
+        function cargarProductosSelector() {
+            fetch('/api/productos/listado-simple')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok && data.productos) {
+                        productosCache = data.productos;
+                        const select = document.getElementById('egreso-producto-id');
+                        if (!select) return;
+                        // Mantener primera opción
+                        select.innerHTML = '<option value="">-- Seleccionar producto --</option>';
+                        data.productos.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.id;
+                            opt.textContent = `${p.nombre} (Stock: ${p.stock})`;
+                            opt.dataset.stock = p.stock;
+                            opt.dataset.costo = p.costo;
+                            select.appendChild(opt);
+                        });
+                    }
+                })
+                .catch(err => console.error('Error cargando productos:', err));
+        }
+
+        // Mostrar stock al seleccionar un producto
+        const selectProducto = document.getElementById('egreso-producto-id');
+        if (selectProducto) {
+            selectProducto.addEventListener('change', function() {
+                const stockInfo = document.getElementById('egreso-stock-info');
+                const stockActual = document.getElementById('egreso-stock-actual');
+                const montoInput = document.getElementById('egreso-monto');
+
+                if (this.value) {
+                    const prod = productosCache.find(p => p.id == this.value);
+                    if (prod) {
+                        stockInfo.style.display = 'block';
+                        stockActual.textContent = prod.stock;
+                        // Auto-completar monto con el costo si hay costo
+                        const cantInput = document.getElementById('egreso-cantidad');
+                        const cant = parseInt(cantInput.value) || 1;
+                        if (prod.costo > 0 && (!montoInput.value || montoInput.value == '0')) {
+                            montoInput.value = Math.round(prod.costo * cant);
+                        }
+                    }
+                } else {
+                    stockInfo.style.display = 'none';
+                }
+            });
+
+            // Recalcular monto al cambiar cantidad si hay producto seleccionado
+            const cantidadInput = document.getElementById('egreso-cantidad');
+            if (cantidadInput) {
+                cantidadInput.addEventListener('input', function() {
+                    const prodId = selectProducto.value;
+                    if (prodId) {
+                        const prod = productosCache.find(p => p.id == prodId);
+                        if (prod && prod.costo > 0) {
+                            const cant = parseInt(this.value) || 1;
+                            document.getElementById('egreso-monto').value = Math.round(prod.costo * cant);
+                        }
+                    }
+                });
+            }
+        }
+
+        cargarProductosSelector();
     </script>
 
     

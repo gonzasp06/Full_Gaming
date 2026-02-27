@@ -199,6 +199,7 @@
                                                     <th>Fecha</th>
                                                     <th>Total</th>
                                                     <th>Estado</th>
+                                                    <th>Acción</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -207,7 +208,30 @@
                                                     <td>#{{ pedido.id }}</td>
                                                     <td>{{ pedido.fecha }}</td>
                                                     <td>${{ "%d" | format(pedido.total) }}</td>
-                                                    <td><span class="badge bg-info">{{ pedido.estado }}</span></td>
+                                                    <td>
+                                                        {% if pedido.estado == 'completado' %}
+                                                            <span class="badge bg-info">Completado</span>
+                                                        {% elif pedido.estado == 'devolucion_pendiente' %}
+                                                            <span class="badge bg-warning text-dark">Devolución Pendiente</span>
+                                                        {% elif pedido.estado == 'devuelto' %}
+                                                            <span class="badge bg-success">Devuelto</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary">{{ pedido.estado }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if pedido.estado == 'completado' %}
+                                                            <button class="btn-devolucion-mini" onclick="abrirFormDevolucion({{ pedido.id }}, {{ pedido.total }})" title="Solicitar devolución">
+                                                                🔄 Devolver
+                                                            </button>
+                                                        {% elif pedido.estado == 'devolucion_pendiente' %}
+                                                            <span class="text-warning" style="font-size: 12px;">⏳ En revisión</span>
+                                                        {% elif pedido.estado == 'devuelto' %}
+                                                            <span class="text-success" style="font-size: 12px;">✅ Devuelto</span>
+                                                        {% else %}
+                                                            <span style="color: #666; font-size: 12px;">—</span>
+                                                        {% endif %}
+                                                    </td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -382,9 +406,138 @@
                                     </button>
                                 </div>
                             </form>
+
+                            <!-- ========== ZONA PELIGROSA ========== -->
+                            {% if session.get('es_admin') != 1 %}
+                            <div class="zona-peligrosa">
+                                <div class="zona-peligrosa-header">
+                                    <h5>⚠️ Zona Peligrosa</h5>
+                                    <p>Acciones irreversibles sobre tu cuenta</p>
+                                </div>
+                                <div class="zona-peligrosa-content">
+                                    <div class="zona-peligrosa-info">
+                                        <strong>🗑️ Eliminar cuenta</strong>
+                                        <p>Esta acción es permanente y eliminará todos tus datos, pedidos y direcciones.</p>
+                                    </div>
+                                    <button type="button" class="btn-eliminar-cuenta" onclick="abrirModalEliminarCuenta()">
+                                        🗑️ Eliminar mi cuenta
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SOLICITAR DEVOLUCIÓN -->
+    <div id="modal-devolucion" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <!-- Paso 1: Formulario -->
+            <div id="devolucion-paso-form" class="paso-modal">
+                <div class="modal-icon" style="font-size: 48px;">🔄</div>
+                <h2 class="modal-title" style="color: #6A44F2;">Solicitar Devolución</h2>
+                <p class="modal-description">Pedido <strong id="devolucion-pedido-num"></strong> — Total: <strong id="devolucion-pedido-monto"></strong></p>
+                
+                <div style="margin: 20px 0;">
+                    <label style="color: #bbb; font-size: 12px; display: block; margin-bottom: 5px;">Motivo de devolución *</label>
+                    <select id="devolucion-motivo" class="form-control" style="background: #1a1f2e; color: white; border: 1px solid #3C308C; border-radius: 8px; padding: 10px;">
+                        <option value="">Seleccioná un motivo</option>
+                        <option value="producto_defectuoso">🔧 Producto defectuoso</option>
+                        <option value="no_coincide">📦 No coincide con la descripción</option>
+                        <option value="arrepentimiento">💭 Arrepentimiento de compra</option>
+                        <option value="otro">📝 Otro motivo</option>
+                    </select>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label style="color: #bbb; font-size: 12px; display: block; margin-bottom: 5px;">Comentarios adicionales (opcional)</label>
+                    <textarea id="devolucion-comentarios" class="form-control" rows="3" placeholder="Describí el problema o razón..." 
+                        style="background: #1a1f2e; color: white; border: 1px solid #3C308C; border-radius: 8px; padding: 10px; resize: vertical;"></textarea>
+                </div>
+                
+                <div style="background: rgba(106, 68, 242, 0.1); border: 1px solid rgba(106, 68, 242, 0.3); border-radius: 10px; padding: 12px; margin: 15px 0;">
+                    <p style="color: #8b82d4; font-size: 12px; margin: 0;">
+                        ℹ️ Tu solicitud será revisada por nuestro equipo. Te notificaremos por email cuando sea procesada.
+                    </p>
+                </div>
+                
+                <div id="error-devolucion" style="display: none; background: rgba(231, 76, 60, 0.15); border: 1px solid rgba(231, 76, 60, 0.4); color: #e74c3c; padding: 10px; border-radius: 8px; font-size: 13px; margin: 10px 0;"></div>
+                
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="cerrarModalDevolucion()">Cancelar</button>
+                    <button class="modal-btn modal-btn-confirm" id="btn-enviar-devolucion" onclick="enviarSolicitudDevolucion()">
+                        📤 Enviar Solicitud
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paso 2: Éxito -->
+            <div id="devolucion-paso-exito" class="paso-modal" style="display: none;">
+                <div class="modal-icon" style="font-size: 48px;">✅</div>
+                <h2 class="modal-title" style="color: #2ecc71;">Solicitud Enviada</h2>
+                <p class="modal-description">Tu solicitud de devolución fue registrada correctamente. Te notificaremos por email cuando sea procesada.</p>
+                <div class="modal-buttons" style="justify-content: center;">
+                    <button class="modal-btn modal-btn-confirm" onclick="cerrarModalDevolucion(); location.reload();">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR CUENTA -->
+    <div id="modal-eliminar-cuenta" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 460px;">
+            <!-- Paso 1: Advertencia -->
+            <div id="eliminar-paso-1" class="paso-modal">
+                <div class="modal-icon" style="font-size: 48px;">🚨</div>
+                <h2 class="modal-title" style="color: #e74c3c;">¿Eliminar tu cuenta?</h2>
+                <div style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 10px; padding: 15px; margin: 15px 0;">
+                    <p style="color: #e74c3c; font-weight: 600; margin: 0 0 8px 0; font-size: 14px;">⚠️ Esta acción es PERMANENTE</p>
+                    <ul style="color: #bbb; font-size: 13px; margin: 0; padding-left: 18px; list-style: disc;">
+                        <li>Se eliminarán todos tus datos personales</li>
+                        <li>Se eliminarán tus pedidos e historial</li>
+                        <li>Se eliminarán tus direcciones guardadas</li>
+                        <li>No podrás recuperar tu cuenta</li>
+                    </ul>
+                </div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="cerrarModalEliminarCuenta()">Cancelar</button>
+                    <button class="modal-btn" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="mostrarPasoConfirmar()">
+                        Continuar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Paso 2: Confirmar con contraseña -->
+            <div id="eliminar-paso-2" class="paso-modal" style="display: none;">
+                <div class="modal-icon" style="font-size: 48px;">🔐</div>
+                <h2 class="modal-title" style="color: #e74c3c;">Confirmá tu identidad</h2>
+                <p class="modal-description">Ingresá tu contraseña actual para confirmar la eliminación</p>
+                <div style="margin: 20px 0;">
+                    <div style="position: relative;">
+                        <input type="password" id="input-pass-eliminar" class="form-control" 
+                               placeholder="Tu contraseña actual" 
+                               style="padding-right: 45px; font-size: 16px;"
+                               onkeydown="if(event.key==='Enter') ejecutarEliminacion()">
+                        <button type="button" class="btn-toggle-pass" onclick="togglePassword('input-pass-eliminar', this)" title="Mostrar contraseña">👁️</button>
+                    </div>
+                </div>
+                <div id="error-eliminar" style="display: none; background: rgba(231, 76, 60, 0.15); border: 1px solid rgba(231, 76, 60, 0.4); color: #e74c3c; padding: 10px; border-radius: 8px; font-size: 13px; margin: 10px 0;"></div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="volverPasoAdvertencia()">← Volver</button>
+                    <button class="modal-btn" id="btn-confirmar-eliminar" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="ejecutarEliminacion()">
+                        🗑️ Eliminar definitivamente
+                    </button>
+                </div>
+            </div>
+
+            <!-- Paso 3: Procesando / Éxito -->
+            <div id="eliminar-paso-3" class="paso-modal" style="display: none;">
+                <div class="modal-icon" style="font-size: 48px;">✅</div>
+                <h2 class="modal-title" style="color: #2ecc71;">Cuenta eliminada</h2>
+                <p class="modal-description">Tu cuenta fue eliminada correctamente. Serás redirigido al inicio...</p>
             </div>
         </div>
     </div>
@@ -1153,6 +1306,161 @@
         document.getElementById('modal-cambiar-contraseña').addEventListener('click', function(event) {
             if (event.target === this) {
                 cerrarModalContraseña();
+            }
+        });
+
+        // ============ DEVOLUCIONES ============
+        let devolucionPedidoId = null;
+
+        function abrirFormDevolucion(pedidoId, montoTotal) {
+            devolucionPedidoId = pedidoId;
+            document.getElementById('devolucion-pedido-num').textContent = '#' + pedidoId;
+            document.getElementById('devolucion-pedido-monto').textContent = '$' + montoTotal.toLocaleString('es-AR');
+            document.getElementById('devolucion-motivo').value = '';
+            document.getElementById('devolucion-comentarios').value = '';
+            document.getElementById('error-devolucion').style.display = 'none';
+            document.getElementById('devolucion-paso-form').style.display = 'block';
+            document.getElementById('devolucion-paso-exito').style.display = 'none';
+            document.getElementById('modal-devolucion').style.display = 'flex';
+        }
+
+        function cerrarModalDevolucion() {
+            document.getElementById('modal-devolucion').style.display = 'none';
+            devolucionPedidoId = null;
+        }
+
+        async function enviarSolicitudDevolucion() {
+            const motivo = document.getElementById('devolucion-motivo').value;
+            const comentarios = document.getElementById('devolucion-comentarios').value.trim();
+            const errorDiv = document.getElementById('error-devolucion');
+            const btn = document.getElementById('btn-enviar-devolucion');
+
+            if (!motivo) {
+                errorDiv.textContent = '⚠️ Debés seleccionar un motivo';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Enviando...';
+            errorDiv.style.display = 'none';
+
+            try {
+                const resp = await fetch('/api/devoluciones/solicitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pedido_id: devolucionPedidoId,
+                        motivo: motivo,
+                        comentarios: comentarios
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (data.ok) {
+                    document.getElementById('devolucion-paso-form').style.display = 'none';
+                    document.getElementById('devolucion-paso-exito').style.display = 'block';
+                    mostrarNotificacion('✓ Solicitud de devolución enviada');
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Error al enviar solicitud');
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = '❌ Error de conexión. Intentá de nuevo.';
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📤 Enviar Solicitud';
+            }
+        }
+
+        // Cerrar modal devolución al hacer click fuera
+        document.getElementById('modal-devolucion').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalDevolucion();
+            }
+        });
+
+        // ============ ELIMINAR CUENTA ============
+        function abrirModalEliminarCuenta() {
+            document.getElementById('modal-eliminar-cuenta').style.display = 'flex';
+            document.getElementById('eliminar-paso-1').style.display = 'block';
+            document.getElementById('eliminar-paso-2').style.display = 'none';
+            document.getElementById('eliminar-paso-3').style.display = 'none';
+            document.getElementById('input-pass-eliminar').value = '';
+            document.getElementById('error-eliminar').style.display = 'none';
+        }
+
+        function cerrarModalEliminarCuenta() {
+            document.getElementById('modal-eliminar-cuenta').style.display = 'none';
+            document.getElementById('input-pass-eliminar').value = '';
+        }
+
+        function mostrarPasoConfirmar() {
+            document.getElementById('eliminar-paso-1').style.display = 'none';
+            document.getElementById('eliminar-paso-2').style.display = 'block';
+            document.getElementById('error-eliminar').style.display = 'none';
+            // Focus en el input de contraseña
+            setTimeout(() => document.getElementById('input-pass-eliminar').focus(), 100);
+        }
+
+        function volverPasoAdvertencia() {
+            document.getElementById('eliminar-paso-2').style.display = 'none';
+            document.getElementById('eliminar-paso-1').style.display = 'block';
+        }
+
+        async function ejecutarEliminacion() {
+            const contraseña = document.getElementById('input-pass-eliminar').value.trim();
+            const errorDiv = document.getElementById('error-eliminar');
+            const btn = document.getElementById('btn-confirmar-eliminar');
+
+            if (!contraseña) {
+                errorDiv.textContent = '⚠️ Debés ingresar tu contraseña';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Estado de carga
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Eliminando...';
+            errorDiv.style.display = 'none';
+
+            try {
+                const resp = await fetch('/api/eliminar-cuenta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contraseña: contraseña })
+                });
+
+                const data = await resp.json();
+
+                if (data.ok) {
+                    // Éxito - Mostrar paso 3
+                    document.getElementById('eliminar-paso-2').style.display = 'none';
+                    document.getElementById('eliminar-paso-3').style.display = 'block';
+                    // Redirigir después de 2.5 segundos
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2500);
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Error al eliminar la cuenta');
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '🗑️ Eliminar definitivamente';
+                }
+            } catch (err) {
+                errorDiv.textContent = '❌ Error de conexión. Intentá de nuevo.';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '🗑️ Eliminar definitivamente';
+            }
+        }
+
+        // Cerrar modal eliminar cuenta al hacer click fuera
+        document.getElementById('modal-eliminar-cuenta').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalEliminarCuenta();
             }
         });
 

@@ -93,6 +93,13 @@
                                 <span class="admin-label">Usuarios</span>
                             </a>
                         </li>
+                        <li class="admin-nav-item">
+                            <a href="/admin/devoluciones" class="admin-nav-link admin-notif-link">
+                                <span class="admin-icon">🔔</span>
+                                <span class="admin-label">Devoluciones</span>
+                                <span id="badge-devoluciones" class="admin-notif-badge" style="display: none;">0</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
@@ -121,6 +128,27 @@
 
             // Hacer función global para que otros scripts la puedan usar
             window.actualizarContadorCarrito = actualizarContadorCarrito;
+
+            // Badge de devoluciones pendientes (solo admin)
+            function actualizarBadgeDevoluciones() {
+                const badge = document.getElementById('badge-devoluciones');
+                if (!badge) return;
+
+                fetch('/api/devoluciones/contador-pendientes')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.ok) {
+                            const cant = data.cantidad || 0;
+                            badge.textContent = cant > 99 ? '99+' : cant;
+                            badge.style.display = cant > 0 ? 'inline-flex' : 'none';
+                        }
+                    })
+                    .catch(() => {});
+            }
+
+            document.addEventListener('DOMContentLoaded', actualizarBadgeDevoluciones);
+            // Actualizar cada 30 segundos
+            setInterval(actualizarBadgeDevoluciones, 30000);
         </script>
     </body>
 </html>

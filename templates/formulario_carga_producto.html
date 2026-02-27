@@ -80,9 +80,9 @@
             text-transform: uppercase;
         }
         .seccion-badge.genera-egreso {
-            background: rgba(231, 76, 60, 0.15);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.25);
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.25);
         }
         .seccion-badge.solo-visual {
             background: rgba(46, 204, 113, 0.12);
@@ -314,7 +314,7 @@
     <main>
         <div class="container py-6 form-container nuevo-producto-panel">
         <h1>Nuevo Producto</h1>
-        <p class="page-subtitle">Completá los datos para agregar un nuevo producto al catálogo. Los campos de compra registran el egreso inicial.</p>
+        <p class="page-subtitle">Completá los datos para agregar un nuevo producto al catálogo. Los campos de compra registran la inversión inicial.</p>
 
         <form id="formularioProducto" action="/cargar_producto" method="post" enctype="multipart/form-data">
 
@@ -387,20 +387,20 @@
                 <div class="seccion-header">
                     <span class="seccion-icon">💰</span>
                     <span class="seccion-titulo">Datos de Compra</span>
-                    <span class="seccion-badge genera-egreso">Genera egreso</span>
+                    <span class="seccion-badge genera-egreso">Genera inversión</span>
                 </div>
 
                 <div class="aviso-contable">
                     <span class="aviso-icon">📊</span>
                     <div class="aviso-body">
                         <div class="aviso-titulo">Impacto en estadísticas</div>
-                        <div class="aviso-texto">Estos datos registran la inversión inicial como egreso. El costo unitario se calcula automáticamente a partir del monto invertido y la cantidad. Estos valores no pueden modificarse después sin generar inconsistencias.</div>
+                        <div class="aviso-texto">Estos datos registran la inversión inicial en mercadería. El costo unitario se calcula automáticamente a partir del monto invertido y la cantidad. Estos valores no pueden modificarse después sin generar inconsistencias.</div>
                     </div>
                 </div>
 
                 <div class="np-grid">
                     <div class="np-group">
-                        <label for="inversion_total" class="np-label">Monto total invertido (egreso)</label>
+                        <label for="inversion_total" class="np-label">Monto total invertido (inversión)</label>
                         <input type="text" id="inversion_total" name="inversion_total" class="np-input" placeholder="Ej: 150000">
                     </div>
                     <div class="np-group">
@@ -472,7 +472,25 @@
 
     <script>
         // Inicializar Quill
-        var quill = new Quill('#descripcion-editor', { theme: 'snow' });
+        var quill = new Quill('#descripcion-editor', {
+            theme: 'snow',
+            modules: {
+                clipboard: { matchers: [] },
+                toolbar: true
+            }
+        });
+
+        // Forzar pegado como texto plano (sin fuentes ni estilos externos)
+        quill.clipboard.addMatcher(Node.ELEMENT_NODE, function(node, delta) {
+            delta.ops = delta.ops.map(op => {
+                if (op.insert && typeof op.insert === 'string') {
+                    return { insert: op.insert };
+                }
+                return op;
+            });
+            return delta;
+        });
+
         let precioEditadoManualmente = false;
 
         // ===== DETECCIÓN AUTOMÁTICA DE MARCA =====
