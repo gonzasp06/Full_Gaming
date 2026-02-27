@@ -275,8 +275,54 @@ def agregar_columna_id_marca_producto_si_no_existe():
         print(f"⚠ Error al agregar columna 'id_marca': {str(e)}")
         return False
 
+
+def agregar_columnas_recuperacion_usuario_si_no_existen():
+    """
+    Agrega columnas para recuperación de contraseña en la tabla usuario.
+    - codigo_recuperacion: código de 6 dígitos para verificación
+    - codigo_expiracion: fecha/hora de expiración del código
+    Ambas columnas son nullable para no afectar usuarios existentes.
+    """
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        # Verificar y agregar codigo_recuperacion
+        if not _columna_existe(cursor, 'usuario', 'codigo_recuperacion'):
+            print("Agregando columna 'codigo_recuperacion' a tabla 'usuario'...")
+            cursor.execute("""
+                ALTER TABLE usuario 
+                ADD COLUMN codigo_recuperacion VARCHAR(10) DEFAULT NULL
+            """)
+            conexion.commit()
+            print("✓ Columna 'codigo_recuperacion' agregada")
+        else:
+            print("✓ La columna 'codigo_recuperacion' ya existe")
+
+        # Verificar y agregar codigo_expiracion
+        if not _columna_existe(cursor, 'usuario', 'codigo_expiracion'):
+            print("Agregando columna 'codigo_expiracion' a tabla 'usuario'...")
+            cursor.execute("""
+                ALTER TABLE usuario 
+                ADD COLUMN codigo_expiracion DATETIME DEFAULT NULL
+            """)
+            conexion.commit()
+            print("✓ Columna 'codigo_expiracion' agregada")
+        else:
+            print("✓ La columna 'codigo_expiracion' ya existe")
+
+        cursor.close()
+        conexion.close()
+        return True
+
+    except Exception as e:
+        print(f"⚠ Error al agregar columnas de recuperación: {str(e)}")
+        return False
+
+
 if __name__ == "__main__":
     agregar_columna_costo_si_no_existe()
     agregar_columna_fecha_creacion_usuario_si_no_existe()
     crear_tabla_stock_compras_si_no_existe()
     agregar_columnas_costos_pedido_items_si_no_existen()
+    agregar_columnas_recuperacion_usuario_si_no_existen()

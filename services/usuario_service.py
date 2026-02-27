@@ -1,5 +1,7 @@
 import mysql.connector
 import bcrypt
+import random
+from datetime import datetime, timedelta
 from database import conectar_base_datos
 
 
@@ -302,3 +304,163 @@ class UsuarioService:
         except Exception as e:
             return {"ok": False, "error": str(e)}
     
+    # =====================================================================
+    # RECUPERACIÓN DE CONTRASEÑA
+    # =====================================================================
+    
+    def generar_codigo_recuperacion(self, email):
+        """
+        Genera un código de 6 dígitos para recuperación de contraseña.
+        El código expira en 10 minutos.
+        
+        Args:
+            email: Email del usuario
+            
+        Returns:
+            dict con ok=True y el código, o ok=False y error
+        """
+        email = email.strip().lower()
+        
+        # Verificar que exista el usuario
+        usuario = self.buscar_usuario(email)
+        if not usuario:
+            # Por seguridad, no revelar si el email existe o no
+            # Pero internamente retornamos error para no enviar email
+            return {"ok": False, "error": "email_no_existe", "mostrar": "Si el email existe, recibirás un código."}
+        
+        try:
+            # Generar código de 6 dígitos
+            codigo = str(random.randint(100000, 999999))
+            
+            # Fecha de expiración: 10 minutos desde ahora
+            expiracion = datetime.now() + timedelta(minutes=10)
+            
+            # Guardar en BD
+            cursor = self.conexion.cursor()
+            query = """
+                UPDATE usuario 
+                SET codigo_recuperacion = %s, codigo_expiracion = %s 
+                WHERE email = %s
+            """
+            cursor.execute(query, (codigo, expiracion, email))
+            self.conexion.commit()
+            cursor.close()
+            
+            return {
+                "ok": True, 
+                "codigo": codigo,
+                "nombre": usuario.get("nombre", "Usuario"),
+                "user_id": usuario.get("id")
+            }
+            
+        except Exception as e:
+            print(f"⚠ Error al generar código: {str(e)}")
+            return {"ok": False, "error": str(e)}
+    
+    def validar_codigo_recuperacion(self, email, codigo):
+        """
+        Valida si el código ingresado es correcto y no ha expirado.
+        
+        Args:
+            email: Email del usuario
+            codigo: Código de 6 dígitos ingresado
+            
+        Returns:
+            dict con ok=True si es válido, o ok=False con error
+        """
+        email = email.strip().lower()
+        codigo = codigo.strip()
+        
+        try:
+            cursor = self.conexion.cursor(dictionary=True)
+            query = """
+                SELECT idusuario, nombre, codigo_recuperacion, codigo_expiracion 
+                FROM usuario 
+                WHERE email = %s
+            """
+            cursor.execute(query, (email,))
+            resultado = cursor.fetchone()
+            cursor.close()
+            
+            if not resultado:
+                return {"ok": False, "error": "Usuario no encontrado"}
+            
+            codigo_guardado = resultado.get('codigo_recuperacion')
+            expiracion = resultado.get('codigo_expiracion')
+            
+            # Verificar que existe código
+            if not codigo_guardado:
+                return {"ok": False, "error": "No hay solicitud de recuperación pendiente"}
+            
+            # Verificar que no expiró
+            if expiracion and datetime.now() > expiracion:
+                return {"ok": False, "error": "El código ha expirado. Solicitá uno nuevo."}
+            
+            # Verificar que coincide
+            if codigo != codigo_guardado:
+                return {"ok": False, "error": "Código incorrecto"}
+            
+            return {
+                "ok": True, 
+                "user_id": resultado.get('idusuario'),
+                "nombre": resultado.get('nombre')
+            }
+            
+        except Exception as e:
+            print(f"⚠ Error al validar código: {str(e)}")
+            return {"ok": False, "error": "Error al validar código"}
+    
+    def restablecer_contraseña(self, email, codigo, nueva_contraseña):
+        """
+        Restablece la contraseña después de validar el código.
+        Invalida el código después del cambio.
+        
+        Args:
+            email: Email del usuario
+            codigo: Código de verificación
+            nueva_contraseña: Nueva contraseña en texto plano
+            
+        Returns:
+            dict con ok=True si se cambió, o ok=False con error
+        """
+        # Primero validar el código
+        validacion = self.validar_codigo_recuperacion(email, codigo)
+        if not validacion.get("ok"):
+            return validacion
+        
+        try:
+            # Hashear nueva contraseña
+            hashed = bcrypt.hashpw(nueva_contraseña.encode('utf-8'), bcrypt.gensalt())
+            
+            # Actualizar contraseña y limpiar código
+            cursor = self.conexion.cursor()
+            query = """
+                UPDATE usuario 
+                SET contraseña = %s, codigo_recuperacion = NULL, codigo_expiracion = NULL 
+                WHERE email = %s
+            """
+            cursor.execute(query, (hashed, email.strip().lower()))
+            self.conexion.commit()
+            cursor.close()
+            
+            return {
+                "ok": True, 
+                "mensaje": "Contraseña actualizada correctamente",
+                "nombre": validacion.get("nombre")
+            }
+            
+        except Exception as e:
+            print(f"⚠ Error al restablecer contraseña: {str(e)}")
+            return {"ok": False, "error": "Error al actualizar contraseña"}
+    
+    def invalidar_codigo_recuperacion(self, email):
+        """Limpia el código de recuperación (uso manual o por seguridad)."""
+        try:
+            cursor = self.conexion.cursor()
+            query = "UPDATE usuario SET codigo_recuperacion = NULL, codigo_expiracion = NULL WHERE email = %s"
+            cursor.execute(query, (email.strip().lower(),))
+            self.conexion.commit()
+            cursor.close()
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}

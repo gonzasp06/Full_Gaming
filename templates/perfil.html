@@ -7,6 +7,25 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* Botón para mostrar/ocultar contraseña */
+        .btn-toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            color: #888;
+            transition: color 0.2s;
+        }
+        .btn-toggle-pass:hover {
+            color: #6A44F2;
+        }
+    </style>
 </head>
 <body class="perfil-page">
     <!-- MODAL DE CONFIRMACIÓN -->
@@ -18,6 +37,88 @@
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
                 <button class="modal-btn modal-btn-confirm" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR CONTRASEÑA CON VERIFICACIÓN EMAIL -->
+    <div id="modal-cambiar-contraseña" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 420px;">
+            <!-- Paso 1: Solicitar código -->
+            <div id="paso-solicitar" class="paso-modal">
+                <div class="modal-icon">🔐</div>
+                <h2 class="modal-title">Cambiar Contraseña</h2>
+                <p class="modal-description">
+                    Por seguridad, enviaremos un código de verificación a:<br>
+                    <strong style="color: #6A44F2;">{{ usuario_email }}</strong>
+                </p>
+                <div id="error-solicitar" class="alert alert-danger" style="display: none; margin: 10px 0;"></div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="cerrarModalContraseña()">Cancelar</button>
+                    <button class="modal-btn modal-btn-confirm" id="btn-enviar-codigo" onclick="enviarCodigoContraseña()">
+                        📧 Enviar Código
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paso 2: Ingresar código -->
+            <div id="paso-codigo" class="paso-modal" style="display: none;">
+                <div class="modal-icon">📬</div>
+                <h2 class="modal-title">Ingresá el Código</h2>
+                <p class="modal-description">Enviamos un código de 6 dígitos a tu email</p>
+                <div style="margin: 20px 0;">
+                    <input type="text" id="input-codigo-pass" class="form-control" 
+                           placeholder="000000" maxlength="6"
+                           style="text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: bold;">
+                </div>
+                <div id="error-codigo" class="alert alert-danger" style="display: none; margin: 10px 0;"></div>
+                <p style="color: #888; font-size: 12px;">El código expira en 10 minutos</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="volverPasoSolicitar()">← Volver</button>
+                    <button class="modal-btn modal-btn-confirm" id="btn-validar-codigo" onclick="validarCodigoContraseña()">
+                        Validar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paso 3: Nueva contraseña -->
+            <div id="paso-nueva-pass" class="paso-modal" style="display: none;">
+                <div class="modal-icon">✨</div>
+                <h2 class="modal-title">Nueva Contraseña</h2>
+                <p class="modal-description">Código verificado. Ingresá tu nueva contraseña.</p>
+                <div style="margin: 20px 0;">
+                    <div class="mb-3">
+                        <label style="color: #bbb; font-size: 12px; display: block; margin-bottom: 5px;">Nueva contraseña</label>
+                        <div style="position: relative;">
+                            <input type="password" id="input-nueva-pass" class="form-control" placeholder="Mínimo 6 caracteres" style="padding-right: 45px;">
+                            <button type="button" class="btn-toggle-pass" onclick="togglePassword('input-nueva-pass', this)" title="Mostrar contraseña">👁️</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label style="color: #bbb; font-size: 12px; display: block; margin-bottom: 5px;">Confirmar contraseña</label>
+                        <div style="position: relative;">
+                            <input type="password" id="input-confirmar-pass" class="form-control" placeholder="Repetí la contraseña" style="padding-right: 45px;">
+                            <button type="button" class="btn-toggle-pass" onclick="togglePassword('input-confirmar-pass', this)" title="Mostrar contraseña">👁️</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="error-nueva-pass" class="alert alert-danger" style="display: none; margin: 10px 0;"></div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-cancel" onclick="cerrarModalContraseña()">Cancelar</button>
+                    <button class="modal-btn modal-btn-confirm" id="btn-cambiar-pass" onclick="confirmarCambioContraseña()">
+                        ✓ Cambiar Contraseña
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paso 4: Éxito -->
+            <div id="paso-exito" class="paso-modal" style="display: none;">
+                <div class="modal-icon">✅</div>
+                <h2 class="modal-title">¡Contraseña Actualizada!</h2>
+                <p class="modal-description">Tu contraseña fue cambiada exitosamente.</p>
+                <div class="modal-buttons" style="justify-content: center;">
+                    <button class="modal-btn modal-btn-confirm" onclick="cerrarModalContraseña()">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -261,9 +362,16 @@
                                         <input type="text" name="dni" class="form-control" placeholder="XX.XXX.XXX" value="{{ usuario_dni if usuario_dni else '' }}">
                                     </div>
                                 </div>
+                                <!-- Sección Cambiar Contraseña - con verificación por email -->
                                 <div class="mb-3">
-                                    <label>Nueva Contraseña (opcional)</label>
-                                    <input type="password" name="contraseña_nueva" class="form-control" placeholder="Dejar en blanco para no cambiar">
+                                    <label>Contraseña</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="password" class="form-control" value="••••••••" disabled style="max-width: 200px;">
+                                        <button type="button" class="btn btn-outline-light btn-sm" onclick="abrirModalCambiarContraseña()" style="white-space: nowrap;">
+                                            🔐 Cambiar contraseña
+                                        </button>
+                                    </div>
+                                    <small style="color: #8b82d4; font-size: 12px;">📧 Se enviará un código de verificación a tu email</small>
                                 </div>
                                 <div class="button-group">
                                     <button type="submit" class="btn" style="background: linear-gradient(135deg, #6A44F2, #3C308C); color: white; border: none;">
@@ -284,6 +392,20 @@
     <script>
         // ============ ESTADO GLOBAL ============
         let direccionEnEdicion = null;  // ID de la dirección que se está editando
+        
+        // ============ TOGGLE PASSWORD ============
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+                btn.title = 'Ocultar contraseña';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+                btn.title = 'Mostrar contraseña';
+            }
+        }
         
         // ============ UTILIDADES ============
         function mostrarNotificacion(mensaje, esError = false) {
@@ -864,6 +986,173 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 cerrarModal();
+                cerrarModalContraseña();
+            }
+        });
+
+        // ============ CAMBIO DE CONTRASEÑA CON VERIFICACIÓN EMAIL ============
+        let codigoValidado = '';  // Guarda el código validado para paso 3
+        
+        function abrirModalCambiarContraseña() {
+            const modal = document.getElementById('modal-cambiar-contraseña');
+            modal.style.display = 'flex';
+            // Resetear a paso 1
+            mostrarPasoModal('paso-solicitar');
+            // Limpiar campos
+            document.getElementById('input-codigo-pass').value = '';
+            document.getElementById('input-nueva-pass').value = '';
+            document.getElementById('input-confirmar-pass').value = '';
+            codigoValidado = '';
+            // Ocultar errores
+            ocultarErroresModal();
+        }
+        
+        function cerrarModalContraseña() {
+            const modal = document.getElementById('modal-cambiar-contraseña');
+            modal.style.display = 'none';
+        }
+        
+        function mostrarPasoModal(pasoId) {
+            document.querySelectorAll('.paso-modal').forEach(p => p.style.display = 'none');
+            document.getElementById(pasoId).style.display = 'block';
+        }
+        
+        function ocultarErroresModal() {
+            ['error-solicitar', 'error-codigo', 'error-nueva-pass'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+        
+        function mostrarErrorModal(elementId, mensaje) {
+            const el = document.getElementById(elementId);
+            el.textContent = mensaje;
+            el.style.display = 'block';
+        }
+        
+        function volverPasoSolicitar() {
+            mostrarPasoModal('paso-solicitar');
+            ocultarErroresModal();
+        }
+        
+        async function enviarCodigoContraseña() {
+            const btn = document.getElementById('btn-enviar-codigo');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+            ocultarErroresModal();
+            
+            try {
+                const resp = await fetch('/api/perfil/solicitar-cambio-contraseña', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await resp.json();
+                
+                if (data.ok) {
+                    mostrarPasoModal('paso-codigo');
+                    // En modo desarrollo, mostrar el código
+                    if (data.dev_mode && data.codigo_dev) {
+                        alert(`🔑 MODO DESARROLLO\n\nTu código es: ${data.codigo_dev}`);
+                    }
+                } else {
+                    mostrarErrorModal('error-solicitar', data.error || 'Error al enviar código');
+                }
+            } catch (err) {
+                mostrarErrorModal('error-solicitar', 'Error de conexión');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📧 Enviar Código';
+            }
+        }
+        
+        async function validarCodigoContraseña() {
+            const codigo = document.getElementById('input-codigo-pass').value.trim();
+            const btn = document.getElementById('btn-validar-codigo');
+            
+            if (!codigo || codigo.length !== 6) {
+                mostrarErrorModal('error-codigo', 'Ingresá el código de 6 dígitos');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Validando...';
+            ocultarErroresModal();
+            
+            try {
+                const resp = await fetch('/api/perfil/validar-codigo-contraseña', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.ok) {
+                    codigoValidado = codigo;
+                    mostrarPasoModal('paso-nueva-pass');
+                } else {
+                    mostrarErrorModal('error-codigo', data.error || 'Código inválido');
+                }
+            } catch (err) {
+                mostrarErrorModal('error-codigo', 'Error de conexión');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Validar';
+            }
+        }
+        
+        async function confirmarCambioContraseña() {
+            const nuevaPass = document.getElementById('input-nueva-pass').value;
+            const confirmarPass = document.getElementById('input-confirmar-pass').value;
+            const btn = document.getElementById('btn-cambiar-pass');
+            
+            // Validaciones
+            if (!nuevaPass || nuevaPass.length < 6) {
+                mostrarErrorModal('error-nueva-pass', 'La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            if (nuevaPass !== confirmarPass) {
+                mostrarErrorModal('error-nueva-pass', 'Las contraseñas no coinciden');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+            ocultarErroresModal();
+            
+            try {
+                const resp = await fetch('/api/perfil/confirmar-cambio-contraseña', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        codigo: codigoValidado,
+                        nueva_contraseña: nuevaPass,
+                        confirmar_contraseña: confirmarPass
+                    })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.ok) {
+                    mostrarPasoModal('paso-exito');
+                    mostrarNotificacion('¡Contraseña actualizada correctamente!');
+                } else {
+                    mostrarErrorModal('error-nueva-pass', data.error || 'Error al cambiar contraseña');
+                }
+            } catch (err) {
+                mostrarErrorModal('error-nueva-pass', 'Error de conexión');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✓ Cambiar Contraseña';
+            }
+        }
+        
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modal-cambiar-contraseña').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalContraseña();
             }
         });
 

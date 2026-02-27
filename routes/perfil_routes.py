@@ -4,6 +4,7 @@ Endpoints para el perfil de usuario
 from flask import request, jsonify, session
 from services.usuario_service import UsuarioService
 from services.direccion_service import DireccionService
+from services.email_service import EmailService
 import bcrypt
 
 
@@ -76,6 +77,125 @@ def registrar_endpoints_perfil(app):
             # Cambiar contraseña
             resultado = service.cambiar_contraseña(usuario_id, datos.get('contraseña_nueva'))
             return jsonify(resultado)
+        except Exception as e:
+            return jsonify({"ok": False, "error": str(e)}), 500
+
+
+    # ====================== CAMBIO DE CONTRASEÑA CON VERIFICACIÓN EMAIL ======================
+    
+    @app.route('/api/perfil/solicitar-cambio-contraseña', methods=['POST'])
+    def solicitar_cambio_contraseña_perfil():
+        """
+        Paso 1: Solicitar código de verificación para cambiar contraseña.
+        Solo disponible para usuarios autenticados.
+        Reutiliza la lógica existente de generar_codigo_recuperacion.
+        """
+        if 'usuario_id' not in session:
+            return jsonify({"ok": False, "error": "No autorizado"}), 401
+        
+        try:
+            email = session.get('usuario_email')
+            nombre = session.get('usuario_nombre', 'Usuario')
+            
+            service = UsuarioService()
+            
+            # Reutilizar la lógica existente para generar código
+            resultado = service.generar_codigo_recuperacion(email)
+            
+            if resultado.get("ok"):
+                # Enviar email con el código (reutilizando EmailService)
+                email_service = EmailService()
+                envio = email_service.enviar_codigo_cambio_perfil(
+                    email_destino=email,
+                    nombre_usuario=nombre,
+                    codigo=resultado.get("codigo")
+                )
+                
+                return jsonify({
+                    "ok": True,
+                    "mensaje": f"Código enviado a {email}",
+                    "dev_mode": envio.get("dev_mode", False),
+                    "codigo_dev": resultado.get("codigo") if envio.get("dev_mode") else None
+                })
+            else:
+                return jsonify({"ok": False, "error": "Error al generar código"}), 500
+                
+        except Exception as e:
+            return jsonify({"ok": False, "error": str(e)}), 500
+    
+    
+    @app.route('/api/perfil/validar-codigo-contraseña', methods=['POST'])
+    def validar_codigo_contraseña_perfil():
+        """
+        Paso 2: Validar el código ingresado por el usuario.
+        Reutiliza validar_codigo_recuperacion existente.
+        """
+        if 'usuario_id' not in session:
+            return jsonify({"ok": False, "error": "No autorizado"}), 401
+        
+        try:
+            datos = request.get_json()
+            codigo = datos.get('codigo', '').strip()
+            email = session.get('usuario_email')
+            
+            if not codigo or len(codigo) != 6:
+                return jsonify({"ok": False, "error": "Código inválido"}), 400
+            
+            service = UsuarioService()
+            
+            # Reutilizar validación existente
+            resultado = service.validar_codigo_recuperacion(email, codigo)
+            
+            return jsonify(resultado)
+            
+        except Exception as e:
+            return jsonify({"ok": False, "error": str(e)}), 500
+    
+    
+    @app.route('/api/perfil/confirmar-cambio-contraseña', methods=['POST'])
+    def confirmar_cambio_contraseña_perfil():
+        """
+        Paso 3: Cambiar la contraseña después de validar el código.
+        Reutiliza restablecer_contraseña existente.
+        NO cierra la sesión del usuario.
+        """
+        if 'usuario_id' not in session:
+            return jsonify({"ok": False, "error": "No autorizado"}), 401
+        
+        try:
+            datos = request.get_json()
+            codigo = datos.get('codigo', '').strip()
+            nueva_contraseña = datos.get('nueva_contraseña', '')
+            confirmar = datos.get('confirmar_contraseña', '')
+            email = session.get('usuario_email')
+            
+            # Validaciones
+            if not codigo or not nueva_contraseña:
+                return jsonify({"ok": False, "error": "Faltan datos"}), 400
+            
+            if len(nueva_contraseña) < 6:
+                return jsonify({"ok": False, "error": "La contraseña debe tener al menos 6 caracteres"}), 400
+            
+            if nueva_contraseña != confirmar:
+                return jsonify({"ok": False, "error": "Las contraseñas no coinciden"}), 400
+            
+            service = UsuarioService()
+            
+            # Reutilizar la lógica existente de restablecer contraseña
+            resultado = service.restablecer_contraseña(email, codigo, nueva_contraseña)
+            
+            if resultado.get("ok"):
+                # Enviar confirmación por email (opcional)
+                email_service = EmailService()
+                email_service.enviar_confirmacion_cambio(email, session.get('usuario_nombre', 'Usuario'))
+                
+                return jsonify({
+                    "ok": True,
+                    "mensaje": "Contraseña actualizada correctamente"
+                })
+            else:
+                return jsonify(resultado)
+                
         except Exception as e:
             return jsonify({"ok": False, "error": str(e)}), 500
 

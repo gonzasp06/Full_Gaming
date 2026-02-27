@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña — FullGaming</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo_solo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* ================================================ */
+        /*  RECUPERAR CONTRASEÑA — TEMA OSCURO PREMIUM     */
+        /* ================================================ */
+        .auth-page {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1f4f 100%);
+            border: 1px solid rgba(106, 68, 242, 0.25);
+            border-radius: 20px;
+            padding: 40px 36px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 50px rgba(106, 68, 242, 0.06);
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .auth-logo img {
+            height: 50px;
+            filter: drop-shadow(0 2px 8px rgba(106, 68, 242, 0.3));
+        }
+        .auth-title {
+            text-align: center;
+            color: #fff;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .auth-subtitle {
+            text-align: center;
+            color: #8b82d4;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        /* --- Pasos --- */
+        .paso {
+            display: none;
+        }
+        .paso.activo {
+            display: block;
+        }
+
+        /* --- Indicador de pasos --- */
+        .pasos-indicador {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .paso-circulo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(106, 68, 242, 0.3);
+            color: #666;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .paso-circulo.activo {
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border-color: #6A44F2;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(106, 68, 242, 0.4);
+        }
+        .paso-circulo.completado {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            color: #fff;
+        }
+
+        /* --- Inputs --- */
+        .auth-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .auth-label {
+            display: block;
+            color: #B5B3F2;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+        }
+        .auth-input-wrap {
+            position: relative;
+        }
+        .auth-input-wrap .auth-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #6A44F2;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .auth-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(106, 68, 242, 0.25) !important;
+            border-radius: 10px !important;
+            padding: 12px 14px 12px 42px !important;
+            color: #d4d0f0 !important;
+            font-size: 15px !important;
+            transition: all 0.2s !important;
+            outline: none !important;
+        }
+        .auth-input:focus {
+            border-color: #6A44F2 !important;
+            box-shadow: 0 0 0 3px rgba(106, 68, 242, 0.15) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        .auth-input::placeholder { color: #7E7B9A !important; opacity: 0.85; }
+        .auth-input.input-error {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
+        }
+
+        /* Input de código de 6 dígitos */
+        .codigo-input {
+            text-align: center;
+            font-size: 28px !important;
+            letter-spacing: 10px;
+            padding: 14px 20px !important;
+            font-weight: 700;
+        }
+
+        /* Toggle password */
+        .auth-toggle-pass {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+            z-index: 2;
+        }
+        .auth-toggle-pass:hover { color: #6A44F2; }
+
+        /* Mensajes */
+        .auth-msg {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .auth-msg.error {
+            background: rgba(231, 76, 60, 0.08);
+            border: 1px solid rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+        }
+        .auth-msg.success {
+            background: rgba(46, 204, 113, 0.08);
+            border: 1px solid rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+        }
+        .auth-msg.visible {
+            display: flex;
+        }
+
+        /* Info */
+        .auth-info {
+            background: rgba(106, 68, 242, 0.06);
+            border: 1px solid rgba(106, 68, 242, 0.15);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #8b82d4;
+            font-size: 13px;
+            text-align: center;
+        }
+        .auth-info strong {
+            color: #d4d0f0;
+        }
+
+        /* Botón principal */
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #6A44F2, #3C308C);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(106, 68, 242, 0.3);
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+        }
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 35px rgba(106, 68, 242, 0.45);
+        }
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Link volver */
+        .auth-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #8b82d4;
+            font-size: 13px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .auth-link:hover {
+            color: #6A44F2;
+        }
+
+        /* Timer reenvío */
+        .reenvio-timer {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 12px;
+        }
+        .reenvio-timer button {
+            background: none;
+            border: none;
+            color: #6A44F2;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .reenvio-timer button:disabled {
+            color: #666;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        /* Éxito final */
+        .exito-icon {
+            text-align: center;
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% include 'navbar.html' %}
+    </header>
+
+    <main class="auth-page">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="{{ url_for('static', filename='images/logo_completo.png') }}" alt="FullGaming">
+            </div>
+            <h1 class="auth-title">Recuperar Contraseña</h1>
+            <p class="auth-subtitle">Seguí los pasos para restablecer tu contraseña</p>
+
+            <!-- Indicador de pasos -->
+            <div class="pasos-indicador">
+                <div class="paso-circulo activo" id="circulo-1">1</div>
+                <div class="paso-circulo" id="circulo-2">2</div>
+                <div class="paso-circulo" id="circulo-3">3</div>
+            </div>
+
+            <!-- PASO 1: Ingresar email -->
+            <div class="paso activo" id="paso-1">
+                <form id="form-email" onsubmit="return solicitarCodigo(event)">
+                    <div class="auth-group">
+                        <label class="auth-label">Email</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">📧</span>
+                            <input type="email" id="email" class="auth-input" placeholder="tu@email.com" required autocomplete="email">
+                        </div>
+                    </div>
+
+                    <div class="auth-msg error" id="msg-email"></div>
+
+                    <button type="submit" class="auth-btn" id="btn-email">
+                        <span class="btn-text">Enviar código</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </form>
+
+                <a href="/acceso" class="auth-link">← Volver al inicio de sesión</a>
+            </div>
+
+            <!-- PASO 2: Ingresar código -->
+            <div class="paso" id="paso-2">
+                <div class="auth-info">
+                    Enviamos un código de 6 dígitos a<br>
+                    <strong id="email-destino">tu@email.com</strong>
+                </div>
+
+                <form id="form-codigo" onsubmit="return validarCodigo(event)">
+                    <div class="auth-group">
+                        <label class="auth-label">Código de verificación</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">🔐</span>
+                            <input type="text" id="codigo" class="auth-input codigo-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autocomplete="one-time-code">
+                        </div>
+                    </div>
+
+                    <div class="auth-msg error" id="msg-codigo"></div>
+
+                    <button type="submit" class="auth-btn" id="btn-codigo">
+                        <span class="btn-text">Verificar código</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </form>
+
+                <div class="reenvio-timer">
+                    <span id="timer-text">Podés reenviar el código en <strong id="countdown">60</strong>s</span>
+                    <button id="btn-reenviar" onclick="reenviarCodigo()" disabled>Reenviar código</button>
+                </div>
+
+                <a href="#" class="auth-link" onclick="volverPaso1()">← Cambiar email</a>
+            </div>
+
+            <!-- PASO 3: Nueva contraseña -->
+            <div class="paso" id="paso-3">
+                <form id="form-pass" onsubmit="return cambiarContraseña(event)">
+                    <div class="auth-group">
+                        <label class="auth-label">Nueva contraseña</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">🔒</span>
+                            <input type="password" id="nueva-pass" class="auth-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                            <button type="button" class="auth-toggle-pass" onclick="togglePass('nueva-pass', this)">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="auth-group">
+                        <label class="auth-label">Confirmar contraseña</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-icon">🔒</span>
+                            <input type="password" id="confirmar-pass" class="auth-input" placeholder="Repetí la contraseña" minlength="6" required>
+                            <button type="button" class="auth-toggle-pass" onclick="togglePass('confirmar-pass', this)">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="auth-msg error" id="msg-pass"></div>
+
+                    <button type="submit" class="auth-btn" id="btn-pass">
+                        <span class="btn-text">Cambiar contraseña</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- PASO 4: Éxito -->
+            <div class="paso" id="paso-4">
+                <div class="exito-icon">✅</div>
+                <h2 class="auth-title">¡Contraseña actualizada!</h2>
+                <p class="auth-subtitle">Ya podés iniciar sesión con tu nueva contraseña</p>
+                <a href="/acceso" class="auth-btn" style="text-decoration: none; margin-top: 20px;">
+                    Ir a Iniciar Sesión
+                </a>
+            </div>
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <script>
+        // =====================================================
+        // LÓGICA DE RECUPERACIÓN DE CONTRASEÑA
+        // =====================================================
+        
+        let emailGuardado = '';
+        let codigoGuardado = '';
+        let timerInterval = null;
+
+        // Utilidades
+        function mostrarError(id, mensaje) {
+            const el = document.getElementById(id);
+            el.textContent = '❌ ' + mensaje;
+            el.classList.add('visible');
+        }
+
+        function ocultarError(id) {
+            document.getElementById(id).classList.remove('visible');
+        }
+
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            const text = btn.querySelector('.btn-text');
+            const spinner = btn.querySelector('.spinner');
+            btn.disabled = loading;
+            text.style.display = loading ? 'none' : 'inline';
+            spinner.style.display = loading ? 'block' : 'none';
+        }
+
+        function irAPaso(num) {
+            // Ocultar todos los pasos
+            document.querySelectorAll('.paso').forEach(p => p.classList.remove('activo'));
+            document.querySelectorAll('.paso-circulo').forEach(c => c.classList.remove('activo'));
+
+            // Mostrar paso actual
+            document.getElementById(`paso-${num}`).classList.add('activo');
+            document.getElementById(`circulo-${num}`)?.classList.add('activo');
+
+            // Marcar anteriores como completados
+            for (let i = 1; i < num; i++) {
+                const c = document.getElementById(`circulo-${i}`);
+                if (c) c.classList.add('completado');
+            }
+        }
+
+        function togglePass(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        // PASO 1: Solicitar código
+        async function solicitarCodigo(e) {
+            e.preventDefault();
+            ocultarError('msg-email');
+
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            if (!email) {
+                mostrarError('msg-email', 'Ingresá tu email');
+                return false;
+            }
+
+            emailGuardado = email;
+            setLoading('btn-email', true);
+
+            try {
+                const resp = await fetch('/api/recuperar/solicitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await resp.json();
+
+                if (data.ok) {
+                    // Mostrar paso 2
+                    document.getElementById('email-destino').textContent = email;
+                    irAPaso(2);
+                    iniciarTimer();
+
+                    // En modo desarrollo, mostrar el código directamente
+                    if (data.dev_mode && data.codigo_dev) {
+                        alert(`🔐 MODO DESARROLLO\n\nTu código de recuperación es:\n\n${data.codigo_dev}\n\n(Este mensaje solo aparece sin configuración SMTP)`);
+                        console.log('🔑 [DEV MODE] Código:', data.codigo_dev);
+                    }
+                } else {
+                    mostrarError('msg-email', data.error || 'Error al enviar código');
+                }
+            } catch (err) {
+                mostrarError('msg-email', 'Error de conexión');
+            } finally {
+                setLoading('btn-email', false);
+            }
+
+            return false;
+        }
+
+        // Timer para reenvío
+        function iniciarTimer() {
+            let segundos = 60;
+            const countdown = document.getElementById('countdown');
+            const timerText = document.getElementById('timer-text');
+            const btnReenviar = document.getElementById('btn-reenviar');
+
+            btnReenviar.disabled = true;
+            btnReenviar.style.display = 'none';
+            timerText.style.display = 'inline';
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                segundos--;
+                countdown.textContent = segundos;
+
+                if (segundos <= 0) {
+                    clearInterval(timerInterval);
+                    timerText.style.display = 'none';
+                    btnReenviar.style.display = 'inline';
+                    btnReenviar.disabled = false;
+                }
+            }, 1000);
+        }
+
+        async function reenviarCodigo() {
+            document.getElementById('btn-reenviar').disabled = true;
+            
+            try {
+                const resp = await fetch('/api/recuperar/solicitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailGuardado })
+                });
+
+                const data = await resp.json();
+                if (data.ok) {
+                    iniciarTimer();
+                    // En modo desarrollo, mostrar el código nuevo
+                    if (data.dev_mode && data.codigo_dev) {
+                        alert(`🔄 CÓDIGO REENVIADO\n\nTu nuevo código es:\n\n${data.codigo_dev}`);
+                    }
+                }
+            } catch (err) {
+                console.error('Error al reenviar código');
+            }
+        }
+
+        function volverPaso1() {
+            if (timerInterval) clearInterval(timerInterval);
+            document.querySelectorAll('.paso-circulo').forEach(c => c.classList.remove('completado', 'activo'));
+            document.getElementById('circulo-1').classList.add('activo');
+            irAPaso(1);
+        }
+
+        // PASO 2: Validar código
+        async function validarCodigo(e) {
+            e.preventDefault();
+            ocultarError('msg-codigo');
+
+            const codigo = document.getElementById('codigo').value.trim();
+            if (!codigo || codigo.length !== 6) {
+                mostrarError('msg-codigo', 'Ingresá el código de 6 dígitos');
+                return false;
+            }
+
+            setLoading('btn-codigo', true);
+
+            try {
+                const resp = await fetch('/api/recuperar/validar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailGuardado, codigo })
+                });
+
+                const data = await resp.json();
+
+                if (data.ok) {
+                    codigoGuardado = codigo;
+                    irAPaso(3);
+                } else {
+                    mostrarError('msg-codigo', data.error || 'Código incorrecto');
+                    document.getElementById('codigo').classList.add('input-error');
+                }
+            } catch (err) {
+                mostrarError('msg-codigo', 'Error de conexión');
+            } finally {
+                setLoading('btn-codigo', false);
+            }
+
+            return false;
+        }
+
+        // PASO 3: Cambiar contraseña
+        async function cambiarContraseña(e) {
+            e.preventDefault();
+            ocultarError('msg-pass');
+
+            const nueva = document.getElementById('nueva-pass').value;
+            const confirmar = document.getElementById('confirmar-pass').value;
+
+            if (nueva.length < 6) {
+                mostrarError('msg-pass', 'La contraseña debe tener al menos 6 caracteres');
+                return false;
+            }
+
+            if (nueva !== confirmar) {
+                mostrarError('msg-pass', 'Las contraseñas no coinciden');
+                return false;
+            }
+
+            setLoading('btn-pass', true);
+
+            try {
+                const resp = await fetch('/api/recuperar/restablecer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailGuardado,
+                        codigo: codigoGuardado,
+                        nueva_contraseña: nueva,
+                        confirmar_contraseña: confirmar
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (data.ok) {
+                    irAPaso(4);
+                } else {
+                    mostrarError('msg-pass', data.error || 'Error al cambiar contraseña');
+                }
+            } catch (err) {
+                mostrarError('msg-pass', 'Error de conexión');
+            } finally {
+                setLoading('btn-pass', false);
+            }
+
+            return false;
+        }
+
+        // Solo permitir números en el campo de código
+        document.getElementById('codigo').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            this.classList.remove('input-error');
+        });
+    </script>
+</body>
+</html>

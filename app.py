@@ -12,6 +12,7 @@ from migrations import (
     agregar_columnas_costos_pedido_items_si_no_existen,
     crear_tabla_marca_si_no_existe,
     agregar_columna_id_marca_producto_si_no_existe,
+    agregar_columnas_recuperacion_usuario_si_no_existen,
 )
 
 #Subir foto tipo archivo al servidor
@@ -24,6 +25,7 @@ from services.usuario_service import UsuarioService
 from services.pedido_service import PedidoService
 from services.stock_service import StockService
 from services.marca_service import MarcaService
+from services.email_service import EmailService
 from services.negocio_models import IngresoStock
 from routes.perfil_routes import registrar_endpoints_perfil
 from routes.estadisticas_routes import registrar_endpoints_estadisticas
@@ -40,6 +42,7 @@ crear_tabla_stock_compras_si_no_existe()
 agregar_columnas_costos_pedido_items_si_no_existen()
 crear_tabla_marca_si_no_existe()
 agregar_columna_id_marca_producto_si_no_existe()
+agregar_columnas_recuperacion_usuario_si_no_existen()
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -574,6 +577,111 @@ def logout():
     """Cerrar sesión"""
     session.clear()
     return redirect(url_for('mostrar_catalogo'))
+
+
+# ==================== RECUPERACIÓN DE CONTRASEÑA ====================
+
+@app.route('/recuperar-contraseña')
+def render_recuperar_contraseña():
+    """Muestra el formulario para solicitar recuperación de contraseña"""
+    return render_template('recuperar_contraseña.html')
+
+
+@app.route('/api/recuperar/solicitar', methods=['POST'])
+def solicitar_recuperacion():
+    """
+    Solicita un código de recuperación de contraseña.
+    Genera código de 6 dígitos y lo envía por email.
+    """
+    datos = request.get_json()
+    email = datos.get('email', '').strip().lower()
+    
+    if not email:
+        return jsonify({"ok": False, "error": "Ingresá tu email"}), 400
+    
+    service = UsuarioService()
+    resultado = service.generar_codigo_recuperacion(email)
+    
+    if resultado.get("ok"):
+        # Enviar email con el código
+        email_service = EmailService()
+        codigo = resultado.get("codigo")
+        envio = email_service.enviar_codigo_recuperacion(
+            email_destino=email,
+            nombre_usuario=resultado.get("nombre", "Usuario"),
+            codigo=codigo
+        )
+        
+        # Por seguridad, siempre responder igual (no revelar si existe el email)
+        respuesta = {
+            "ok": True, 
+            "mensaje": "Si el email está registrado, recibirás un código de verificación.",
+            "dev_mode": envio.get("dev_mode", False)  # Solo para desarrollo
+        }
+        
+        # En modo desarrollo, incluir el código en la respuesta para testing
+        if envio.get("dev_mode"):
+            respuesta["codigo_dev"] = codigo
+            
+        return jsonify(respuesta)
+    else:
+        # Si el email no existe, igual mostrar mensaje genérico por seguridad
+        return jsonify({
+            "ok": True,
+            "mensaje": "Si el email está registrado, recibirás un código de verificación."
+        })
+
+
+@app.route('/api/recuperar/validar', methods=['POST'])
+def validar_codigo_recuperacion():
+    """
+    Valida el código de recuperación ingresado.
+    Si es válido, permite cambiar la contraseña.
+    """
+    datos = request.get_json()
+    email = datos.get('email', '').strip().lower()
+    codigo = datos.get('codigo', '').strip()
+    
+    if not email or not codigo:
+        return jsonify({"ok": False, "error": "Faltan datos"}), 400
+    
+    service = UsuarioService()
+    resultado = service.validar_codigo_recuperacion(email, codigo)
+    
+    return jsonify(resultado)
+
+
+@app.route('/api/recuperar/restablecer', methods=['POST'])
+def restablecer_contraseña():
+    """
+    Restablece la contraseña después de validar el código.
+    """
+    datos = request.get_json()
+    email = datos.get('email', '').strip().lower()
+    codigo = datos.get('codigo', '').strip()
+    nueva_contraseña = datos.get('nueva_contraseña', '')
+    confirmar = datos.get('confirmar_contraseña', '')
+    
+    # Validaciones
+    if not email or not codigo or not nueva_contraseña:
+        return jsonify({"ok": False, "error": "Faltan datos"}), 400
+    
+    if len(nueva_contraseña) < 6:
+        return jsonify({"ok": False, "error": "La contraseña debe tener al menos 6 caracteres"}), 400
+    
+    if nueva_contraseña != confirmar:
+        return jsonify({"ok": False, "error": "Las contraseñas no coinciden"}), 400
+    
+    # Restablecer
+    service = UsuarioService()
+    resultado = service.restablecer_contraseña(email, codigo, nueva_contraseña)
+    
+    if resultado.get("ok"):
+        # Enviar confirmación por email (opcional, no bloquea el flujo)
+        email_service = EmailService()
+        email_service.enviar_confirmacion_cambio(email, resultado.get("nombre", "Usuario"))
+    
+    return jsonify(resultado)
 
 
 @app.route('/perfil')

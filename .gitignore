@@ -10,3 +10,10 @@ Estudio/
 EXPLICACION_SISTEMA.md
 EXPLICACION_PRESENTACION.txt
 DOCUMENTACION_PROFESORES.md
+
+# Scripts de utilidad (no subir al repo)
+resetear_contraseña.py
+verificar_sistema.py
+
+# Configuración con credenciales (IMPORTANTE: no subir)
+config_email.py
