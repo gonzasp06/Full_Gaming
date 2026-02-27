@@ -53,9 +53,16 @@
 .nav-btn img.nav-btn-img {
     width: 20px; /* tamaño de la imagen */
     height: auto;
+    /* Filtro para convertir icono a dorado */
+    filter: brightness(0) saturate(100%) invert(80%) sepia(60%) saturate(500%) hue-rotate(5deg) brightness(105%);
 }
 .nav-btn:hover {
     background: #6A44F2;
+}
+
+.nav-btn:hover img.nav-btn-img {
+    /* Dorado más brillante en hover */
+    filter: brightness(0) saturate(100%) invert(90%) sepia(40%) saturate(600%) hue-rotate(5deg) brightness(110%);
 }
 
 /* Badge contador del carrito */
@@ -131,18 +138,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #FFD700;
+    color: #FFD700;  /* Dorado */
     flex-shrink: 0;
+    border: 2px solid #FFD700;  /* Borde dorado para mejor visibilidad */
 }
 
 .user-avatar svg {
     width: 20px;
     height: 20px;
-    fill: currentColor;
+    fill: #FFD700;  /* Icono dorado */
 }
 
 .nav-user-name {
-    color: #6A44F2;
+    color: #FFD700;  /* Dorado para mejor visibilidad */
     font-weight: 600;
     font-size: 14px;
 }

@@ -304,3 +304,139 @@ El equipo de {self.nombre_sistema}
         except Exception as e:
             print(f"⚠ Error al enviar email: {str(e)}")
             return {"ok": False, "error": "Error al enviar el email"}
+
+    def enviar_bienvenida(self, email_destino, nombre_usuario, token_eliminacion, url_base="http://127.0.0.1:5000"):
+        """
+        Envía email de bienvenida al registrarse un nuevo usuario.
+        Incluye link para eliminar la cuenta si no fue el usuario quien se registró.
+        
+        Args:
+            email_destino: Email del nuevo usuario
+            nombre_usuario: Nombre del usuario
+            token_eliminacion: Token para eliminar la cuenta
+            url_base: URL base del sitio (para los links)
+        """
+        if not self.email_user or not self.email_password:
+            print(f"📧 [DEV MODE] Email de bienvenida para {email_destino}")
+            print(f"   Token eliminación: {token_eliminacion}")
+            return {"ok": True, "dev_mode": True}
+        
+        try:
+            mensaje = MIMEMultipart('alternative')
+            mensaje['Subject'] = f"🎮 ¡Bienvenido a {self.nombre_sistema}!"
+            mensaje['From'] = f"{self.nombre_sistema} <{self.email_user}>"
+            mensaje['To'] = email_destino
+            
+            link_tienda = url_base
+            link_eliminar = f"{url_base}/eliminar-cuenta/{token_eliminacion}"
+            
+            texto_plano = f"""
+¡Hola {nombre_usuario}! 🎮
+
+¡Bienvenido a {self.nombre_sistema}!
+
+Tu cuenta fue creada exitosamente. Ya podés empezar a explorar nuestra tienda 
+con los mejores productos gaming.
+
+Visitá nuestra tienda: {link_tienda}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ ¿No te registraste en {self.nombre_sistema}?
+
+Si no creaste esta cuenta, podés eliminarla haciendo clic aquí:
+{link_eliminar}
+
+Este link es único y solo funcionará una vez.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Saludos,
+El equipo de {self.nombre_sistema}
+            """
+            
+            html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #1a1a2e; color: #ffffff; padding: 20px; margin: 0;">
+    <div style="max-width: 550px; margin: 0 auto; background: linear-gradient(135deg, #252540 0%, #1a1a2e 100%); border-radius: 20px; padding: 40px; border: 1px solid #3C308C;">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #6A44F2; margin: 0; font-size: 32px;">🎮 {self.nombre_sistema}</h1>
+            <p style="color: #888; margin-top: 5px;">Tu tienda gamer de confianza</p>
+        </div>
+        
+        <!-- Bienvenida -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #fff; margin: 0;">¡Bienvenido, {nombre_usuario}! 🚀</h2>
+            <p style="color: #bbb; font-size: 15px; margin-top: 10px;">
+                Tu cuenta fue creada exitosamente
+            </p>
+        </div>
+        
+        <!-- Card de características -->
+        <div style="background: rgba(106, 68, 242, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+            <p style="color: #bbb; font-size: 14px; margin: 0 0 15px 0;">Con tu cuenta podés:</p>
+            <div style="color: #8b82d4; font-size: 13px;">
+                <p style="margin: 8px 0;">✅ Comprar hardware y periféricos gaming</p>
+                <p style="margin: 8px 0;">✅ Guardar tu historial de pedidos</p>
+                <p style="margin: 8px 0;">✅ Agregar múltiples direcciones de envío</p>
+                <p style="margin: 8px 0;">✅ Acceso a ofertas exclusivas</p>
+            </div>
+        </div>
+        
+        <!-- Botón IR A LA TIENDA -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{link_tienda}" style="display: inline-block; background: linear-gradient(135deg, #6A44F2, #3C308C); color: #fff; text-decoration: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; font-size: 16px;">
+                🛒 Ir a la Tienda
+            </a>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #3C308C; margin: 30px 0;">
+        
+        <!-- Sección: No me registré -->
+        <div style="background: rgba(231, 76, 60, 0.08); border: 1px solid rgba(231, 76, 60, 0.2); border-radius: 12px; padding: 20px; text-align: center;">
+            <p style="color: #e74c3c; font-size: 13px; margin: 0 0 10px 0; font-weight: bold;">
+                ⚠️ ¿No te registraste en {self.nombre_sistema}?
+            </p>
+            <p style="color: #999; font-size: 12px; margin: 0 0 15px 0;">
+                Si no creaste esta cuenta, podés eliminarla inmediatamente:
+            </p>
+            <a href="{link_eliminar}" style="display: inline-block; background: transparent; border: 1px solid #e74c3c; color: #e74c3c; text-decoration: none; padding: 10px 25px; border-radius: 8px; font-size: 13px;">
+                🗑️ Eliminar esta cuenta
+            </a>
+            <p style="color: #666; font-size: 10px; margin-top: 12px;">
+                Este link es único y solo funcionará una vez
+            </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #3C308C; margin: 25px 0;">
+        
+        <p style="color: #555; font-size: 11px; text-align: center;">
+            © 2026 {self.nombre_sistema} - Todos los derechos reservados
+        </p>
+    </div>
+</body>
+</html>
+            """
+            
+            mensaje.attach(MIMEText(texto_plano, 'plain', 'utf-8'))
+            mensaje.attach(MIMEText(html, 'html', 'utf-8'))
+            
+            server = self._crear_conexion()
+            if not server:
+                return {"ok": False, "error": "No se pudo conectar al servidor de email"}
+            
+            server.sendmail(self.email_user, email_destino, mensaje.as_string())
+            server.quit()
+            
+            print(f"✓ Email de bienvenida enviado a {email_destino}")
+            return {"ok": True}
+            
+        except Exception as e:
+            print(f"⚠ Error al enviar email de bienvenida: {str(e)}")
+            return {"ok": False, "error": "Error al enviar el email"}

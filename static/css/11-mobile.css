@@ -1,0 +1,813 @@
+/* ============================================= */
+/* 11-MOBILE.CSS - ESTILOS RESPONSIVE MÓVIL     */
+/* ============================================= */
+/* Solo afecta pantallas <= 768px               */
+/* Desktop queda intacto                        */
+/* ============================================= */
+
+/* ============================================= */
+/* 1. LAYOUT GENERAL - SIN ESPACIOS VACÍOS      */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  /* Evitar overflow horizontal */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Contenedor principal ocupa todo el ancho */
+  main {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Contenedores Bootstrap ajustados */
+  .container,
+  .container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 100%;
+  }
+
+  /* Filas sin márgenes negativos que causan overflow */
+  .row {
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+
+  .row > * {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+/* ============================================= */
+/* 2. NAVBAR MÓVIL                              */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .primer_nav {
+    padding: 10px 12px;
+  }
+
+  .nav-wrapper {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Logo más pequeño */
+  .logo img {
+    height: 35px;
+  }
+
+  /* Barra de búsqueda debajo */
+  .nav-center {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 8px;
+  }
+
+  .nav-center form {
+    width: 100%;
+  }
+
+  .nav-center input {
+    width: 100%;
+  }
+
+  /* Botones derecha más compactos */
+  .nav-right {
+    gap: 8px;
+  }
+
+  .nav-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .nav-btn span {
+    display: none;
+  }
+
+  /* Usuario logueado compacto */
+  .nav-user-logueado {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .nav-user-name {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-btn-logout {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .carrito-btn span {
+    display: none;
+  }
+}
+
+/* ============================================= */
+/* 3. CARRUSEL MÓVIL                            */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .carrusel {
+    margin: 0;
+    border-radius: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .carrusel-inner {
+    height: 220px;
+  }
+
+  .carrusel-inner img {
+    object-fit: cover;
+  }
+}
+
+/* ============================================= */
+/* 4. CATEGORÍAS HOME MÓVIL                     */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .categorias-container {
+    margin: 15px auto;
+    padding: 25px 12px;
+    border-radius: 15px;
+    width: calc(100% - 20px);
+  }
+
+  .categorias-titulo {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .categorias-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0;
+  }
+
+  .categoria-card {
+    padding: 18px 10px;
+    border-radius: 12px;
+  }
+
+  .categoria-icon {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 8px;
+  }
+
+  .categoria-icon i {
+    font-size: 24px;
+  }
+
+  .categoria-nombre {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ============================================= */
+/* 5. TARJETAS DE PRODUCTOS MÓVIL               */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  /* Contenedor de imagen fijo y proporcional */
+  .product-image-wrapper,
+  .image-container {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f8f8;
+  }
+
+  /* Imagen se adapta sin deformarse */
+  .product-image,
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;  /* Muestra toda la imagen sin cortar */
+    object-position: center;
+  }
+
+  /* Alternativa: usar cover si prefieren que llene el espacio */
+  /* .product-image { object-fit: cover; } */
+
+  /* Card de producto */
+  .product-card,
+  .card {
+    margin-bottom: 15px;
+    border-radius: 12px;
+  }
+
+  /* Cuerpo de la tarjeta */
+  .card-body,
+  .product-info {
+    padding: 12px;
+  }
+
+  /* Título más pequeño */
+  .card-title,
+  .product-title {
+    font-size: 0.95rem;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    /* Limitar a 2 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Precio */
+  .card-text,
+  .product-price {
+    font-size: 1rem;
+  }
+
+  /* Botón agregar al carrito */
+  .btn-agregar-carrito,
+  .product-card .btn {
+    padding: 10px 15px;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  /* Grid de productos en 1 columna para móvil pequeño */
+  .row.row-cols-md-3,
+  .row.row-cols-lg-4 {
+    --bs-gutter-x: 10px;
+    --bs-gutter-y: 15px;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .product-image-wrapper,
+  .image-container {
+    height: 180px;
+  }
+
+  .card-title,
+  .product-title {
+    font-size: 0.85rem;
+  }
+}
+
+/* ============================================= */
+/* 6. TABLA GESTIÓN PRODUCTOS MÓVIL             */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  /* Panel principal ocupa todo el ancho */
+  .gestion-productos-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 10px 0 !important;
+    padding: 15px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .gestion-productos-panel h1 {
+    font-size: 18px !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Stats en 2x2 */
+  .stats-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .stat-card {
+    min-width: auto !important;
+    padding: 12px 8px !important;
+  }
+
+  .stat-card .stat-num {
+    font-size: 20px !important;
+  }
+
+  .stat-card .stat-label {
+    font-size: 9px !important;
+  }
+
+  /* Filtros en columna */
+  .filtros-bar-prod {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+
+  .filtros-bar-prod .filtro-label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  /* Chips de filtro en wrap */
+  .filtros-bar-prod > div:not(.busqueda-inline) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filtro-chip-prod {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* Buscador full width */
+  .busqueda-inline {
+    margin-left: 0 !important;
+    margin-top: 10px !important;
+    width: 100% !important;
+  }
+
+  .busqueda-inline input {
+    width: 100% !important;
+  }
+
+  /* Contenedor de tabla ocupa todo el ancho */
+  .form-container.table-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 15px 0;
+    padding: 15px 10px;
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Wrapper de tabla con scroll */
+  .tabla-wrapper,
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
+
+  /* Tabla se puede hacer scroll horizontal */
+  .gestion-productos-panel .table,
+  .form-container table {
+    min-width: 700px;
+    font-size: 12px !important;
+  }
+
+  .gestion-productos-panel th,
+  .gestion-productos-panel td,
+  .form-container th,
+  .form-container td {
+    padding: 8px 6px !important;
+    white-space: nowrap;
+  }
+
+  /* Ocultar columnas menos importantes en móvil */
+  .form-container td.descripcion {
+    max-width: 150px;
+  }
+
+  /* Botones de acción más pequeños */
+  .btn-editar,
+  .btn-eliminar,
+  .btn-detalle {
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+    gap: 3px !important;
+  }
+
+  .btn-editar span,
+  .btn-eliminar span,
+  .btn-detalle span {
+    display: none !important;
+  }
+
+  .btn-editar img,
+  .btn-eliminar img {
+    width: 14px;
+  }
+
+  /* Botón agregar producto */
+  .btn-agregar-producto {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  /* Mensaje scroll horizontal */
+  .gestion-productos-panel::after {
+    content: '← Deslizá para ver más →';
+    display: block;
+    text-align: center;
+    color: #8b82d4;
+    font-size: 11px;
+    padding: 8px;
+    margin-top: 10px;
+    background: rgba(106, 68, 242, 0.08);
+    border-radius: 8px;
+  }
+}
+
+/* ============================================= */
+/* 7. GESTIÓN DE USUARIOS MÓVIL                 */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  /* Panel principal full width */
+  .gestion-usuarios-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 10px 0 !important;
+    padding: 15px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .gestion-usuarios-panel h1 {
+    font-size: 18px !important;
+  }
+
+  /* Barra de filtros en columna */
+  .filtros-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  .filtros-bar .filtro-label {
+    width: 100%;
+  }
+
+  /* Chips de filtro en wrap */
+  .filtros-bar > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filtros-bar button.filtro-chip {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* Buscador full width */
+  .filtros-bar .busqueda-inline-usuarios {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: 8px;
+  }
+
+  .filtros-bar .busqueda-inline-usuarios input {
+    width: 100% !important;
+  }
+
+  /* Stats en grid 2x2 */
+  .stats-grid,
+  .estadisticas-grid,
+  .stats-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .stat-card,
+  .estadistica-card {
+    padding: 12px !important;
+    min-width: auto !important;
+  }
+
+  .stat-card .stat-num {
+    font-size: 20px !important;
+  }
+
+  .stat-card .stat-label {
+    font-size: 9px !important;
+  }
+
+  /* Tabla de usuarios con scroll */
+  .gestion-usuarios-panel .table {
+    min-width: 600px !important;
+    font-size: 12px !important;
+  }
+
+  .gestion-usuarios-panel th,
+  .gestion-usuarios-panel td {
+    padding: 8px 6px !important;
+  }
+
+  /* Cards de usuario ocupan todo el ancho */
+  .usuario-card,
+  .user-card {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  /* Mensaje de scroll */
+  .gestion-usuarios-panel .table-responsive::after {
+    content: '← Deslizá para ver más →';
+    display: block;
+    text-align: center;
+    color: #8b82d4;
+    font-size: 11px;
+    padding: 8px;
+    margin-top: 10px;
+  }
+}
+
+/* ============================================= */
+/* 8. FORMULARIOS MÓVIL                         */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .form-container {
+    width: calc(100% - 20px);
+    margin: 20px auto;
+    padding: 20px 15px;
+    border-radius: 12px;
+  }
+
+  .form-container h1 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+
+  .form-container .form-label {
+    font-size: 0.95rem;
+  }
+
+  .form-container .form-control {
+    font-size: 16px; /* Evita zoom en iOS */
+    padding: 10px 12px;
+  }
+
+  .form-container .btn-primary {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+/* ============================================= */
+/* 9. PÁGINA DE PRODUCTO DETALLE MÓVIL          */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .producto-detalle-container {
+    flex-direction: column;
+    padding: 15px;
+    gap: 20px;
+  }
+
+  .producto-imagen-container {
+    width: 100%;
+    height: 280px;
+  }
+
+  .producto-imagen-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .producto-info-container {
+    width: 100%;
+    padding: 0;
+  }
+}
+
+/* ============================================= */
+/* 10. CARRITO MÓVIL                            */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .carrito-container {
+    padding: 15px 10px;
+  }
+
+  .carrito-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .carrito-item-imagen {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+  }
+
+  .carrito-item-info {
+    width: 100%;
+  }
+
+  .carrito-resumen {
+    position: relative;
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+/* ============================================= */
+/* 11. PERFIL MÓVIL                             */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .perfil-container {
+    padding: 15px;
+    width: calc(100% - 20px);
+    margin: 15px auto;
+  }
+
+  .perfil-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .perfil-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .perfil-tab {
+    flex: 1 1 45%;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================= */
+/* 12. MODALES MÓVIL                            */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .modal-content {
+    border-radius: 15px;
+  }
+
+  .modal-header {
+    padding: 15px;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .modal-footer {
+    padding: 15px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+
+/* ============================================= */
+/* 13. FOOTER MÓVIL                             */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  footer {
+    padding: 20px 15px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ============================================= */
+/* 14. PAGINACIÓN MÓVIL                         */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .pagination .page-link {
+    padding: 8px 12px;
+    font-size: 13px;
+    margin: 2px;
+  }
+}
+
+/* ============================================= */
+/* 15. ADMIN PANEL MÓVIL (DASHBOARD)            */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  /* Panel admin ocupa todo el ancho */
+  .admin-dashboard,
+  .admin-container {
+    width: 100%;
+    padding: 15px 10px;
+  }
+
+  /* Stats en 2 columnas */
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .admin-stat-card {
+    padding: 15px;
+  }
+
+  /* Filtros en columna */
+  .admin-filtros {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .admin-filtros select,
+  .admin-filtros input {
+    width: 100%;
+  }
+}
+
+/* ============================================= */
+/* 16. BÚSQUEDA Y RESULTADOS MÓVIL              */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .search-results-header {
+    padding: 15px;
+    font-size: 14px;
+  }
+
+  .search-results-container {
+    padding: 10px;
+  }
+}
+
+/* ============================================= */
+/* 17. UTILIDADES MÓVIL                         */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  /* Ocultar en móvil */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Mostrar solo en móvil */
+  .show-mobile {
+    display: block !important;
+  }
+
+  /* Texto centrado en móvil */
+  .text-center-mobile {
+    text-align: center !important;
+  }
+
+  /* Full width en móvil */
+  .full-width-mobile {
+    width: 100% !important;
+  }
+}
+
+/* ============================================= */
+/* FIN DE ESTILOS MÓVILES                       */
+/* ============================================= */

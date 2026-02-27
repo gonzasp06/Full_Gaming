@@ -1,6 +1,7 @@
 import mysql.connector
 import bcrypt
 import random
+import secrets
 from datetime import datetime, timedelta
 from database import conectar_base_datos
 
@@ -69,6 +70,7 @@ class UsuarioService:
     
     def login(self, email, contraseña):
         email = email.strip().lower()
+        contraseña = contraseña.strip()  # Elimina espacios de teclados móviles
         usuario = self.buscar_usuario(email)
 
         if not usuario:
@@ -464,3 +466,92 @@ class UsuarioService:
             return {"ok": True}
         except Exception as e:
             return {"ok": False, "error": str(e)}
+
+    # =====================================================================
+    # ELIMINACIÓN DE CUENTA POR TOKEN (desde email de bienvenida)
+    # =====================================================================
+    
+    def generar_token_eliminacion(self, user_id):
+        """
+        Genera un token único para permitir eliminar la cuenta desde el email.
+        El token se guarda en la BD y se envía en el link del email de bienvenida.
+        
+        Args:
+            user_id: ID del usuario
+            
+        Returns:
+            str: Token de 32 caracteres hex
+        """
+        try:
+            # Generar token seguro de 32 caracteres
+            token = secrets.token_hex(16)
+            
+            cursor = self.conexion.cursor()
+            query = "UPDATE usuario SET token_eliminacion = %s WHERE idusuario = %s"
+            cursor.execute(query, (token, user_id))
+            self.conexion.commit()
+            cursor.close()
+            
+            return token
+            
+        except Exception as e:
+            print(f"⚠ Error al generar token eliminación: {str(e)}")
+            return None
+    
+    def eliminar_cuenta_por_token(self, token):
+        """
+        Elimina una cuenta usando el token de eliminación.
+        Esto permite que usuarios eliminen su cuenta desde el email de bienvenida
+        si no fueron ellos quienes se registraron.
+        
+        Args:
+            token: Token de eliminación de 32 caracteres
+            
+        Returns:
+            dict con ok=True y nombre del usuario eliminado, o ok=False con error
+        """
+        if not token or len(token) != 32:
+            return {"ok": False, "error": "Token inválido"}
+        
+        try:
+            cursor = self.conexion.cursor(dictionary=True)
+            
+            # Buscar usuario con ese token
+            cursor.execute("""
+                SELECT idusuario, nombre, email 
+                FROM usuario 
+                WHERE token_eliminacion = %s
+            """, (token,))
+            usuario = cursor.fetchone()
+            
+            if not usuario:
+                cursor.close()
+                return {"ok": False, "error": "Token no válido o cuenta ya eliminada"}
+            
+            user_id = usuario['idusuario']
+            nombre = usuario['nombre']
+            email = usuario['email']
+            
+            # Eliminar registros relacionados primero (por integridad referencial)
+            # Eliminar items de pedidos
+            cursor.execute("DELETE FROM pedido_items WHERE pedido_id IN (SELECT id FROM pedidos WHERE usuario_id = %s)", (user_id,))
+            # Eliminar pedidos
+            cursor.execute("DELETE FROM pedidos WHERE usuario_id = %s", (user_id,))
+            # Eliminar direcciones
+            cursor.execute("DELETE FROM direcciones WHERE usuario_id = %s", (user_id,))
+            # Finalmente eliminar usuario
+            cursor.execute("DELETE FROM usuario WHERE idusuario = %s", (user_id,))
+            
+            self.conexion.commit()
+            cursor.close()
+            
+            return {
+                "ok": True, 
+                "nombre": nombre,
+                "email": email,
+                "mensaje": f"Cuenta de {email} eliminada correctamente"
+            }
+            
+        except Exception as e:
+            print(f"⚠ Error al eliminar cuenta por token: {str(e)}")
+            return {"ok": False, "error": "Error al eliminar la cuenta"}

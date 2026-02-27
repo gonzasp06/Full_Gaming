@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for, abort
+from flask import Flask, request, jsonify, render_template, render_template_string, session, redirect, url_for, abort
 import mysql.connector
 from datetime import timedelta
 
@@ -13,6 +13,7 @@ from migrations import (
     crear_tabla_marca_si_no_existe,
     agregar_columna_id_marca_producto_si_no_existe,
     agregar_columnas_recuperacion_usuario_si_no_existen,
+    agregar_columna_token_eliminacion_si_no_existe,
 )
 
 #Subir foto tipo archivo al servidor
@@ -43,6 +44,7 @@ agregar_columnas_costos_pedido_items_si_no_existen()
 crear_tabla_marca_si_no_existe()
 agregar_columna_id_marca_producto_si_no_existe()
 agregar_columnas_recuperacion_usuario_si_no_existen()
+agregar_columna_token_eliminacion_si_no_existe()
 # ============================================
 # INSTANCIAR SERVICIOS
 # ============================================
@@ -171,6 +173,23 @@ def cargar_usuario():
             session['usuario_email'] = usuario['email']
             session['usuario_nombre'] = usuario['nombre']
             session['es_admin'] = usuario['is_admin']
+            
+            # Enviar email de bienvenida con opción de eliminar cuenta
+            try:
+                email_service = EmailService()
+                token = service.generar_token_eliminacion(usuario['id'])
+                if token:
+                    url_base = request.host_url.rstrip('/')
+                    email_service.enviar_bienvenida(
+                        email_destino=usuario['email'],
+                        nombre_usuario=usuario['nombre'],
+                        token_eliminacion=token,
+                        url_base=url_base
+                    )
+            except Exception as e:
+                print(f"⚠ Error enviando email de bienvenida: {e}")
+                # No bloqueamos el registro si falla el email
+                
         return jsonify({"ok": True, "mensaje": "Cuenta creada"}), 200
     else:
         return jsonify({"ok": False, "error": resultado["error"]}), 400
@@ -196,8 +215,17 @@ def verificar_usuario():
 def acceso_cuentas():
     if request.method == 'POST':
         service = UsuarioService()
-        email = request.form['email']
-        contraseña = request.form['contraseña']
+        # .strip() elimina espacios que agregan los teclados de celulares
+        email = request.form.get('email', '').strip().lower()
+        contraseña = request.form.get('contraseña', '').strip()
+        
+        # DEBUG: Ver qué llega desde el cliente
+        print(f"🔍 LOGIN DEBUG:")
+        print(f"   Email recibido: '{email}'")
+        print(f"   Contraseña len: {len(contraseña)} chars")
+        print(f"   Contraseña bytes: {contraseña.encode('utf-8')}")
+        print(f"   User-Agent: {request.headers.get('User-Agent', 'N/A')[:50]}")
+        
         usuario = service.login(email, contraseña)
         if usuario:
             session['usuario_id'] = usuario['id']  # ID del usuario
@@ -682,6 +710,94 @@ def restablecer_contraseña():
         email_service.enviar_confirmacion_cambio(email, resultado.get("nombre", "Usuario"))
     
     return jsonify(resultado)
+
+
+# ==================== ELIMINAR CUENTA POR TOKEN ====================
+
+@app.route('/eliminar-cuenta/<token>')
+def eliminar_cuenta_por_token(token):
+    """
+    Elimina una cuenta usando el token enviado en el email de bienvenida.
+    Para usuarios que no se registraron ellos mismos.
+    """
+    if not token or len(token) < 20:
+        return render_template_string('''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Link Inválido - Full Gaming</title>
+                <style>
+                    body { font-family: Arial, sans-serif; background: #1a1a2e; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+                    .card { background: #252540; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; border: 1px solid #3C308C; }
+                    h2 { color: #e74c3c; }
+                    p { color: #bbb; }
+                    a { color: #6A44F2; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h2>❌ Link Inválido</h2>
+                    <p>El link que usaste no es válido o ya fue utilizado.</p>
+                    <p><a href="/">Volver al inicio</a></p>
+                </div>
+            </body>
+            </html>
+        ''')
+    
+    service = UsuarioService()
+    resultado = service.eliminar_cuenta_por_token(token)
+    
+    if resultado.get("ok"):
+        return render_template_string('''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Cuenta Eliminada - Full Gaming</title>
+                <style>
+                    body { font-family: Arial, sans-serif; background: #1a1a2e; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+                    .card { background: #252540; padding: 40px; border-radius: 20px; text-align: center; max-width: 450px; border: 1px solid #3C308C; }
+                    h2 { color: #27ae60; }
+                    p { color: #bbb; line-height: 1.6; }
+                    a { display: inline-block; margin-top: 20px; background: linear-gradient(135deg, #6A44F2, #3C308C); color: #fff; text-decoration: none; padding: 12px 30px; border-radius: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h2>✅ Cuenta Eliminada</h2>
+                    <p>La cuenta fue eliminada exitosamente.</p>
+                    <p>Lamentamos las molestias. Si en el futuro querés crear una cuenta, serás bienvenido.</p>
+                    <a href="/">Ir al Inicio</a>
+                </div>
+            </body>
+            </html>
+        ''')
+    else:
+        return render_template_string('''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Error - Full Gaming</title>
+                <style>
+                    body { font-family: Arial, sans-serif; background: #1a1a2e; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+                    .card { background: #252540; padding: 40px; border-radius: 20px; text-align: center; max-width: 450px; border: 1px solid #3C308C; }
+                    h2 { color: #e74c3c; }
+                    p { color: #bbb; }
+                    a { color: #6A44F2; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h2>⚠️ No se pudo eliminar</h2>
+                    <p>{{ error }}</p>
+                    <p>Es posible que el link ya haya sido usado o la cuenta ya no exista.</p>
+                    <p><a href="/">Volver al inicio</a></p>
+                </div>
+            </body>
+            </html>
+        ''', error=resultado.get("error", "Error desconocido"))
 
 
 @app.route('/perfil')

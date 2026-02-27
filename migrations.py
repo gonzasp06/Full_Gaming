@@ -320,9 +320,39 @@ def agregar_columnas_recuperacion_usuario_si_no_existen():
         return False
 
 
+def agregar_columna_token_eliminacion_si_no_existe():
+    """
+    Agrega columna para token de eliminación de cuenta.
+    Permite que usuarios eliminen su cuenta desde el email de bienvenida.
+    """
+    try:
+        conexion = conectar_base_datos()
+        cursor = conexion.cursor()
+
+        if not _columna_existe(cursor, 'usuario', 'token_eliminacion'):
+            print("Agregando columna 'token_eliminacion' a tabla 'usuario'...")
+            cursor.execute("""
+                ALTER TABLE usuario 
+                ADD COLUMN token_eliminacion VARCHAR(64) DEFAULT NULL
+            """)
+            conexion.commit()
+            print("✓ Columna 'token_eliminacion' agregada")
+        else:
+            print("✓ La columna 'token_eliminacion' ya existe")
+
+        cursor.close()
+        conexion.close()
+        return True
+
+    except Exception as e:
+        print(f"⚠ Error al agregar columna token_eliminacion: {str(e)}")
+        return False
+
+
 if __name__ == "__main__":
     agregar_columna_costo_si_no_existe()
     agregar_columna_fecha_creacion_usuario_si_no_existe()
     crear_tabla_stock_compras_si_no_existe()
     agregar_columnas_costos_pedido_items_si_no_existen()
     agregar_columnas_recuperacion_usuario_si_no_existen()
+    agregar_columna_token_eliminacion_si_no_existe()

@@ -112,9 +112,11 @@ class ProductoService:
     def eliminar_producto(self, id_producto):
         cursor = self.conexion.cursor()
         try:
-            # Primero eliminar los items del pedido que hacen referencia a este producto
+            # Primero eliminar los registros de stock_compras que hacen referencia a este producto
+            cursor.execute('DELETE FROM catalogo.stock_compras WHERE producto_id = %s', (id_producto,))
+            # Luego eliminar los items del pedido que hacen referencia a este producto
             cursor.execute('DELETE FROM catalogo.pedido_items WHERE producto_id = %s', (id_producto,))
-            # Luego eliminar el producto
+            # Finalmente eliminar el producto
             cursor.execute('DELETE FROM catalogo.producto WHERE id= %s', (id_producto,))
             self.conexion.commit()
             cursor.close()

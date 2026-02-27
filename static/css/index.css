@@ -9,3 +9,4 @@
 @import url('./8-modales.css');
 @import url('./9-footer.css');
 @import url('./10-categorias.css');
+@import url('./11-mobile.css');  /* Estilos responsive móvil - SIEMPRE AL FINAL */
